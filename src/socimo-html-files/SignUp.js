@@ -1,88 +1,170 @@
-import React, {useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-
 import { Link } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { useHistory } from "react-router-dom";
+import '../css/signup.css'
 
 function SignUp() {
-  // const addPostApi = async () => {
-  //   const dataAddPost = {
-  //     email: "khoaanh@gmail.com",
-  //     name: "Truong Khoa Map",
-  //     password: "stri123ng",
-  //     phone: "0909",
-  //     address: "111111",
-  //     img: null,
-  //     bio: "Khoa khong ngu",
-  //     status: true
-  //   }
-  //   try {
-  //     const response = await axios.post(
-  //       "http://20.188.111.70:12348/api/v1/alumni",
-  //       dataAddPost
-  //     );
-  //     if (response.status == 200) {
-  //       console.log(response.status)
-  //     } 
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
+  let history = useHistory();
 
-  // useEffect(async () => {
-  //   await addPostApi();
-  // }, []);
+  const initialState = {
+    email: "",
+    firstName: "",
+    lastName: "",
+    name: "",
+    password: "",
+    phone: "",
+    address: "",
+    img: "",
+    bio: "",
+    status: true,
+  };
 
-    return (
-      <div>
-        {/* page loader */}
-        <div className="theme-layout">
-          <div className="authtication bluesh high-opacity">
-            <div className="verticle-center">
-              <div className="welcome-note">
-                <div className="logo">
-                  <img src="images/logo.png" alt="" />
-                  <span>Socimo</span>
-                </div>
-                <h1>Welcome to Socimo</h1>
-                <p>
-                  Socimo is a one and only plateform for the researcheres,
-                  students, and Acdamic people. Every one can join this
-                  plateform free and share his ideas and research with seniors
-                  and juniours comments and openions.
-                </p>
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
+
+  const [formData, setFormData] = useState(initialState);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData({ ...formData, [name]: value });
+  };
+
+  useEffect(() => {
+    setFormData({
+      ...formData,
+      name: formData.firstName + " " + formData.lastName,
+    });
+  }, [formData.firstName, formData.lastName]);
+
+  const handleCreate = async (e) => {
+    console.log(register.required);
+    const data = formData;
+    try {
+      const response = await axios.post(
+        "http://20.188.111.70:12348/api/v1/Alumni",
+        data
+      );
+      history.push("/home");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const onSubmit = (data) => {
+    console.log(data);
+    console.log(register);
+  };
+
+  return (
+    <div>
+      {/* page loader */}
+      <div className="theme-layout">
+        <div className="authtication bluesh high-opacity">
+          <div className="verticle-center">
+            <div className="welcome-note">
+              <div className="logo">
+                <img src="images/logo.png" alt="" />
+                <span>Socimo</span>
               </div>
-              <div
-                className="bg-image"
-                style={{
-                  backgroundImage: "url(images/resources/login-bg.png)",
-                }}
-              />
+              <h1>Welcome to Socimo</h1>
+              <p>
+                Socimo is a one and only plateform for the researcheres,
+                students, and Acdamic people. Every one can join this plateform
+                free and share his ideas and research with seniors and juniours
+                comments and openions.
+              </p>
             </div>
+            <div
+              className="bg-image"
+              style={{
+                backgroundImage: "url(images/resources/login-bg.png)",
+              }}
+            />
           </div>
-          <div className="auth-login">
-            <div className="verticle-center">
-              <div className="signup-form">
-                <h4>
-                  <i className="icofont-lock" /> Singup
-                </h4>
-                <form method="post" className="c-form">
-                  <div className="row merged-10">
-                    <div className="col-lg-12">
-                      <h4>What type of researcher are you?</h4>
-                    </div>
-                    <div className="col-lg-6 col-sm-6 col-md-6">
-                      <input type="text" placeholder="First Name" />
-                    </div>
-                    <div className="col-lg-6 col-sm-6 col-md-6">
-                      <input type="text" placeholder="Last Name" />
-                    </div>
-                    <div className="col-lg-6 col-sm-6 col-md-6">
-                      <input type="text" placeholder="Email@" />
-                    </div>
-                    <div className="col-lg-6 col-sm-6 col-md-6">
-                      <input type="password" placeholder="Password" />
-                    </div>
-                    <div className="col-lg-6 col-sm-6 col-md-6">
+        </div>
+        <div className="auth-login">
+          <div className="verticle-center">
+            <div className="signup-form">
+              <h4>
+                <i className="icofont-lock" /> Singup
+              </h4>
+              <form className="c-form">
+                <div className="row merged-10">
+                  <div className="col-lg-12">
+                    <h4>What type of researcher are you?</h4>
+                  </div>
+                  <div className="col-lg-6 col-sm-6 col-md-6">
+                    <input
+                      type="text"
+                      {...register("firstName", {
+                        required: "Nhập tên", // JS only: <p>error message</p> TS only support string
+                      })}
+                      onChange={handleChange}
+                      name="firstName"
+                      placeholder="First Name"
+                    />
+                    {errors.firstName && (
+                      <p className="error">{errors.firstName.message}</p>
+                    )}
+                  </div>
+                  <div className="col-lg-6 col-sm-6 col-md-6">
+                    <input
+                      type="text"
+                      {...register("lastName", {
+                        required: "Nhập họ", // JS only: <p>error message</p> TS only support string
+                      })}
+                      onChange={handleChange}
+                      name="lastName"
+                      placeholder="Last Name"
+                    />
+                    {errors.lastName && (
+                      <p className="error">{errors.lastName.message}</p>
+                    )}
+                  </div>
+                  <div className="col-lg-6 col-sm-6 col-md-6">
+                    <input
+                      type="text"
+                      {...register("email", {
+                        required: "Nhập Email",
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: "invalid email address",
+                        }, // JS only: <p>error message</p> TS only support string
+                      })}
+                      onChange={handleChange}
+                      name="email"
+                      placeholder="Email@"
+                    />
+                    {errors.email && (
+                      <p className="error">{errors.email.message}</p>
+                    )}
+                  </div>
+                  <div className="col-lg-6 col-sm-6 col-md-6">
+                    <input
+                      type="password"
+                      {...register("password", {
+                        required: "Nhập mật khẩu",
+                        pattern: {
+                          value: /^[A-Za-z0-9]+$/,
+                          message: "Mật khẩu không chứa kí tự đặc biệt",
+                        }, // JS only: <p>error message</p> TS only support string
+                      })}
+                      onChange={handleChange}
+                      name="password"
+                      placeholder="Password"
+                    />
+                    {errors.password && (
+                      <p className="error">{errors.password.message}</p>
+                    )}
+                  </div>
+                  {/* <div className="col-lg-6 col-sm-6 col-md-6">
                       <input
                         type="radio"
                         id="student"
@@ -121,15 +203,26 @@ function SignUp() {
                       <label htmlFor="other">Not a Rsearcher</label>
                     </div>
                     <div className="col-lg-6 col-sm-6 col-md-6">
-                      <input type="text" placeholder="Institute, Company" />
+                      <input type="text" name="company" placeholder="Institute, Company" />
                     </div>
                     <div className="col-lg-6 col-sm-6 col-md-6">
-                      <input type="text" placeholder="Department" />
-                    </div>
-                    <div className="col-lg-12">
-                      <input type="text" placeholder="Your Position" />
-                    </div>
-                    <div className="col-lg-12">
+                      <input type="text" name="department" placeholder="Department" />
+                    </div> */}
+                  <div className="col-lg-12">
+                    <input
+                      type="text"
+                      {...register("address", {
+                        required: "Nhập địa chỉ", // JS only: <p>error message</p> TS only support string
+                      })}
+                      onChange={handleChange}
+                      name="address"
+                      placeholder="Your Position"
+                    />
+                    {errors.address && (
+                      <p className="error">{errors.address.message}</p>
+                    )}
+                  </div>
+                  {/* <div className="col-lg-12">
                       <div className="gender">
                         <input
                           type="radio"
@@ -146,29 +239,35 @@ function SignUp() {
                         />
                         <label htmlFor="female">Female</label>
                       </div>
-                    </div>
-                    <div className="col-lg-12">
-                      <div className="checkbox">
-                        <input type="checkbox" id="checkbox" defaultChecked />
-                        <label htmlFor="checkbox">
+                    </div> */}
+                  <div className="col-lg-12">
+                    <div className="checkbox">
+                      <input type="checkbox" id="checkbox" defaultChecked />
+                      {/* <label htmlFor="checkbox">
                           <span>
                             I agree the terms of Services and acknowledge the
                             privacy policy
                           </span>
-                        </label>
-                      </div>
-                      <button className="main-btn" type="submit">
+                        </label> */}
+                    </div>
+                    <Link to="/home">
+                      <button
+                        onClick={handleSubmit(handleCreate)}
+                        className="main-btn"
+                        type="submit"
+                      >
                         <i className="icofont-key" /> Signup
                       </button>
-                    </div>
+                    </Link>
                   </div>
-                </form>
-              </div>
+                </div>
+              </form>
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
 export default SignUp;
