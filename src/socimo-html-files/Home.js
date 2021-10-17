@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import AccountPopup from "./AccountPopup";
+import Groups from "./Groups";
 
 function Home() {
+  const [clickGroups,setClickGroups] = useState(false);
+  const [clickHome,setClickHome] = useState(true);
   const [dataContent, setDataContent] = useState([]);
   const axios = require("axios").default;
   useEffect(async () => {
@@ -20,6 +24,17 @@ function Home() {
       console.error(err);
     }
   };
+
+  const changeNav =(e)=>{
+    const {id} = e.target;
+    console.log(id);
+    if(id === 'home') {setClickHome(true);
+      setClickGroups(false);
+    }
+    if(id === 'groups'){ setClickGroups(true);
+setClickHome(false);
+    }
+  }
 
   function renderHome() {
     // alumni-alumniId-conmments-content-createAt-id-images-modifiedAt-postInGroups-status
@@ -487,6 +502,7 @@ function Home() {
           </div>
         </div>
         {/* responsive header */}
+        <AccountPopup />
         <header className>
           <div className="topbar stick">
             <div className="logo">
@@ -988,23 +1004,28 @@ function Home() {
                     <div className="col-lg-6">
                       <ul className="filtr-tabs">
                         <li>
-                          <a className="active" href="#" title>
+                          <a className="active" onClick={changeNav} id="home" href="#" title>
                             Home
                           </a>
                         </li>
                         <li>
-                          <a href="#" title>
-                            Recent
+                          <a href="#" title onClick={changeNav} id="groups">
+                            Nhóm
                           </a>
                         </li>
                         <li>
-                          <a href="#" title>
-                            Favourit
+                          <a href="#" title onClick={changeNav} id="favorites">
+                            Ưa thích
                           </a>
                         </li>
                       </ul>
                       {/* tab buttons */}
                       <div className="main-wraper">
+                         {clickGroups && 
+                        <Groups />
+                     }
+
+                     {clickHome&& <div>
                         <span className="new-title">Create New Post</span>
                         <div className="new-post">
                           <form method="post">
@@ -1049,7 +1070,7 @@ function Home() {
                             </li>
                           </ul>
                         </div>
-                      </div>
+                      {/* </div> */}
                       {/* create new post */}
                       {/* <div className="story-card">
                           <div className="story-title">
@@ -1772,6 +1793,7 @@ function Home() {
                       {/* post sell book */}
 
                       <div>{renderHome()}</div>
+                       </div> }
 
                       {/* advertisment carousel */}
                       {/* loadmore buttons */}
@@ -2059,6 +2081,7 @@ function Home() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </section>
         {/* content */}

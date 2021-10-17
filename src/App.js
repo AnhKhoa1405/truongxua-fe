@@ -68,6 +68,7 @@ function App() {
         <Route path="/eventDetail" component={EventDetail} />
         <Route path="/invoice" component={Invoice} />
         <Route path="/loadimg" component={LoadImg} />
+    
         
       </div>
     </Router>

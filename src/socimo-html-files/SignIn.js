@@ -97,7 +97,12 @@ class SignIn extends React.Component {
 
                   <Link to="/groupDetails">
                     <button className="main-btn">
-                      <i className="icofont-key" /> Login
+                      <i className="icofont-key" /> Đăng nhập
+                    </button>
+                  </Link>
+                  <Link to="/signup">
+                    <button className="main-btn" style={{float: 'left', marginTop:10,marginLeft:30}}>
+                      <i className="icofont-key" /> Đăng ký
                     </button>
                   </Link>
                 </form>
