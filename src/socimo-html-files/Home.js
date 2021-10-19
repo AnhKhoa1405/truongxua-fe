@@ -1070,7 +1070,7 @@ setClickHome(false);
                             </li>
                           </ul>
                         </div>
-                      {/* </div> */}
+                      {/* </div> comment div */}
                       {/* create new post */}
                       {/* <div className="story-card">
                           <div className="story-title">
@@ -2083,6 +2083,7 @@ setClickHome(false);
             </div>
           </div>
           </div>
+          {/* add div */}
         </section>
         {/* content */}
         <figure className="bottom-mockup">

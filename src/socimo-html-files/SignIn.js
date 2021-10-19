@@ -95,7 +95,7 @@ class SignIn extends React.Component {
                     firebaseAuth={firebase.auth()}
                   />
 
-                  <Link to="/groupDetails">
+                  <Link to="/home">
                     <button className="main-btn">
                       <i className="icofont-key" /> Đăng nhập
                     </button>
