@@ -14,6 +14,7 @@ function AccountPopup(props) {
     schoolId: "",
     email: "",
     password: "",
+    yearId:"",
   };
 
   const [alumiId,setAluniId] = useState(9);
@@ -28,77 +29,133 @@ function AccountPopup(props) {
   const [formData, setFormData] = useState(initialState);
   const [searchList, setSearchList] = useState([]);
   const [schoolName, setSchoolName] = useState("");
-  const [find, setFind] = useState(false);
-
+  const [schoolYear, setSchoolYear] = useState([]);
+  const [yearOfOneSchool,setYearOfOneSchool] = useState([]);
   const SearchList = () => {
     return searchList.map((search) => {
-      return (
-        <div>
-          <p
+      return (     
+           <p
             key={search.name}
+            id={search.id}
             onClick={() => {
               fetchSchool(search);
+              fetchScoolYear();
+              setYearOfOneSchool(findSchoolYear(search.id));
             }}
-            className="item-search"
+            className={`item-search ${formData?.schoolId === search?.id ? 'active' : ''}`}
           >
             {search.name}
           </p>
-        </div>
       );
     });
   };
 
-  let searchValue = document.querySelectorAll(".item-search");
-
-  function removeActiveSearch() {
-    searchValue.forEach(function (s) {
-      s.classList.remove("active");
+  const findSchoolYear = (schoolId) => {
+    let listYears = [];
+    schoolYear.forEach(element => {
+      if(element.schoolId === schoolId) {
+        listYears.push(element);
+      }
     });
+    return listYears;
   }
 
-  searchValue.forEach(function (item, index) {
-    item.addEventListener("click", function (e) {
-      removeActiveSearch();
-      this.classList.add("active");
-    });
-  });
+  const renderSchoolYear = () =>{
+    return yearOfOneSchool.map((year) =>{
+      return(
+        <>
+        <option key={year.id.toString()} value={year.id}>{formatDate(year.startDate)} - {formatDate(year.endDate)}</option>
+        </>
+      )
+    })
+  }
 
-  const fetchSchool = async (school) => {
+  const fetchSchool = (school) => {
+    // try {
+    //   const response = await axios.get(
+    //     `http://20.188.111.70:12348/api/v1/schools/${school.id}`
+    //   );
+    //   setFormData({ ...formData, schoolId: response.data.id });
+    // } catch (error) {
+    //   console.log(error);
+    // }
+    setFormData({ ...formData, schoolId: school.id});
+  };
+
+  const fetchScoolYear = async () =>{
     try {
-      const response = await axios.get(
-        `http://20.188.111.70:12348/api/v1/schools/${school.id}`
-      );
-      setFormData({ ...formData, schoolId: response.data.id });
-    } catch (error) {
+      const response = await axios.get('http://20.188.111.70:12348/api/v1/schools/schoolyears?pageNumber=0&pageSize=0');
+      setSchoolYear(response.data);
+    }
+    catch (error) {
       console.log(error);
     }
-  };
+  }
+
+  const formatDate = (date) => {
+    const myArr = date.split("T");
+      const day = myArr[0].split("-").reverse();
+       return day.join("/");
+  }
 
   const onChange = (e) => {
     const { name, value, type } = e.target;
-    if (name === "search") {
-      setSchoolName(value);
-    }
+    // if (name === "search") {
+    //   setSchoolName(value);
+    // }
 
     if (type === "file") {
       setFormData({ ...formData, [name]: e.target.files[0] });
     } else {
       setFormData({ ...formData, [name]: value });
     }
+
+    console.log(name + ':' + value);
   };
 
+  const saveImgInImgBB = async () => {
+    let dataImgSave = {};
+    if (formData.img != "") {
+      let body = new FormData();
+      body.set("key", "801bd3a925ecfac0e693d493198af86c");
+     
+          body.append("image", formData.img);
+          try {
+            const response = await axios({
+              method: "POST",
+              url: "https://api.imgbb.com/1/upload",
+              data: body,
+            });
+            if (response.status == 200) {
+              dataImgSave = {
+                name: response.data.data.title,
+                url_display: response.data.data.display_url,
+              };
+              // setFormData({...formData, img: response.data.data.display_url});
+          
+            }
+          } catch (err) {
+            console.error(err);
+          }
+       
+    }
+    return dataImgSave.url_display;
+  }
   
     // console.log(data);
 
   const updateProfile =  async () => {
-const data = {
+   const urlBB = await saveImgInImgBB();
+     const data = {
       phone: formData.phone,
     address: formData.address,
     bio: formData.bio,
-    img: formData.img,
+    // img: formData.img,
+    img:urlBB,
     schoolId: formData.schoolId,
     email: formData.email,
     password: formData.password,
+    schoolYearId: formData.yearId,
     };
     
   try{
@@ -106,6 +163,7 @@ const data = {
     data
     )
 	setTrigger(false);
+ 
   }
   catch(err){
     console.log(err)
@@ -118,6 +176,7 @@ const data = {
     try {
       const response = await axios.get(
         "http://20.188.111.70:12348/api/v1/alumni/9"
+  
       );
       initialState.name = response.data.name;
       initialState.email = response.data.email;
@@ -132,7 +191,8 @@ const data = {
   async function fetchSearchData() {
     try {
       const response = await axios.get(
-        `http://20.188.111.70:12348/api/v1/schools/name?searchName=${schoolName}&pageNumber=1&pageSize=4`
+        // `http://20.188.111.70:12348/api/v1/schools/name?searchName=${schoolName}&pageNumber=1&pageSize=4`
+        `http://20.188.111.70:12348/api/v1/schools/name?searchName=${formData.search}&pageNumber=1&pageSize=4`
       );
       setSearchList(response.data);
     } catch (error) {
@@ -140,12 +200,15 @@ const data = {
     }
   }
 
+ 
+
   useEffect(() => {
     fetchSearchData();
-  }, [schoolName]);
+  }, [formData.search]);
 
   useEffect(() => {
     getProfile();
+    fetchScoolYear();
   }, []);
 
   return trigger ? (
@@ -184,6 +247,19 @@ const data = {
             </form>
 
             <form method="post" name="form-info">
+              <div className="select-wrap">
+
+            <select  {...register("yearId", {
+    required: 'Tìm trường và chọn niên khóa của một trường' 
+  })} className="select-year" id="" name='yearId'
+            onChange={onChange}
+            value={formData.yearId}>
+              <option className="selected-year" value="">Chọn niên khóa </option>
+              {renderSchoolYear()}
+            </select>
+             {errors.yearId && <p className="error">{errors.yearId.message}</p>}
+              </div>
+
               <p style={{ marginBottom: 10, marginTop: 20 }}>
                 Nhập Số điện thoại
               </p>
@@ -222,13 +298,15 @@ const data = {
                 type="submit"
                 style={{
                   position: "unset",
-                  backgroundColor: "#007bff",
-                  color: "white",
+                  backgroundColor: "#71cff9",
+                  color: "black",
                   margin: "20px auto",
                   width: "max-content",
                   display: "block",
                   padding: "10px 40px",
-                  borderRadius: 20,
+                  borderRadius: 10,
+                  border:"none",
+                  fontWeight:"bold"
                 }}
                 onClick={handleSubmit(updateProfile)}
               >
