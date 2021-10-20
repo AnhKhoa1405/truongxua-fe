@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
 import '../css/signup.css'
+import firebase from "firebase";
 
 function SignUp() {
   let history = useHistory();
@@ -19,6 +20,9 @@ function SignUp() {
     img: "",
     bio: "",
     status: true,
+    loading: false,
+    error:[],
+    userRef: firebase.database().ref('users')
   };
 
   const {
@@ -43,8 +47,7 @@ function SignUp() {
     });
   }, [formData.firstName, formData.lastName]);
 
-  const handleCreate = async (e) => {
-    console.log(register.required);
+  const saveUserToDb = async (e) => {
     const data = formData;
     try {
       const response = await axios.post(
@@ -57,6 +60,33 @@ function SignUp() {
     }
   };
 
+  const handleCreate = (e) => {
+    setFormData({...formData, loading:true});
+    firebase.auth().createUserWithEmailAndPassword(formData.email, formData.password)
+    .then((createUser) => {
+      console.log(createUser);
+
+      createUser.user.updateProfile({
+        displayName: formData.name,
+        // photoURL:`http://gravatar.com/avatar/${md5(createUser.user.email)}?d=identicon` 
+      }).then(() => {
+        saveUser(createUser).then(() => {
+          
+          console.log("user save");
+          this.setState({...formData,loading:false});
+        })
+      })
+    }).catch((err) => {console.log(err);
+    this.setState({...formData, loading: false})});
+  }
+
+  const saveUser =(createUser) => {
+    saveUserToDb();
+    return formData.userRef.child(createUser.user.uid).set({
+      name: createUser.user.displayName,
+      // avatar: createUser.user.photoURL
+    });
+  }
   const onSubmit = (data) => {
     console.log(data);
     console.log(register);
@@ -154,7 +184,12 @@ function SignUp() {
                         pattern: {
                           value: /^[A-Za-z0-9]+$/,
                           message: "Mật khẩu không chứa kí tự đặc biệt",
-                        }, // JS only: <p>error message</p> TS only support string
+                        },
+                         minLength: {
+                        value: 6,
+                        message: 'mật khẩu lớn hơn hoặc bằng 6 ký tự' // JS only: <p>error message</p> TS only support string
+    }
+                         // JS only: <p>error message</p> TS only support string
                       })}
                       onChange={handleChange}
                       name="password"
