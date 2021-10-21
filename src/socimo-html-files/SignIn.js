@@ -101,7 +101,10 @@ class SignIn extends React.Component {
                     </button>
                   </Link>
                   <Link to="/signup">
-                    <button className="main-btn" style={{float: 'left', marginTop:10,marginLeft:30}}>
+                    <button
+                      className="main-btn"
+                      style={{ float: "left", marginTop: 10, marginLeft: 30 }}
+                    >
                       <i className="icofont-key" /> Đăng ký
                     </button>
                   </Link>

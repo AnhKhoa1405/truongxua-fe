@@ -19,9 +19,9 @@ import SendFeedBack from "./socimo-html-files/SendFeedBack";
 import Settings from "./socimo-html-files/Settings";
 import SignIn from "./socimo-html-files/SignIn";
 import SignUp from "./socimo-html-files/SignUp";
-import AccountPopup from "./socimo-html-files/AccountPopup"
+import AccountPopup from "./socimo-html-files/AccountPopup";
 import Groups from "./socimo-html-files/Groups";
-
+import axios from "axios";
 
 // Configure Firebase.
 const config = {
@@ -36,8 +36,10 @@ const config = {
 firebase.initializeApp(config);
 
 function App() {
+  let jwtDecode = require("jwt-decode").default;
   //handel firebase
   useEffect(() => {
+    //indexedDB.deleteDatabase("firebaseLocalStorageDb");
     const unregisterAuthObserver = firebase
       .auth()
       .onAuthStateChanged(async (user) => {
@@ -47,12 +49,30 @@ function App() {
           return;
         }
         console.log("Login user: ", user.displayName);
-
         const token = await user.getIdToken();
         console.log("Logged in user: ", token);
+        await encodeToDecode(token);
       });
     return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
   }, []);
+
+  const encodeToDecode = async (tokenUser) => {
+    try {
+      const response = await axios.post(
+        `http://20.188.111.70:12347/api/users/log-in?idToken=${tokenUser}`
+      );
+      if (response.status == 200) {
+        console.log(response);
+        let decoded = jwtDecode(response.data);
+        decoded.author = response.data;
+        sessionStorage.setItem("infoUser", JSON.stringify(decoded));
+      }
+    } catch (err) {
+      console.log("Error");
+      console.error(err);
+    }
+  };
+
   return (
     <Router>
       <div>
@@ -60,8 +80,8 @@ function App() {
         {/* <SignIn /> */}
         {/* <Home /> */}
         <Route path="/" exact component={SignIn} />
-        <Route path="/popup"  component={AccountPopup} />
-        <Route path="/groups"  component={Groups} />
+        <Route path="/popup" component={AccountPopup} />
+        <Route path="/groups" component={Groups} />
         <Route path="/aboutUniversity" component={AboutUniversity} />
         <Route path="/home" component={Home} />
         <Route path="/sendFeedBack" component={SendFeedBack} />
@@ -76,8 +96,6 @@ function App() {
         <Route path="/eventDetail" component={EventDetail} />
         <Route path="/invoice" component={Invoice} />
         <Route path="/loadimg" component={LoadImg} />
-    
-        
       </div>
     </Router>
   );
