@@ -54,7 +54,7 @@ function SignUp() {
         "http://20.188.111.70:12348/api/v1/Alumni",
         data
       );
-      history.push("/home");
+      history.push("/");
     } catch (err) {
       console.log(err);
     }
@@ -64,8 +64,7 @@ function SignUp() {
     setFormData({...formData, loading:true});
     firebase.auth().createUserWithEmailAndPassword(formData.email, formData.password)
     .then((createUser) => {
-      console.log(createUser);
-
+      console.log(createUser.user.uid);
       createUser.user.updateProfile({
         displayName: formData.name,
         // photoURL:`http://gravatar.com/avatar/${md5(createUser.user.email)}?d=identicon` 
@@ -285,7 +284,7 @@ function SignUp() {
                           </span>
                         </label> */}
                     </div>
-                    <Link to="/home">
+                    <Link to="/">
                       <button
                         onClick={handleSubmit(handleCreate)}
                         className="main-btn"
@@ -297,6 +296,15 @@ function SignUp() {
                   </div>
                 </div>
               </form>
+              <Link to="/">
+                <p className="back" style={{ marginTop: 20,
+                fontSize:16, 
+                  borderBottom:"2px solid #17a2b8",
+                  paddingBottom:5,
+                  width:"max-content",
+             
+                }}>Quay về trang chủ</p>
+              </Link>
             </div>
           </div>
         </div>
