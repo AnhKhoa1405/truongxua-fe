@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import "../css/group.css"
+import "../css/group.css";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 function Groups(props) {
   const [listGroups, setListGroups] = useState([]);
@@ -29,15 +30,25 @@ function Groups(props) {
               <h5 className="group-name">{group.name}</h5>
             </a>
 
-            <p className="creator">(Người tạo) {group.info}</p>
+            <p className="creator">(Trưởng nhóm) </p>
           </div>
           <div className="body">
             <img className="group-img" src={group.avataImg} />
+            <p
+              style={{
+                color: "black",
+                fontSize: 12,
+                marginBottom: 0,
+              }}
+            >
+              {group.description}
+            </p>
           </div>
-          <div>
-            <div className="bottom">
+
+          <div className="bottom">
+            <Link to="/groupDetails">
               <p className="join">Tham gia</p>
-            </div>
+            </Link>
           </div>
         </div>
       );
