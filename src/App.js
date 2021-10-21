@@ -1,4 +1,7 @@
 import firebase from "firebase";
+import "firebase/auth"
+import 'firebase/database'
+import 'firebase/storage'
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import AboutUniversity from "./socimo-html-files/AboutUniversity";
@@ -24,6 +27,11 @@ import axios from "axios";
 const config = {
   apiKey: process.env.REACT_APP_FIREBASE_API,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: "truongxua-d9940",
+  storageBucket: "truongxua-d9940.appspot.com",
+  messagingSenderId: "78169522021",
+  appId: "1:78169522021:web:13934f5f09fb08e97ceb8c",
+  measurementId: "G-2T9SQ4HENT"
 };
 firebase.initializeApp(config);
 

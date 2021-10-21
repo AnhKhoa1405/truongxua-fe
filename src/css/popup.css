@@ -21,9 +21,29 @@ padding: 10px 20px;
 	color: #22222c;
 }
 
+.item-search.active{
+	border: 5px solid #71cff9;
+}
+
 .list-search{
 display: grid;
 grid-template-columns: repeat(2, 1fr);
 margin-top:20px;
 column-gap: 10px;
+}
+
+.select-year{
+	margin-top:20px;
+	border: none;
+	background-color:#71cff9;
+	padding:10px 20px;
+	border-radius:5px;
+	color:#291b1b;
+	font-weight: bold;
+	width: 250px;
+}
+
+.selected-year{
+	padding: 5px 10px;
+	background-color: aliceblue;
 }
