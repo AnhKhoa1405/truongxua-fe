@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../css/popup.css";
+import jwt_decode from "jwt-decode";
+ 
 
 import { useForm } from "react-hook-form";
 import { render } from "@testing-library/react";
@@ -175,7 +177,7 @@ function AccountPopup(props) {
   const getProfile = async () => {
     try {
       const response = await axios.get(
-        "http://20.188.111.70:12348/api/v1/alumni/9"
+        `http://20.188.111.70:12348/api/v1/alumni/${user.Id}`
   
       );
       initialState.name = response.data.name;
@@ -183,6 +185,7 @@ function AccountPopup(props) {
       initialState.address = response.data.address;
       initialState.bio = response.data.bio;
       initialState.phone = response.data.phone;
+      console.log(response.data)
     } catch (error) {
       console.log(error);
     }
@@ -200,8 +203,14 @@ function AccountPopup(props) {
     }
   }
 
- 
-
+  const [user, setUser] = useState({});
+  
+  const decodeToken = (token) =>{
+var decoded = jwt_decode(token);
+ setUser(decoded);
+console.log(decoded.Id);
+  }
+  
   useEffect(() => {
     fetchSearchData();
   }, [formData.search]);
@@ -209,6 +218,9 @@ function AccountPopup(props) {
   useEffect(() => {
     getProfile();
     fetchScoolYear();
+    localStorage.setItem("accessToken","eyJhbGciOiJSUzI1NiIsImtpZCI6IjhmYmRmMjQxZTdjM2E2NTEzNTYwNmRkYzFmZWQyYzU1MjI2MzBhODciLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoidHVhbiBhbmgiLCJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vdHJ1b25neHVhLWQ5OTQwIiwiYXVkIjoidHJ1b25neHVhLWQ5OTQwIiwiYXV0aF90aW1lIjoxNjM0ODMyMDg1LCJ1c2VyX2lkIjoiYmVKY2hhaHNzSmVKVzBnNzNralE1ZmR6bVpiMiIsInN1YiI6ImJlSmNoYWhzc0plSlcwZzcza2pRNWZkem1aYjIiLCJpYXQiOjE2MzQ4MzIwODYsImV4cCI6MTYzNDgzNTY4NiwiZW1haWwiOiJ0dWFuYW5oMjAwMDU1NUBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImZpcmViYXNlIjp7ImlkZW50aXRpZXMiOnsiZW1haWwiOlsidHVhbmFuaDIwMDA1NTVAZ21haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.IdPro3naw4FhC7wNg14nP9zYWcqWZR-w9oJdm-9INkBKe115H4W4CR2MEk79RMM4ROWrWlaY1YXrRFGphui999FoCOv58j6qrfFOvNLgNtIwZAXxrc-YYp-sP3exIj2lkfFs6VFzGk-G1DQSsUz9elEXHbFy1qfLUv7sS2q05EW3RQPnUKXcqKfFRhObQ29cUDrDEUeLGnWIWf16lHoTYPXfwacLLxaxakL-81bAJm98cVIyRfVe9Gn-qwTEu6eJhiUxp8ZCnDCCOfsGUlueWuxU14m0LASTXY4zHuin54taLL2vwCRJeuH-DBZq_6dYUG96f0faMJCa7iPPVaqkHA: ");
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJiZUpjaGFoc3NKZUpXMGc3M2tqUTVmZHptWmIyIiwicm9sZSI6IlVzZXIiLCJJZCI6IjEzOSIsIlNjaG9vbElkIjoiIiwiR3JvdXBJZCI6IjMzIiwibmJmIjoxNjM0ODI5MzU0LCJleHAiOjE2MzU0MzQxNTQsImlhdCI6MTYzNDgyOTM1NH0.eySR4nAGVTIat2T0RWN0MJj0Qjs8Xnd_rwVhSM3FDEA";
+    decodeToken(token)
   }, []);
 
   return trigger ? (

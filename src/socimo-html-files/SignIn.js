@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import firebase from "firebase";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
-
+import { withRouter } from "react-router-dom";
+import axios from "axios";
 const uiConfig = {
   // Popup signin flow rather than redirect flow.
   signInFlow: "popup", //redirect
@@ -12,6 +13,61 @@ const uiConfig = {
 };
 
 class SignIn extends React.Component {
+
+  state ={
+    email: "",
+    password: "",
+    loading: false,
+    error: [],
+    currentUser:{},
+    token: "",
+  }
+
+
+  handleChange = (e)=> {
+    const {name, value} = e.target
+
+    this.setState({[name]: value});
+  }
+
+  handleSubmit =  (e) => {
+    e.preventDefault();
+
+    if(this.isFormValid){
+      this.setState({error:[], loading: true})
+      const {email, password,error} = this.state;
+       firebase.auth()
+      .signInWithEmailAndPassword(email, password)
+      .then((signInUser)=>{
+        console.log(signInUser);
+      }).then(  ()=>{
+       firebase.auth().currentUser.getIdToken(/* forceRefresh */ true).then(async function(idToken) {
+  console.log("id token:" +idToken)
+           try {
+      const response = await axios.post(
+        `http://20.188.111.70:12348/api/users/log-in?idToken=${idToken}`,
+        idToken
+      );
+      console.log("response :" + response.data);
+      localStorage.setItem("accessToken", response.data);
+
+    } catch (err) {
+      console.log(err);
+    }
+  
+}).catch(function(error) {
+  // Handle error
+});
+      })
+      .catch(err=>{
+        console.log(err);
+        this.setState({error:[...error, err] ,loading: false})
+        this.props.history.push('/');
+      })
+    }
+  }
+
+  isFormValid = () => (this.state.email && this.state.password)
   render() {
     return (
       <div>
@@ -82,9 +138,9 @@ class SignIn extends React.Component {
                 <h4>
                   <i className="icofont-key-hole" /> Login
                 </h4>
-                <form method="post" className="c-form">
-                  <input type="text" placeholder="User Name @" />
-                  <input type="password" placeholder="xxxxxxxxxx" />
+                <form  className="c-form">
+                  <input name="email" type="text" onChange={this.handleChange} placeholder="User Name @" />
+                  <input name="password" type="password" onChange ={this.handleChange} placeholder="Passwordxxxxxxxxxx" />
 
                   {/* <input type="checkbox" id="checkbox" defaultChecked />
                     <label htmlFor="checkbox">
@@ -95,17 +151,22 @@ class SignIn extends React.Component {
                     firebaseAuth={firebase.auth()}
                   />
 
-                  <Link to="/home">
-                    <button className="main-btn">
+                  {/* <Link to="/home"> */}
+                    <button onClick={this.handleSubmit} className="main-btn">
                       <i className="icofont-key" /> Đăng nhập
                     </button>
-                  </Link>
-                  <Link to="/signup">
-                    <button className="main-btn" style={{float: 'left', marginTop:10,marginLeft:30}}>
-                      <i className="icofont-key" /> Đăng ký
-                    </button>
-                  </Link>
+                  {/* </Link> */}
+                  
                 </form>
+                <Link to="/signup">
+                    <p style={{ marginTop: 20,
+                fontSize:16, 
+                  borderBottom:"2px solid #17a2b8",
+                  paddingBottom:4,
+                  width:"max-content",
+             
+                }}> Đăng ký tài khoản</p>
+                  </Link>
               </div>
             </div>
             <div className="mockup right">
@@ -118,4 +179,4 @@ class SignIn extends React.Component {
   }
 }
 
-export default SignIn;
+export default withRouter(SignIn);

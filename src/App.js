@@ -22,7 +22,6 @@ import SignUp from "./socimo-html-files/SignUp";
 import AccountPopup from "./socimo-html-files/AccountPopup"
 import Groups from "./socimo-html-files/Groups";
 
-
 // Configure Firebase.
 const config = {
   apiKey: process.env.REACT_APP_FIREBASE_API,
@@ -54,7 +53,8 @@ function App() {
     return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
   }, []);
   return (
-    <Router>
+    
+    <Router >
       <div>
         {/* <AboutUniversity /> */}
         {/* <SignIn /> */}

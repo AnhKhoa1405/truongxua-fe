@@ -4,18 +4,105 @@ import AccountPopup from "./AccountPopup";
 import Groups from "./Groups";
 
 function Home() {
-  const [clickGroups,setClickGroups] = useState(false);
-  const [clickHome,setClickHome] = useState(true);
+  const [clickGroups, setClickGroups] = useState(false);
+  const [clickHome, setClickHome] = useState(true);
   const [dataContent, setDataContent] = useState([]);
+  const [deleteAPost, setDeleteAPost] = useState(-1);
+  const [img, setImg] = useState({});
+  const [elementUpdate, setElementUpdate] = useState(undefined);
   const axios = require("axios").default;
   useEffect(async () => {
     await getNewsInSchool();
-  }, []);
+  }, [deleteAPost]);
 
+  const updateImg = (event) => {
+    setImg(event.target.files[0]);
+    // if (event != undefined) {
+
+    //   document.getElementById("fileUpdateImg").style.display = "none";
+    //   document.getElementById("loadImg").insertAdjacentHTML(
+    //     "beforeend",
+    //     `<img style="width: 400px;
+    //     height: 200px;
+    //     margin-bottom: 20px;
+    //     position: relative"
+    //     src="${URL.createObjectURL(event.target.files[0])}" />
+    //     <i
+    //     style="
+    //     position: absolute;
+    //     font-size: 30px;
+    //     color: black;
+    //     left: 49%;
+    //     top: 41%"
+    //     class="icofont-close-circled"
+    //     id="deleteImgInForm"
+    //   />`
+    //   );
+    // }
+  };
+  // const deleteImgNotSave = () => {
+  //   console.log("kaka");
+  // };
+  const changeSubmit = async (event) => {
+    event.preventDefault();
+    const addNews = await addNewsInApi();
+  };
+  const addNewsInApi = async () => {
+    console.log(elementUpdate);
+    // console.log(
+    //   document.getElementById("titleID").value +
+    //     "-----" +
+    //     document.getElementById("emojionearea1").value
+    // );
+    const body = {
+      schoolId: elementUpdate == undefined ? 5 : elementUpdate.schoolId,
+      adminId: elementUpdate == undefined ? 1 : elementUpdate.adminId,
+      title: document.getElementById("titleID").value,
+      content: document.getElementById("emojionearea1").value,
+      createAt:
+        elementUpdate == undefined ? new Date() : elementUpdate.createAt,
+      modifiedAt: elementUpdate == undefined ? null : new Date(),
+      status: true,
+    };
+    try {
+      const response =
+        elementUpdate == undefined
+          ? await axios.post("http://20.188.111.70:12348/api/v1/news", body)
+          : await axios.put(
+              `http://20.188.111.70:12348/api/v1/news?id=${elementUpdate.id}`,
+              body
+            );
+      if (response.status == 200) {
+        var element = document.getElementById("post-new");
+        element.classList.remove("active");
+        document.getElementById("emojionearea1").value = "";
+        document.getElementById("titleID").value = null;
+        console.log(response.headers.date);
+        setDeleteAPost(response.headers.date);
+        setElementUpdate(undefined);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const deleteANews = async () => {
+    try {
+      const response = axios.delete(
+        `http://20.188.111.70:12348/api/v1/news/${deleteAPost}`
+      );
+      if ((await response).status === 200) {
+        setDeleteAPost(-1);
+        var value = document.getElementById("delete-post");
+        value.classList.remove("active");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const getNewsInSchool = async () => {
     try {
       const response = await axios.get(
-        "http://20.188.111.70:12348/api/v1/news"
+        "http://20.188.111.70:12348/api/v1/news?sort=desc&pageNumber=1&pageSize=0"
       );
       if (response.status === 200) {
         setDataContent(response.data);
@@ -24,17 +111,43 @@ function Home() {
       console.error(err);
     }
   };
+  const saveImgInImgBB = async () => {
+    let dataImgSave = {};
 
-  const changeNav =(e)=>{
-    const {id} = e.target;
+    let body = new FormData();
+    body.set("key", "71b6c3846105c92074f8e9a49b85887f");
+
+    body.append("image", img);
+    try {
+      const response = await axios({
+        method: "POST",
+        url: "https://api.imgbb.com/1/upload",
+        data: body,
+      });
+      if (response.status == 200) {
+        dataImgSave = {
+          name: response.data.data.title,
+          url_display: response.data.data.display_url,
+        };
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    return dataImgSave;
+  };
+
+  const changeNav = (e) => {
+    const { id } = e.target;
     console.log(id);
-    if(id === 'home') {setClickHome(true);
+    if (id === "home") {
+      setClickHome(true);
       setClickGroups(false);
     }
-    if(id === 'groups'){ setClickGroups(true);
-setClickHome(false);
+    if (id === "groups") {
+      setClickGroups(true);
+      setClickHome(false);
     }
-  }
+  };
 
   function renderHome() {
     // alumni-alumniId-conmments-content-createAt-id-images-modifiedAt-postInGroups-status
@@ -86,24 +199,45 @@ setClickHome(false);
                         </svg>
                       </i>
                       <ul>
-                        <li>
+                        <li
+                          onClick={() => {
+                            var elementTest =
+                              document.getElementById("post-new");
+                            elementTest.classList.add("active");
+                            let test =
+                              document.getElementById("popup-head-name");
+                            test.innerHTML = "Chỉnh sửa bài đăng";
+                            console.log(element);
+                            document.getElementById("titleID").value =
+                              element.title;
+                            document.getElementById("emojionearea1").value =
+                              element.content;
+                            setElementUpdate(element);
+                          }}
+                        >
                           <i className="icofont-pen-alt-1" />
-                          Edit Post
+                          Chỉnh sửa bài đăng
                           <span>Edit This Post within a Hour</span>
                         </li>
                         <li>
                           <i className="icofont-ban" />
-                          Hide Post
+                          Ẩn bài đăng
                           <span>Hide This Post</span>
                         </li>
-                        <li>
+                        <li
+                          onClick={() => {
+                            var value = document.getElementById("delete-post");
+                            value.classList.add("active");
+                            setDeleteAPost(element.id);
+                          }}
+                        >
                           <i className="icofont-ui-delete" />
-                          Delete Post
+                          Xóa bài đăng
                           <span>If inappropriate Post By Mistake</span>
                         </li>
                         <li>
                           <i className="icofont-flag" />
-                          Report
+                          Báo cáo bài đăng
                           <span>Inappropriate content</span>
                         </li>
                       </ul>
@@ -502,7 +636,7 @@ setClickHome(false);
           </div>
         </div>
         {/* responsive header */}
-        <AccountPopup />
+        {/* < AccountPopup /> */}
         <header className>
           <div className="topbar stick">
             <div className="logo">
@@ -1004,73 +1138,29 @@ setClickHome(false);
                     <div className="col-lg-6">
                       <ul className="filtr-tabs">
                         <li>
-                          <a className="active" onClick={changeNav} id="home" href="#" title>
-                            Home
+                          <a
+                            onClick={changeNav}
+                            className="active"
+                            href="#"
+                            id="home"
+                            title
+                          >
+                            Bản tin trường
                           </a>
                         </li>
                         <li>
-                          <a href="#" title onClick={changeNav} id="groups">
+                          <a onClick={changeNav} id="groups" href="#" title>
                             Nhóm
                           </a>
                         </li>
                         <li>
-                          <a href="#" title onClick={changeNav} id="favorites">
-                            Ưa thích
+                          <a onClick={changeNav} id="events" href="#" title>
+                            Event của trường
                           </a>
                         </li>
                       </ul>
                       {/* tab buttons */}
-                      <div className="main-wraper">
-                         {clickGroups && 
-                        <Groups />
-                     }
 
-                     {clickHome&& <div>
-                        <span className="new-title">Create New Post</span>
-                        <div className="new-post">
-                          <form method="post">
-                            <i className="icofont-pen-alt-1" />
-                            <input
-                              type="text"
-                              placeholder="Create New Post"
-                              onClick={() => {
-                                var element =
-                                  document.getElementById("post-new");
-                                element.classList.add("active");
-                                let test =
-                                  document.getElementById("popup-head-name");
-                                test.innerHTML = "Create New Post";
-                              }}
-                            />
-                          </form>
-                          <ul className="upload-media">
-                            <li>
-                              <a href="#" title>
-                                <i>
-                                  <img src="images/image.png" alt="" />
-                                </i>
-                                <span>Photo/Video</span>
-                              </a>
-                            </li>
-                            <li>
-                              <a href="#" title>
-                                <i>
-                                  <img src="images/activity.png" alt="" />
-                                </i>
-                                <span>Feeling/Activity</span>
-                              </a>
-                            </li>
-                            <li>
-                              <a href="live-stream.html" title>
-                                <i>
-                                  <img src="images/live-stream.png" alt="" />
-                                </i>
-                                <span>Live Stream</span>
-                              </a>
-                            </li>
-                          </ul>
-                        </div>
-                      {/* </div> comment div */}
                       {/* create new post */}
                       {/* <div className="story-card">
                           <div className="story-title">
@@ -1253,550 +1343,620 @@ setClickHome(false);
                           </ul>
                         </div> */}
                       {/* chat rooms */}
-                      <div className="main-wraper">
-                        <div className="user-post">
-                          <div className="friend-info">
-                            <figure>
-                              <i className="icofont-learn" />
-                            </figure>
-                            <div className="friend-name">
-                              <ins>
-                                <a title href="time-line.html">
-                                  Suggested
-                                </a>
-                              </ins>
-                              <span>
-                                <i className="icofont-runner-alt-1" /> Follow
-                                similar People
-                              </span>
+                      {clickGroups && <Groups />}
+                      {clickHome && (
+                        <div className="blogsInSchool">
+                          <div className="main-wraper">
+                            <span className="new-title">Create New Post</span>
+                            <div className="new-post">
+                              <form method="post">
+                                <i className="icofont-pen-alt-1" />
+                                <input
+                                  type="text"
+                                  placeholder="Create New Post"
+                                  onClick={() => {
+                                    var element =
+                                      document.getElementById("post-new");
+                                    element.classList.add("active");
+                                    let test =
+                                      document.getElementById(
+                                        "popup-head-name"
+                                      );
+                                    test.innerHTML = "Tạo bài đăng";
+                                  }}
+                                />
+                              </form>
+                              <ul className="upload-media">
+                                <li>
+                                  <a href="#" title>
+                                    <i>
+                                      <img src="images/image.png" alt="" />
+                                    </i>
+                                    <span>Photo/Video</span>
+                                  </a>
+                                </li>
+                                <li>
+                                  <a href="#" title>
+                                    <i>
+                                      <img src="images/activity.png" alt="" />
+                                    </i>
+                                    <span>Feeling/Activity</span>
+                                  </a>
+                                </li>
+                                <li>
+                                  <a href="live-stream.html" title>
+                                    <i>
+                                      <img
+                                        src="images/live-stream.png"
+                                        alt=""
+                                      />
+                                    </i>
+                                    <span>Live Stream</span>
+                                  </a>
+                                </li>
+                              </ul>
                             </div>
-                            <ul
-                              style={{ display: "flex" }}
-                              className="suggested-caro"
-                            >
-                              <li>
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-1.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>Amy Watson</span>
-                                <ins>Department of Socilolgy</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </li>
-                              <li>
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-2.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>Muhammad Khan</span>
-                                <ins>Department of Socilolgy</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </li>
-                              <li>
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-3.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>Sadia Gill</span>
-                                <ins>Department of Socilolgy</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </li>
-                            </ul>
                           </div>
-                        </div>
-                      </div>
-                      {/* suggested friends */}
-
-                      {/* share audio post */}
-
-                      {/* share video post */}
-
-                      {/* share post without image */}
-                      <div className="main-wraper">
-                        <div className="user-post">
-                          <div className="friend-info">
-                            <figure>
-                              <em>
-                                <svg
-                                  style={{ verticalAlign: "middle" }}
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width={15}
-                                  height={15}
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    fill="#82828e"
-                                    stroke="#82828e"
-                                    d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"
-                                  />
-                                </svg>
-                              </em>
-                              <img alt="" src="images/resources/user2.jpg" />
-                            </figure>
-                            <div className="friend-name">
-                              <div className="more">
-                                <div className="more-post-optns">
-                                  <i className>
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      width={24}
-                                      height={24}
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth={2}
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      className="feather feather-more-horizontal"
-                                    >
-                                      <circle cx={12} cy={12} r={1} />
-                                      <circle cx={19} cy={12} r={1} />
-                                      <circle cx={5} cy={12} r={1} />
-                                    </svg>
-                                  </i>
-                                  <ul>
-                                    <li>
-                                      <i className="icofont-pen-alt-1" />
-                                      Edit Post
-                                      <span>Edit This Post within a Hour</span>
-                                    </li>
-                                    <li>
-                                      <i className="icofont-ban" />
-                                      Hide Post
-                                      <span>Hide This Post</span>
-                                    </li>
-                                    <li>
-                                      <i className="icofont-ui-delete" />
-                                      Delete Post
-                                      <span>
-                                        If inappropriate Post By Mistake
-                                      </span>
-                                    </li>
-                                    <li>
-                                      <i className="icofont-flag" />
-                                      Report
-                                      <span>Inappropriate content</span>
-                                    </li>
-                                  </ul>
+                          <div className="main-wraper">
+                            <div className="user-post">
+                              <div className="friend-info">
+                                <figure>
+                                  <i className="icofont-learn" />
+                                </figure>
+                                <div className="friend-name">
+                                  <ins>
+                                    <a title href="time-line.html">
+                                      Suggested
+                                    </a>
+                                  </ins>
+                                  <span>
+                                    <i className="icofont-runner-alt-1" />{" "}
+                                    Follow similar People
+                                  </span>
                                 </div>
-                              </div>
-                              <ins>
-                                <a title href="time-line.html">
-                                  Maria k.
-                                </a>{" "}
-                                Premium Product
-                              </ins>
-                              <span>
-                                <i className="icofont-globe" /> published:
-                                Sep,15 2020
-                              </span>
-                            </div>
-                            <div className="post-meta">
-                              <figure className="premium-post">
-                                <img src="images/resources/book5.jpg" alt="" />
-                              </figure>
-                              <div className="premium">
-                                <a
-                                  href="book-detail.html"
-                                  className="post-title"
+                                <ul
+                                  style={{ display: "flex" }}
+                                  className="suggested-caro"
                                 >
-                                  Technicial words 2020 Book world
-                                </a>
-                                <p>
-                                  Nam eget dui. Etiam rhoncus. Maecenas tempus,
-                                  tellus eget condimentum rhoncus, sem quam
-                                  semper libero.
-                                </p>
-                                <a
-                                  className="main-btn purchase-btn"
-                                  title
-                                  href="book-detail.html"
-                                >
-                                  <i className="icofont-cart-alt" /> Buy Now
-                                </a>
-                              </div>
-                              <div className="we-video-info">
-                                <ul>
                                   <li>
-                                    <span title="views" className="views">
-                                      <i>
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          width={16}
-                                          height={16}
-                                          viewBox="0 0 24 24"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          strokeWidth={2}
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          className="feather feather-eye"
-                                        >
-                                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                          <circle cx={12} cy={12} r={3} />
-                                        </svg>
-                                      </i>
-                                      <ins>1.2k</ins>
-                                    </span>
+                                    <figure>
+                                      <img
+                                        src="images/resources/speak-1.jpg"
+                                        alt=""
+                                      />
+                                    </figure>
+                                    <span>Amy Watson</span>
+                                    <ins>Department of Socilolgy</ins>
+                                    <a href="#" title data-ripple>
+                                      <i className="icofont-star" /> Follow
+                                    </a>
                                   </li>
                                   <li>
-                                    <span
-                                      title="Comments"
-                                      className="Recommend"
-                                    >
-                                      <i>
-                                        <svg
-                                          className="feather feather-message-square"
-                                          strokeLinejoin="round"
-                                          strokeLinecap="round"
-                                          strokeWidth={2}
-                                          stroke="currentColor"
-                                          fill="none"
-                                          viewBox="0 0 24 24"
-                                          height={16}
-                                          width={16}
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                                        </svg>
-                                      </i>
-                                      <ins>54</ins>
-                                    </span>
+                                    <figure>
+                                      <img
+                                        src="images/resources/speak-2.jpg"
+                                        alt=""
+                                      />
+                                    </figure>
+                                    <span>Muhammad Khan</span>
+                                    <ins>Department of Socilolgy</ins>
+                                    <a href="#" title data-ripple>
+                                      <i className="icofont-star" /> Follow
+                                    </a>
                                   </li>
                                   <li>
-                                    <span title="follow" className="Follow">
-                                      <i>
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          width={16}
-                                          height={16}
-                                          viewBox="0 0 24 24"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          strokeWidth={2}
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          className="feather feather-star"
-                                        >
-                                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                                        </svg>
-                                      </i>
-                                      <ins>5k</ins>
-                                    </span>
-                                  </li>
-                                  <li>
-                                    <span className="share-pst" title="Share">
-                                      <i>
-                                        <svg
-                                          xmlns="http://www.w3.org/2000/svg"
-                                          width={16}
-                                          height={16}
-                                          viewBox="0 0 24 24"
-                                          fill="none"
-                                          stroke="currentColor"
-                                          strokeWidth={2}
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          className="feather feather-share-2"
-                                        >
-                                          <circle cx={18} cy={5} r={3} />
-                                          <circle cx={6} cy={12} r={3} />
-                                          <circle cx={18} cy={19} r={3} />
-                                          <line
-                                            x1="8.59"
-                                            y1="13.51"
-                                            x2="15.42"
-                                            y2="17.49"
-                                          />
-                                          <line
-                                            x1="15.41"
-                                            y1="6.51"
-                                            x2="8.59"
-                                            y2="10.49"
-                                          />
-                                        </svg>
-                                      </i>
-                                      <ins>205</ins>
-                                    </span>
+                                    <figure>
+                                      <img
+                                        src="images/resources/speak-3.jpg"
+                                        alt=""
+                                      />
+                                    </figure>
+                                    <span>Sadia Gill</span>
+                                    <ins>Department of Socilolgy</ins>
+                                    <a href="#" title data-ripple>
+                                      <i className="icofont-star" /> Follow
+                                    </a>
                                   </li>
                                 </ul>
-                                <a
-                                  href="post-detail.html"
-                                  title
-                                  className="reply"
-                                >
-                                  Reply <i className="icofont-reply" />
-                                </a>
                               </div>
-                              <div className="stat-tools">
-                                <div className="box">
-                                  <div className="Like">
-                                    <a className="Like__link">
-                                      <i className="icofont-like" /> Like
-                                    </a>
-                                    <div className="Emojis">
-                                      <div className="Emoji Emoji--like">
-                                        <div className="icon icon--like" />
-                                      </div>
-                                      <div className="Emoji Emoji--love">
-                                        <div className="icon icon--heart" />
-                                      </div>
-                                      <div className="Emoji Emoji--haha">
-                                        <div className="icon icon--haha" />
-                                      </div>
-                                      <div className="Emoji Emoji--wow">
-                                        <div className="icon icon--wow" />
-                                      </div>
-                                      <div className="Emoji Emoji--sad">
-                                        <div className="icon icon--sad" />
-                                      </div>
-                                      <div className="Emoji Emoji--angry">
-                                        <div className="icon icon--angry" />
-                                      </div>
+                            </div>
+                          </div>
+                          <div className="main-wraper">
+                            <div className="user-post">
+                              <div className="friend-info">
+                                <figure>
+                                  <em>
+                                    <svg
+                                      style={{ verticalAlign: "middle" }}
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width={15}
+                                      height={15}
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        fill="#82828e"
+                                        stroke="#82828e"
+                                        d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"
+                                      />
+                                    </svg>
+                                  </em>
+                                  <img
+                                    alt=""
+                                    src="images/resources/user2.jpg"
+                                  />
+                                </figure>
+                                <div className="friend-name">
+                                  <div className="more">
+                                    <div className="more-post-optns">
+                                      <i className>
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width={24}
+                                          height={24}
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth={2}
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          className="feather feather-more-horizontal"
+                                        >
+                                          <circle cx={12} cy={12} r={1} />
+                                          <circle cx={19} cy={12} r={1} />
+                                          <circle cx={5} cy={12} r={1} />
+                                        </svg>
+                                      </i>
+                                      <ul>
+                                        <li>
+                                          <i className="icofont-pen-alt-1" />
+                                          Edit Post
+                                          <span>
+                                            Edit This Post within a Hour
+                                          </span>
+                                        </li>
+                                        <li>
+                                          <i className="icofont-ban" />
+                                          Hide Post
+                                          <span>Hide This Post</span>
+                                        </li>
+                                        <li>
+                                          <i className="icofont-ui-delete" />
+                                          Delete Post
+                                          <span>
+                                            If inappropriate Post By Mistake
+                                          </span>
+                                        </li>
+                                        <li>
+                                          <i className="icofont-flag" />
+                                          Report
+                                          <span>Inappropriate content</span>
+                                        </li>
+                                      </ul>
                                     </div>
                                   </div>
+                                  <ins>
+                                    <a title href="time-line.html">
+                                      Maria k.
+                                    </a>{" "}
+                                    Premium Product
+                                  </ins>
+                                  <span>
+                                    <i className="icofont-globe" /> published:
+                                    Sep,15 2020
+                                  </span>
                                 </div>
-                                <div className="box">
-                                  <div className="Emojis">
-                                    <div className="Emoji Emoji--like">
-                                      <div className="icon icon--like" />
-                                    </div>
-                                    <div className="Emoji Emoji--love">
-                                      <div className="icon icon--heart" />
-                                    </div>
-                                    <div className="Emoji Emoji--haha">
-                                      <div className="icon icon--haha" />
-                                    </div>
-                                    <div className="Emoji Emoji--wow">
-                                      <div className="icon icon--wow" />
-                                    </div>
-                                    <div className="Emoji Emoji--sad">
-                                      <div className="icon icon--sad" />
-                                    </div>
-                                    <div className="Emoji Emoji--angry">
-                                      <div className="icon icon--angry" />
-                                    </div>
-                                  </div>
-                                </div>
-                                <a title href="#" className="comment-to">
-                                  <i className="icofont-comment" /> Comment
-                                </a>
-                                <a title href="#" className="share-to">
-                                  <i className="icofont-share-alt" /> Share
-                                </a>
-                                <div className="emoji-state">
-                                  <div className="popover_wrapper">
-                                    <a className="popover_title" href="#" title>
-                                      <img
-                                        alt=""
-                                        src="images/smiles/thumb.png"
-                                      />
-                                    </a>
-                                    <div className="popover_content">
-                                      <span>
-                                        <img
-                                          alt=""
-                                          src="images/smiles/thumb.png"
-                                        />{" "}
-                                        Likes
-                                      </span>
-                                      <ul className="namelist">
-                                        <li>Jhon Doe</li>
-                                        <li>Amara Sin</li>
-                                        <li>Sarah K.</li>
-                                        <li>
-                                          <span>20+ more</span>
-                                        </li>
-                                      </ul>
-                                    </div>
-                                  </div>
-                                  <div className="popover_wrapper">
-                                    <a className="popover_title" href="#" title>
-                                      <img
-                                        alt=""
-                                        src="images/smiles/heart.png"
-                                      />
-                                    </a>
-                                    <div className="popover_content">
-                                      <span>
-                                        <img
-                                          alt=""
-                                          src="images/smiles/heart.png"
-                                        />{" "}
-                                        Love
-                                      </span>
-                                      <ul className="namelist">
-                                        <li>Amara Sin</li>
-                                        <li>Jhon Doe</li>
-                                        <li>
-                                          <span>10+ more</span>
-                                        </li>
-                                      </ul>
-                                    </div>
-                                  </div>
-                                  <div className="popover_wrapper">
-                                    <a className="popover_title" href="#" title>
-                                      <img
-                                        alt=""
-                                        src="images/smiles/smile.png"
-                                      />
-                                    </a>
-                                    <div className="popover_content">
-                                      <span>
-                                        <img
-                                          alt=""
-                                          src="images/smiles/smile.png"
-                                        />{" "}
-                                        Happy
-                                      </span>
-                                      <ul className="namelist">
-                                        <li>Sarah K.</li>
-                                        <li>Jhon Doe</li>
-                                        <li>Amara Sin</li>
-                                        <li>
-                                          <span>100+ more</span>
-                                        </li>
-                                      </ul>
-                                    </div>
-                                  </div>
-                                  <div className="popover_wrapper">
-                                    <a className="popover_title" href="#" title>
-                                      <img
-                                        alt=""
-                                        src="images/smiles/weep.png"
-                                      />
-                                    </a>
-                                    <div className="popover_content">
-                                      <span>
-                                        <img
-                                          alt=""
-                                          src="images/smiles/weep.png"
-                                        />{" "}
-                                        Dislike
-                                      </span>
-                                      <ul className="namelist">
-                                        <li>Danial Carbal</li>
-                                        <li>Amara Sin</li>
-                                        <li>Sarah K.</li>
-                                        <li>
-                                          <span>15+ more</span>
-                                        </li>
-                                      </ul>
-                                    </div>
-                                  </div>
-                                  <p>10+</p>
-                                </div>
-                                <div
-                                  className="new-comment"
-                                  style={{ display: "block" }}
-                                >
-                                  <form method="post">
-                                    <input
-                                      type="text"
-                                      placeholder="write comment"
+                                <div className="post-meta">
+                                  <figure className="premium-post">
+                                    <img
+                                      src="images/resources/book5.jpg"
+                                      alt=""
                                     />
-                                    <button type="submit">
-                                      <i className="icofont-paper-plane" />
-                                    </button>
-                                  </form>
-                                  <div className="comments-area">
+                                  </figure>
+                                  <div className="premium">
+                                    <a
+                                      href="book-detail.html"
+                                      className="post-title"
+                                    >
+                                      Technicial words 2020 Book world
+                                    </a>
+                                    <p>
+                                      Nam eget dui. Etiam rhoncus. Maecenas
+                                      tempus, tellus eget condimentum rhoncus,
+                                      sem quam semper libero.
+                                    </p>
+                                    <a
+                                      className="main-btn purchase-btn"
+                                      title
+                                      href="book-detail.html"
+                                    >
+                                      <i className="icofont-cart-alt" /> Buy Now
+                                    </a>
+                                  </div>
+                                  <div className="we-video-info">
                                     <ul>
                                       <li>
-                                        <figure>
-                                          <img
-                                            alt=""
-                                            src="images/resources/user1.jpg"
-                                          />
-                                        </figure>
-                                        <div className="commenter">
-                                          <h5>
-                                            <a title href="#">
-                                              Jack Carter
-                                            </a>
-                                          </h5>
-                                          <span>2 hours ago</span>
-                                          <p>
-                                            i think that some how, we learn who
-                                            we really are and then live with
-                                            that decision, great post!
-                                          </p>
-                                          <span>
-                                            you can view the more detail via
-                                            link
-                                          </span>
-                                          <a title href="#">
-                                            https://www.youtube.com/watch?v=HpZgwHU1GcI
-                                          </a>
-                                        </div>
-                                        <a title="Like" href="#">
-                                          <i className="icofont-heart" />
-                                        </a>
-                                        <a
-                                          title="Reply"
-                                          href="#"
-                                          className="reply-coment"
-                                        >
-                                          <i className="icofont-reply" />
-                                        </a>
+                                        <span title="views" className="views">
+                                          <i>
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              width={16}
+                                              height={16}
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              strokeWidth={2}
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              className="feather feather-eye"
+                                            >
+                                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                              <circle cx={12} cy={12} r={3} />
+                                            </svg>
+                                          </i>
+                                          <ins>1.2k</ins>
+                                        </span>
                                       </li>
                                       <li>
-                                        <figure>
-                                          <img
-                                            alt=""
-                                            src="images/resources/user2.jpg"
-                                          />
-                                        </figure>
-                                        <div className="commenter">
-                                          <h5>
-                                            <a title href="#">
-                                              Ching xang
-                                            </a>
-                                          </h5>
-                                          <span>2 hours ago</span>
-                                          <p>
-                                            i think that some how, we learn who
-                                            we really are and then live with
-                                            that decision, great post!
-                                          </p>
-                                        </div>
-                                        <a title="Like" href="#">
-                                          <i className="icofont-heart" />
-                                        </a>
-                                        <a
-                                          title="Reply"
-                                          href="#"
-                                          className="reply-coment"
+                                        <span
+                                          title="Comments"
+                                          className="Recommend"
                                         >
-                                          <i className="icofont-reply" />
-                                        </a>
+                                          <i>
+                                            <svg
+                                              className="feather feather-message-square"
+                                              strokeLinejoin="round"
+                                              strokeLinecap="round"
+                                              strokeWidth={2}
+                                              stroke="currentColor"
+                                              fill="none"
+                                              viewBox="0 0 24 24"
+                                              height={16}
+                                              width={16}
+                                              xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                            </svg>
+                                          </i>
+                                          <ins>54</ins>
+                                        </span>
+                                      </li>
+                                      <li>
+                                        <span title="follow" className="Follow">
+                                          <i>
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              width={16}
+                                              height={16}
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              strokeWidth={2}
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              className="feather feather-star"
+                                            >
+                                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                                            </svg>
+                                          </i>
+                                          <ins>5k</ins>
+                                        </span>
+                                      </li>
+                                      <li>
+                                        <span
+                                          className="share-pst"
+                                          title="Share"
+                                        >
+                                          <i>
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              width={16}
+                                              height={16}
+                                              viewBox="0 0 24 24"
+                                              fill="none"
+                                              stroke="currentColor"
+                                              strokeWidth={2}
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              className="feather feather-share-2"
+                                            >
+                                              <circle cx={18} cy={5} r={3} />
+                                              <circle cx={6} cy={12} r={3} />
+                                              <circle cx={18} cy={19} r={3} />
+                                              <line
+                                                x1="8.59"
+                                                y1="13.51"
+                                                x2="15.42"
+                                                y2="17.49"
+                                              />
+                                              <line
+                                                x1="15.41"
+                                                y1="6.51"
+                                                x2="8.59"
+                                                y2="10.49"
+                                              />
+                                            </svg>
+                                          </i>
+                                          <ins>205</ins>
+                                        </span>
                                       </li>
                                     </ul>
+                                    <a
+                                      href="post-detail.html"
+                                      title
+                                      className="reply"
+                                    >
+                                      Reply <i className="icofont-reply" />
+                                    </a>
+                                  </div>
+                                  <div className="stat-tools">
+                                    <div className="box">
+                                      <div className="Like">
+                                        <a className="Like__link">
+                                          <i className="icofont-like" /> Like
+                                        </a>
+                                        <div className="Emojis">
+                                          <div className="Emoji Emoji--like">
+                                            <div className="icon icon--like" />
+                                          </div>
+                                          <div className="Emoji Emoji--love">
+                                            <div className="icon icon--heart" />
+                                          </div>
+                                          <div className="Emoji Emoji--haha">
+                                            <div className="icon icon--haha" />
+                                          </div>
+                                          <div className="Emoji Emoji--wow">
+                                            <div className="icon icon--wow" />
+                                          </div>
+                                          <div className="Emoji Emoji--sad">
+                                            <div className="icon icon--sad" />
+                                          </div>
+                                          <div className="Emoji Emoji--angry">
+                                            <div className="icon icon--angry" />
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="box">
+                                      <div className="Emojis">
+                                        <div className="Emoji Emoji--like">
+                                          <div className="icon icon--like" />
+                                        </div>
+                                        <div className="Emoji Emoji--love">
+                                          <div className="icon icon--heart" />
+                                        </div>
+                                        <div className="Emoji Emoji--haha">
+                                          <div className="icon icon--haha" />
+                                        </div>
+                                        <div className="Emoji Emoji--wow">
+                                          <div className="icon icon--wow" />
+                                        </div>
+                                        <div className="Emoji Emoji--sad">
+                                          <div className="icon icon--sad" />
+                                        </div>
+                                        <div className="Emoji Emoji--angry">
+                                          <div className="icon icon--angry" />
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <a title href="#" className="comment-to">
+                                      <i className="icofont-comment" /> Comment
+                                    </a>
+                                    <a title href="#" className="share-to">
+                                      <i className="icofont-share-alt" /> Share
+                                    </a>
+                                    <div className="emoji-state">
+                                      <div className="popover_wrapper">
+                                        <a
+                                          className="popover_title"
+                                          href="#"
+                                          title
+                                        >
+                                          <img
+                                            alt=""
+                                            src="images/smiles/thumb.png"
+                                          />
+                                        </a>
+                                        <div className="popover_content">
+                                          <span>
+                                            <img
+                                              alt=""
+                                              src="images/smiles/thumb.png"
+                                            />{" "}
+                                            Likes
+                                          </span>
+                                          <ul className="namelist">
+                                            <li>Jhon Doe</li>
+                                            <li>Amara Sin</li>
+                                            <li>Sarah K.</li>
+                                            <li>
+                                              <span>20+ more</span>
+                                            </li>
+                                          </ul>
+                                        </div>
+                                      </div>
+                                      <div className="popover_wrapper">
+                                        <a
+                                          className="popover_title"
+                                          href="#"
+                                          title
+                                        >
+                                          <img
+                                            alt=""
+                                            src="images/smiles/heart.png"
+                                          />
+                                        </a>
+                                        <div className="popover_content">
+                                          <span>
+                                            <img
+                                              alt=""
+                                              src="images/smiles/heart.png"
+                                            />{" "}
+                                            Love
+                                          </span>
+                                          <ul className="namelist">
+                                            <li>Amara Sin</li>
+                                            <li>Jhon Doe</li>
+                                            <li>
+                                              <span>10+ more</span>
+                                            </li>
+                                          </ul>
+                                        </div>
+                                      </div>
+                                      <div className="popover_wrapper">
+                                        <a
+                                          className="popover_title"
+                                          href="#"
+                                          title
+                                        >
+                                          <img
+                                            alt=""
+                                            src="images/smiles/smile.png"
+                                          />
+                                        </a>
+                                        <div className="popover_content">
+                                          <span>
+                                            <img
+                                              alt=""
+                                              src="images/smiles/smile.png"
+                                            />{" "}
+                                            Happy
+                                          </span>
+                                          <ul className="namelist">
+                                            <li>Sarah K.</li>
+                                            <li>Jhon Doe</li>
+                                            <li>Amara Sin</li>
+                                            <li>
+                                              <span>100+ more</span>
+                                            </li>
+                                          </ul>
+                                        </div>
+                                      </div>
+                                      <div className="popover_wrapper">
+                                        <a
+                                          className="popover_title"
+                                          href="#"
+                                          title
+                                        >
+                                          <img
+                                            alt=""
+                                            src="images/smiles/weep.png"
+                                          />
+                                        </a>
+                                        <div className="popover_content">
+                                          <span>
+                                            <img
+                                              alt=""
+                                              src="images/smiles/weep.png"
+                                            />{" "}
+                                            Dislike
+                                          </span>
+                                          <ul className="namelist">
+                                            <li>Danial Carbal</li>
+                                            <li>Amara Sin</li>
+                                            <li>Sarah K.</li>
+                                            <li>
+                                              <span>15+ more</span>
+                                            </li>
+                                          </ul>
+                                        </div>
+                                      </div>
+                                      <p>10+</p>
+                                    </div>
+                                    <div
+                                      className="new-comment"
+                                      style={{ display: "block" }}
+                                    >
+                                      <form method="post">
+                                        <input
+                                          type="text"
+                                          placeholder="write comment"
+                                        />
+                                        <button type="submit">
+                                          <i className="icofont-paper-plane" />
+                                        </button>
+                                      </form>
+                                      <div className="comments-area">
+                                        <ul>
+                                          <li>
+                                            <figure>
+                                              <img
+                                                alt=""
+                                                src="images/resources/user1.jpg"
+                                              />
+                                            </figure>
+                                            <div className="commenter">
+                                              <h5>
+                                                <a title href="#">
+                                                  Jack Carter
+                                                </a>
+                                              </h5>
+                                              <span>2 hours ago</span>
+                                              <p>
+                                                i think that some how, we learn
+                                                who we really are and then live
+                                                with that decision, great post!
+                                              </p>
+                                              <span>
+                                                you can view the more detail via
+                                                link
+                                              </span>
+                                              <a title href="#">
+                                                https://www.youtube.com/watch?v=HpZgwHU1GcI
+                                              </a>
+                                            </div>
+                                            <a title="Like" href="#">
+                                              <i className="icofont-heart" />
+                                            </a>
+                                            <a
+                                              title="Reply"
+                                              href="#"
+                                              className="reply-coment"
+                                            >
+                                              <i className="icofont-reply" />
+                                            </a>
+                                          </li>
+                                          <li>
+                                            <figure>
+                                              <img
+                                                alt=""
+                                                src="images/resources/user2.jpg"
+                                              />
+                                            </figure>
+                                            <div className="commenter">
+                                              <h5>
+                                                <a title href="#">
+                                                  Ching xang
+                                                </a>
+                                              </h5>
+                                              <span>2 hours ago</span>
+                                              <p>
+                                                i think that some how, we learn
+                                                who we really are and then live
+                                                with that decision, great post!
+                                              </p>
+                                            </div>
+                                            <a title="Like" href="#">
+                                              <i className="icofont-heart" />
+                                            </a>
+                                            <a
+                                              title="Reply"
+                                              href="#"
+                                              className="reply-coment"
+                                            >
+                                              <i className="icofont-reply" />
+                                            </a>
+                                          </li>
+                                        </ul>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
+                          <div>{renderHome()}</div>
                         </div>
-                      </div>
-                      {/* post sell book */}
-
-                      <div>{renderHome()}</div>
-                       </div> }
-
-                      {/* advertisment carousel */}
-                      {/* loadmore buttons */}
+                      )}
                     </div>
                     <div className="col-lg-3">
                       <aside className="sidebar static right">
@@ -2082,8 +2242,6 @@ setClickHome(false);
               </div>
             </div>
           </div>
-          </div>
-          {/* add div */}
         </section>
         {/* content */}
         <figure className="bottom-mockup">
@@ -2359,9 +2517,11 @@ setClickHome(false);
             <span
               onClick={() => {
                 var element = document.getElementById("post-new");
-
                 element.classList.remove("active");
                 document.getElementById("emojionearea1").value = "";
+                document.getElementById("titleID").value = "";
+
+                setElementUpdate(undefined);
               }}
               className="popup-closed"
             >
@@ -2398,63 +2558,81 @@ setClickHome(false);
                   </p>
                 </h5>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  marginTop: 20,
-                  alignItems: "baseline",
-                }}
+              <form
+                onSubmit={changeSubmit}
+                style={{ width: "100%" }}
+                className="c-form"
               >
-                <p
+                <div
                   style={{
-                    marginRight: 20,
-                    fontSize: 24,
-                    fontWeight: 700,
+                    display: "flex",
+                    marginTop: 20,
+                    alignItems: "baseline",
                   }}
                 >
-                  Tiêu đề:{" "}
-                </p>
-                <input
-                  placeholder="Tiêu đề bài đăng"
-                  style={{
-                    width: "80%",
-                    padding: 10,
-                  }}
-                  id="titleID"
-                />
-              </div>
-              <div className="post-new">
-                <p
-                  style={{
-                    marginRight: 20,
-                    fontSize: 24,
-                    fontWeight: 700,
-                  }}
-                >
-                  Nội dung
-                </p>
-                <form style={{ width: "100%" }} className="c-form">
+                  <p
+                    style={{
+                      marginRight: 20,
+                      fontSize: 24,
+                      fontWeight: 700,
+                    }}
+                  >
+                    Tiêu đề:{" "}
+                  </p>
+                  <input
+                    required
+                    placeholder="Tiêu đề bài đăng"
+                    style={{
+                      width: "80%",
+                      padding: 10,
+                    }}
+                    id="titleID"
+                  />
+                </div>
+                <div className="post-new">
+                  <p
+                    style={{
+                      marginRight: 20,
+                      fontSize: 24,
+                      fontWeight: 700,
+                    }}
+                  >
+                    Nội dung
+                  </p>
+
                   <textarea
                     id="emojionearea1"
                     placeholder="Nhập nội dung của bài đăng"
                     defaultValue={""}
                     style={{
-                      height: 300,
+                      height: 170,
                     }}
                     required
                   />
 
+                  <input
+                    style={{
+                      borderWidth: 1,
+                      borderColor: "black",
+                    }}
+                    id="fileUpdateImg"
+                    type="file"
+                    onChange={updateImg}
+                    name="img"
+                  />
+                  {/* <div id="loadImg"></div> */}
                   <button
                     style={{
                       fontSize: 24,
+                      width: "100%",
                     }}
                     type="submit"
                     className="main-btn"
                   >
                     Đăng bài
                   </button>
-                </form>
-              </div>
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -2500,6 +2678,7 @@ setClickHome(false);
                   onClick={() => {
                     var element = document.getElementById("delete-post");
                     element.classList.remove("active");
+                    setDeleteAPost(-1);
                   }}
                 >
                   Hủy
@@ -2516,6 +2695,7 @@ setClickHome(false);
                     backgroundColor: "red",
                     float: "right",
                   }}
+                  onClick={() => deleteANews()}
                 >
                   Xóa
                 </button>
@@ -2623,7 +2803,6 @@ setClickHome(false);
                     <input type="radio" name="hear" /> Other
                   </label>
                   <input type="text" placeholder="Writh Other" />
-
                   <button type="submit" className="primary button">
                     Submit
                   </button>
