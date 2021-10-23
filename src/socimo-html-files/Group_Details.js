@@ -5,6 +5,10 @@ import HeaderPage from "./Header";
 import "../css/groupdetail.css";
 
 function GroupDetails() {
+  const [eventPopup,setEventPopup] = useState(false);
+  const showEventPopup =()=>{
+    setEventPopup(true);
+  }
   const [imgNotSave, setimgNotSave] = useState([]);
   // const [imgSave, setImgSave] = useState([]);
   const [content, setContent] = useState("");
@@ -2667,7 +2671,7 @@ const [imgEventNotSave, setimgEventNotSave] = useState([]);
                               </div>
                             </div>
                             {/* create new post */}
-                                <div className="event-button">
+                                <div className="event-button" onClick ={showEventPopup}>
                               <p className="">Tạo sự kiện mới</p>
                             </div>
                             {/* chat rooms */}
@@ -3204,9 +3208,9 @@ const [imgEventNotSave, setimgEventNotSave] = useState([]);
           </div>
         </div>
         {/* bottombar */}
-        <div className="wraper-invite">
+        <div className={`wraper-invite ${eventPopup === true?'active':''}`}>
           <div className="popup">
-            <span className="popup-closed">
+            <span className="popup-closed" onClick={() =>{setEventPopup(false)}}>
               <i className="icofont-close" />
             </span>
             <div className="popup-meta">
