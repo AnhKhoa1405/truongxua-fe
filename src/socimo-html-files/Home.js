@@ -6,6 +6,7 @@ import HeaderPage from "./Header";
 
 function Home() {
   const [clickGroups, setClickGroups] = useState(false);
+    const [clickEvent, setClickEvent] =useState(false);
   const [clickHome, setClickHome] = useState(true);
   const [dataContent, setDataContent] = useState([]);
   const [deleteAPost, setDeleteAPost] = useState(-1);
@@ -145,18 +146,27 @@ function Home() {
     return dataImgSave;
   };
 
-  const changeNav = (e) => {
+const changeNav = (e) => {
     const { id } = e.target;
     console.log(id);
     if (id === "home") {
       setClickHome(true);
       setClickGroups(false);
+      setClickEvent(false);
     }
     if (id === "groups") {
       setClickGroups(true);
       setClickHome(false);
+      setClickEvent(false);
     }
+    if (id === "event") {
+      setClickEvent(true);
+      setClickHome(false);
+      setClickGroups(false);
+    }
+    
   };
+
 
   function renderHome() {
     // alumni-alumniId-conmments-content-createAt-id-images-modifiedAt-postInGroups-status
@@ -913,7 +923,7 @@ function Home() {
                         <li>
                           <a
                             onClick={changeNav}
-                            className="active"
+                            className= {`${clickHome === true ? 'active' :''}`}
                             href="#"
                             id="home"
                             title
@@ -922,12 +932,12 @@ function Home() {
                           </a>
                         </li>
                         <li>
-                          <a onClick={changeNav} id="groups" href="#" title>
+                          <a onClick={changeNav} className = {`${clickGroups === true ? 'active' :''}`} id="groups" href="#" title>
                             Nhóm
                           </a>
                         </li>
                         <li>
-                          <a onClick={changeNav} id="events" href="#" title>
+                          <a onClick={changeNav} className =  {`${clickEvent === true ? 'active' :''}`} id="event" href="#" title>
                             Event của trường
                           </a>
                         </li>
