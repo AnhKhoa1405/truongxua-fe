@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AccountPopup from "./AccountPopup";
 import Groups from "./Groups";
+import HeaderPage from "./Header";
 
 function Home() {
   const [clickGroups, setClickGroups] = useState(false);
@@ -11,10 +12,18 @@ function Home() {
   const [img, setImg] = useState({});
   const [elementUpdate, setElementUpdate] = useState(undefined);
   const axios = require("axios").default;
+
   useEffect(async () => {
     await getNewsInSchool();
+    console.log(JSON.parse(localStorage.infoUser).SchoolId);
   }, [deleteAPost]);
-
+  const findSchoolRecent = async() => {
+    try{
+      const response = await axios.get("")
+    }catch(err){
+      console.error(err)
+    }
+  }
   const updateImg = (event) => {
     setImg(event.target.files[0]);
     // if (event != undefined) {
@@ -48,15 +57,15 @@ function Home() {
     const addNews = await addNewsInApi();
   };
   const addNewsInApi = async () => {
-    console.log(elementUpdate);
+    
     // console.log(
     //   document.getElementById("titleID").value +
     //     "-----" +
     //     document.getElementById("emojionearea1").value
     // );
     const body = {
-      schoolId: elementUpdate == undefined ? 5 : elementUpdate.schoolId,
-      adminId: elementUpdate == undefined ? 1 : elementUpdate.adminId,
+      schoolId: elementUpdate == undefined ? JSON.parse(localStorage.infoUser).SchoolId : elementUpdate.schoolId,
+      adminId: elementUpdate == undefined ? JSON.parse(localStorage.infoUser).Id : elementUpdate.adminId,
       title: document.getElementById("titleID").value,
       content: document.getElementById("emojionearea1").value,
       createAt:
@@ -155,216 +164,254 @@ function Home() {
     if (dataContent != undefined) {
       return dataContent.map((element, index) => {
         const d = new Date(element.createAt);
-        return (
-          <div key={index} className="main-wraper">
-            <div className="user-post">
-              <div className="friend-info">
-                <figure>
-                  <em>
-                    <svg
-                      style={{ verticalAlign: "middle" }}
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={15}
-                      height={15}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        fill="#7fba00"
-                        stroke="#7fba00"
-                        d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"
-                      />
-                    </svg>
-                  </em>
-                  <img alt="" src="images/resources/user1.jpg" />
-                </figure>
-                <div className="friend-name">
-                  <div className="more">
-                    <div className="more-post-optns">
-                      <i className>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width={24}
-                          height={24}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="feather feather-more-horizontal"
-                        >
-                          <circle cx={12} cy={12} r={1} />
-                          <circle cx={19} cy={12} r={1} />
-                          <circle cx={5} cy={12} r={1} />
-                        </svg>
-                      </i>
+        if (JSON.parse(localStorage.infoUser).SchoolId == element.schoolId) {
+          return (
+            <div key={index} className="main-wraper">
+              <div className="user-post">
+                <div className="friend-info">
+                  <figure>
+                    <em>
+                      <svg
+                        style={{ verticalAlign: "middle" }}
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={15}
+                        height={15}
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          fill="#7fba00"
+                          stroke="#7fba00"
+                          d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"
+                        />
+                      </svg>
+                    </em>
+                    <img
+                      alt=""
+                      style={{
+                        width: 40,
+                        height: 40,
+                      }}
+                      src={JSON.parse(localStorage.infoUser).infoDetail.img}
+                    />
+                  </figure>
+                  <div className="friend-name">
+                    <div className="more">
+                      <div className="more-post-optns">
+                        <i className>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width={24}
+                            height={24}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="feather feather-more-horizontal"
+                          >
+                            <circle cx={12} cy={12} r={1} />
+                            <circle cx={19} cy={12} r={1} />
+                            <circle cx={5} cy={12} r={1} />
+                          </svg>
+                        </i>
+                        <ul>
+                          <li
+                            onClick={() => {
+                              var elementTest =
+                                document.getElementById("post-new");
+                              elementTest.classList.add("active");
+                              let test =
+                                document.getElementById("popup-head-name");
+                              test.innerHTML = "Chỉnh sửa bài đăng";
+                              console.log(element);
+                              document.getElementById("titleID").value =
+                                element.title;
+                              document.getElementById("emojionearea1").value =
+                                element.content;
+                              setElementUpdate(element);
+                            }}
+                          >
+                            <i className="icofont-pen-alt-1" />
+                            Chỉnh sửa bài đăng
+                            <span>Edit This Post within a Hour</span>
+                          </li>
+                          <li>
+                            <i className="icofont-ban" />
+                            Ẩn bài đăng
+                            <span>Hide This Post</span>
+                          </li>
+                          <li
+                            onClick={() => {
+                              var value =
+                                document.getElementById("delete-post");
+                              value.classList.add("active");
+                              setDeleteAPost(element.id);
+                            }}
+                          >
+                            <i className="icofont-ui-delete" />
+                            Xóa bài đăng
+                            <span>If inappropriate Post By Mistake</span>
+                          </li>
+                          <li>
+                            <i className="icofont-flag" />
+                            Báo cáo bài đăng
+                            <span>Inappropriate content</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <ins>
+                      <a title="verified" href="time-line.html">
+                        {JSON.parse(localStorage.infoUser).infoDetail.name}
+                      </a>{" "}
+                      Đăng bài
+                    </ins>
+                    <span>
+                      <i className="icofont-globe" /> Ngày tạo:{" "}
+                      {d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear()}
+                    </span>
+                  </div>
+                  <div className="post-meta">
+                    <a href="post-detail.html" className="post-title">
+                      {element.title}
+                    </a>
+                    <p>{element.content}</p>
+                    <div className="we-video-info">
                       <ul>
-                        <li
-                          onClick={() => {
-                            var elementTest =
-                              document.getElementById("post-new");
-                            elementTest.classList.add("active");
-                            let test =
-                              document.getElementById("popup-head-name");
-                            test.innerHTML = "Chỉnh sửa bài đăng";
-                            console.log(element);
-                            document.getElementById("titleID").value =
-                              element.title;
-                            document.getElementById("emojionearea1").value =
-                              element.content;
-                            setElementUpdate(element);
-                          }}
-                        >
-                          <i className="icofont-pen-alt-1" />
-                          Chỉnh sửa bài đăng
-                          <span>Edit This Post within a Hour</span>
+                        <li>
+                          <span title="views" className="views">
+                            <i>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={16}
+                                height={16}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="feather feather-eye"
+                              >
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx={12} cy={12} r={3} />
+                              </svg>
+                            </i>
+                            <ins>1.2k</ins>
+                          </span>
                         </li>
                         <li>
-                          <i className="icofont-ban" />
-                          Ẩn bài đăng
-                          <span>Hide This Post</span>
-                        </li>
-                        <li
-                          onClick={() => {
-                            var value = document.getElementById("delete-post");
-                            value.classList.add("active");
-                            setDeleteAPost(element.id);
-                          }}
-                        >
-                          <i className="icofont-ui-delete" />
-                          Xóa bài đăng
-                          <span>If inappropriate Post By Mistake</span>
+                          <span title="Comments" className="Recommend">
+                            <i>
+                              <svg
+                                className="feather feather-message-square"
+                                strokeLinejoin="round"
+                                strokeLinecap="round"
+                                strokeWidth={2}
+                                stroke="currentColor"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                height={16}
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                              </svg>
+                            </i>
+                            <ins>54</ins>
+                          </span>
                         </li>
                         <li>
-                          <i className="icofont-flag" />
-                          Báo cáo bài đăng
-                          <span>Inappropriate content</span>
+                          <span title="follow" className="Follow">
+                            <i>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={16}
+                                height={16}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="feather feather-star"
+                              >
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            </i>
+                            <ins>5k</ins>
+                          </span>
+                        </li>
+                        <li>
+                          <span className="share-pst" title="Share">
+                            <i>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={16}
+                                height={16}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="feather feather-share-2"
+                              >
+                                <circle cx={18} cy={5} r={3} />
+                                <circle cx={6} cy={12} r={3} />
+                                <circle cx={18} cy={19} r={3} />
+                                <line
+                                  x1="8.59"
+                                  y1="13.51"
+                                  x2="15.42"
+                                  y2="17.49"
+                                />
+                                <line
+                                  x1="15.41"
+                                  y1="6.51"
+                                  x2="8.59"
+                                  y2="10.49"
+                                />
+                              </svg>
+                            </i>
+                            <ins>205</ins>
+                          </span>
                         </li>
                       </ul>
+                      <a href="post-detail.html" title className="reply">
+                        Reply <i className="icofont-reply" />
+                      </a>
                     </div>
-                  </div>
-                  <ins>
-                    <a title="verified" href="time-line.html">
-                      Jack Carter
-                    </a>{" "}
-                    Share Post
-                  </ins>
-                  <span>
-                    <i className="icofont-globe" /> published: Sep,15 2020
-                  </span>
-                </div>
-                <div className="post-meta">
-                  <a href="post-detail.html" className="post-title">
-                    {element.title}
-                  </a>
-                  <p>{element.content}</p>
-                  <div className="we-video-info">
-                    <ul>
-                      <li>
-                        <span title="views" className="views">
-                          <i>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width={16}
-                              height={16}
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="feather feather-eye"
-                            >
-                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                              <circle cx={12} cy={12} r={3} />
-                            </svg>
-                          </i>
-                          <ins>1.2k</ins>
-                        </span>
-                      </li>
-                      <li>
-                        <span title="Comments" className="Recommend">
-                          <i>
-                            <svg
-                              className="feather feather-message-square"
-                              strokeLinejoin="round"
-                              strokeLinecap="round"
-                              strokeWidth={2}
-                              stroke="currentColor"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              height={16}
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                            </svg>
-                          </i>
-                          <ins>54</ins>
-                        </span>
-                      </li>
-                      <li>
-                        <span title="follow" className="Follow">
-                          <i>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width={16}
-                              height={16}
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="feather feather-star"
-                            >
-                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                            </svg>
-                          </i>
-                          <ins>5k</ins>
-                        </span>
-                      </li>
-                      <li>
-                        <span className="share-pst" title="Share">
-                          <i>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width={16}
-                              height={16}
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="feather feather-share-2"
-                            >
-                              <circle cx={18} cy={5} r={3} />
-                              <circle cx={6} cy={12} r={3} />
-                              <circle cx={18} cy={19} r={3} />
-                              <line
-                                x1="8.59"
-                                y1="13.51"
-                                x2="15.42"
-                                y2="17.49"
-                              />
-                              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                            </svg>
-                          </i>
-                          <ins>205</ins>
-                        </span>
-                      </li>
-                    </ul>
-                    <a href="post-detail.html" title className="reply">
-                      Reply <i className="icofont-reply" />
-                    </a>
-                  </div>
-                  <div className="stat-tools">
-                    <div className="box">
-                      <div className="Like">
-                        <a className="Like__link">
-                          <i className="icofont-like" /> Like
-                        </a>
+                    <div className="stat-tools">
+                      <div className="box">
+                        <div className="Like">
+                          <a className="Like__link">
+                            <i className="icofont-like" /> Like
+                          </a>
+                          <div className="Emojis">
+                            <div className="Emoji Emoji--like">
+                              <div className="icon icon--like" />
+                            </div>
+                            <div className="Emoji Emoji--love">
+                              <div className="icon icon--heart" />
+                            </div>
+                            <div className="Emoji Emoji--haha">
+                              <div className="icon icon--haha" />
+                            </div>
+                            <div className="Emoji Emoji--wow">
+                              <div className="icon icon--wow" />
+                            </div>
+                            <div className="Emoji Emoji--sad">
+                              <div className="icon icon--sad" />
+                            </div>
+                            <div className="Emoji Emoji--angry">
+                              <div className="icon icon--angry" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="box">
                         <div className="Emojis">
                           <div className="Emoji Emoji--like">
                             <div className="icon icon--like" />
@@ -386,183 +433,172 @@ function Home() {
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="box">
-                      <div className="Emojis">
-                        <div className="Emoji Emoji--like">
-                          <div className="icon icon--like" />
+                      <a title href="#" className="comment-to">
+                        <i className="icofont-comment" /> Comment
+                      </a>
+                      <a title href="#" className="share-to">
+                        <i className="icofont-share-alt" /> Share
+                      </a>
+                      <div className="emoji-state">
+                        <div className="popover_wrapper">
+                          <a className="popover_title" href="#" title>
+                            <img alt="" src="images/smiles/thumb.png" />
+                          </a>
+                          <div className="popover_content">
+                            <span>
+                              <img alt="" src="images/smiles/thumb.png" /> Likes
+                            </span>
+                            <ul className="namelist">
+                              <li>Jhon Doe</li>
+                              <li>Amara Sin</li>
+                              <li>Sarah K.</li>
+                              <li>
+                                <span>20+ more</span>
+                              </li>
+                            </ul>
+                          </div>
                         </div>
-                        <div className="Emoji Emoji--love">
-                          <div className="icon icon--heart" />
+                        <div className="popover_wrapper">
+                          <a className="popover_title" href="#" title>
+                            <img alt="" src="images/smiles/heart.png" />
+                          </a>
+                          <div className="popover_content">
+                            <span>
+                              <img alt="" src="images/smiles/heart.png" /> Love
+                            </span>
+                            <ul className="namelist">
+                              <li>Amara Sin</li>
+                              <li>Jhon Doe</li>
+                              <li>
+                                <span>10+ more</span>
+                              </li>
+                            </ul>
+                          </div>
                         </div>
-                        <div className="Emoji Emoji--haha">
-                          <div className="icon icon--haha" />
+                        <div className="popover_wrapper">
+                          <a className="popover_title" href="#" title>
+                            <img alt="" src="images/smiles/smile.png" />
+                          </a>
+                          <div className="popover_content">
+                            <span>
+                              <img alt="" src="images/smiles/smile.png" /> Happy
+                            </span>
+                            <ul className="namelist">
+                              <li>Sarah K.</li>
+                              <li>Jhon Doe</li>
+                              <li>Amara Sin</li>
+                              <li>
+                                <span>100+ more</span>
+                              </li>
+                            </ul>
+                          </div>
                         </div>
-                        <div className="Emoji Emoji--wow">
-                          <div className="icon icon--wow" />
+                        <div className="popover_wrapper">
+                          <a className="popover_title" href="#" title>
+                            <img alt="" src="images/smiles/weep.png" />
+                          </a>
+                          <div className="popover_content">
+                            <span>
+                              <img alt="" src="images/smiles/weep.png" />{" "}
+                              Dislike
+                            </span>
+                            <ul className="namelist">
+                              <li>Danial Carbal</li>
+                              <li>Amara Sin</li>
+                              <li>Sarah K.</li>
+                              <li>
+                                <span>15+ more</span>
+                              </li>
+                            </ul>
+                          </div>
                         </div>
-                        <div className="Emoji Emoji--sad">
-                          <div className="icon icon--sad" />
-                        </div>
-                        <div className="Emoji Emoji--angry">
-                          <div className="icon icon--angry" />
-                        </div>
+                        <p>10+</p>
                       </div>
-                    </div>
-                    <a title href="#" className="comment-to">
-                      <i className="icofont-comment" /> Comment
-                    </a>
-                    <a title href="#" className="share-to">
-                      <i className="icofont-share-alt" /> Share
-                    </a>
-                    <div className="emoji-state">
-                      <div className="popover_wrapper">
-                        <a className="popover_title" href="#" title>
-                          <img alt="" src="images/smiles/thumb.png" />
-                        </a>
-                        <div className="popover_content">
-                          <span>
-                            <img alt="" src="images/smiles/thumb.png" /> Likes
-                          </span>
-                          <ul className="namelist">
-                            <li>Jhon Doe</li>
-                            <li>Amara Sin</li>
-                            <li>Sarah K.</li>
+                      <div className="new-comment" style={{ display: "none" }}>
+                        <form method="post">
+                          <input type="text" placeholder="write comment" />
+                          <button type="submit">
+                            <i className="icofont-paper-plane" />
+                          </button>
+                        </form>
+                        <div className="comments-area">
+                          <ul>
                             <li>
-                              <span>20+ more</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                      <div className="popover_wrapper">
-                        <a className="popover_title" href="#" title>
-                          <img alt="" src="images/smiles/heart.png" />
-                        </a>
-                        <div className="popover_content">
-                          <span>
-                            <img alt="" src="images/smiles/heart.png" /> Love
-                          </span>
-                          <ul className="namelist">
-                            <li>Amara Sin</li>
-                            <li>Jhon Doe</li>
-                            <li>
-                              <span>10+ more</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                      <div className="popover_wrapper">
-                        <a className="popover_title" href="#" title>
-                          <img alt="" src="images/smiles/smile.png" />
-                        </a>
-                        <div className="popover_content">
-                          <span>
-                            <img alt="" src="images/smiles/smile.png" /> Happy
-                          </span>
-                          <ul className="namelist">
-                            <li>Sarah K.</li>
-                            <li>Jhon Doe</li>
-                            <li>Amara Sin</li>
-                            <li>
-                              <span>100+ more</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                      <div className="popover_wrapper">
-                        <a className="popover_title" href="#" title>
-                          <img alt="" src="images/smiles/weep.png" />
-                        </a>
-                        <div className="popover_content">
-                          <span>
-                            <img alt="" src="images/smiles/weep.png" /> Dislike
-                          </span>
-                          <ul className="namelist">
-                            <li>Danial Carbal</li>
-                            <li>Amara Sin</li>
-                            <li>Sarah K.</li>
-                            <li>
-                              <span>15+ more</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                      <p>10+</p>
-                    </div>
-                    <div className="new-comment" style={{ display: "none" }}>
-                      <form method="post">
-                        <input type="text" placeholder="write comment" />
-                        <button type="submit">
-                          <i className="icofont-paper-plane" />
-                        </button>
-                      </form>
-                      <div className="comments-area">
-                        <ul>
-                          <li>
-                            <figure>
-                              <img alt="" src="images/resources/user1.jpg" />
-                            </figure>
-                            <div className="commenter">
-                              <h5>
-                                <a title href="#">
-                                  Jack Carter
+                              <figure>
+                                <img alt="" src="images/resources/user1.jpg" />
+                              </figure>
+                              <div className="commenter">
+                                <h5>
+                                  <a title href="#">
+                                    Jack Carter
+                                  </a>
+                                </h5>
+                                <span>2 hours ago</span>
+                                <p>
+                                  i think that some how, we learn who we really
+                                  are and then live with that decision, great
+                                  post!
+                                </p>
+                                <span>
+                                  you can view the more detail via link
+                                </span>
+                                <a
+                                  title
+                                  href="https://www.youtube.com/watch?v=HpZgwHU1GcI"
+                                  target="_blank"
+                                >
+                                  https://www.youtube.com/watch?v=HpZgwHU1GcI
                                 </a>
-                              </h5>
-                              <span>2 hours ago</span>
-                              <p>
-                                i think that some how, we learn who we really
-                                are and then live with that decision, great
-                                post!
-                              </p>
-                              <span>you can view the more detail via link</span>
-                              <a
-                                title
-                                href="https://www.youtube.com/watch?v=HpZgwHU1GcI"
-                                target="_blank"
-                              >
-                                https://www.youtube.com/watch?v=HpZgwHU1GcI
+                              </div>
+                              <a title="Like" href="#">
+                                <i className="icofont-heart" />
                               </a>
-                            </div>
-                            <a title="Like" href="#">
-                              <i className="icofont-heart" />
-                            </a>
-                            <a title="Reply" href="#" className="reply-coment">
-                              <i className="icofont-reply" />
-                            </a>
-                          </li>
-                          <li>
-                            <figure>
-                              <img alt="" src="images/resources/user2.jpg" />
-                            </figure>
-                            <div className="commenter">
-                              <h5>
-                                <a title href="#">
-                                  Ching xang
-                                </a>
-                              </h5>
-                              <span>2 hours ago</span>
-                              <p>
-                                i think that some how, we learn who we really
-                                are and then live with that decision, great
-                                post!
-                              </p>
-                            </div>
-                            <a title="Like" href="#">
-                              <i className="icofont-heart" />
-                            </a>
-                            <a title="Reply" href="#" className="reply-coment">
-                              <i className="icofont-reply" />
-                            </a>
-                          </li>
-                        </ul>
+                              <a
+                                title="Reply"
+                                href="#"
+                                className="reply-coment"
+                              >
+                                <i className="icofont-reply" />
+                              </a>
+                            </li>
+                            <li>
+                              <figure>
+                                <img alt="" src="images/resources/user2.jpg" />
+                              </figure>
+                              <div className="commenter">
+                                <h5>
+                                  <a title href="#">
+                                    Ching xang
+                                  </a>
+                                </h5>
+                                <span>2 hours ago</span>
+                                <p>
+                                  i think that some how, we learn who we really
+                                  are and then live with that decision, great
+                                  post!
+                                </p>
+                              </div>
+                              <a title="Like" href="#">
+                                <i className="icofont-heart" />
+                              </a>
+                              <a
+                                title="Reply"
+                                href="#"
+                                className="reply-coment"
+                              >
+                                <i className="icofont-reply" />
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        );
+          );
+        }
       });
     }
   }
@@ -637,270 +673,7 @@ function Home() {
         </div>
         {/* responsive header */}
         {/* < AccountPopup /> */}
-        <header className>
-          <div className="topbar stick">
-            <div className="logo">
-              <img src="images/logo.png" alt="" />
-              <span>Socimo</span>
-            </div>
-            <div className="searches">
-              <form method="post">
-                <input type="text" placeholder="Search..." />
-                <button type="submit">
-                  <i className="icofont-search" />
-                </button>
-                <span className="cancel-search">
-                  <i className="icofont-close" />
-                </span>
-                <div className="recent-search">
-                  <h4 className="recent-searches">Your's Recent Search</h4>
-                  <ul className="so-history">
-                    <li>
-                      <div className="searched-user">
-                        <figure>
-                          <img src="images/resources/user1.jpg" alt="" />
-                        </figure>
-                        <span>Danial Carabal</span>
-                      </div>
-                      <span className="trash">
-                        <i className="icofont-close-circled" />
-                      </span>
-                    </li>
-                    <li>
-                      <div className="searched-user">
-                        <figure>
-                          <img src="images/resources/user2.jpg" alt="" />
-                        </figure>
-                        <span>Maria K</span>
-                      </div>
-                      <span className="trash">
-                        <i className="icofont-close-circled" />
-                      </span>
-                    </li>
-                    <li>
-                      <div className="searched-user">
-                        <figure>
-                          <img src="images/resources/user3.jpg" alt="" />
-                        </figure>
-                        <span>Fawad Khan</span>
-                      </div>
-                      <span className="trash">
-                        <i className="icofont-close-circled" />
-                      </span>
-                    </li>
-                    <li>
-                      <div className="searched-user">
-                        <figure>
-                          <img src="images/resources/user4.jpg" alt="" />
-                        </figure>
-                        <span>Danial Sandos</span>
-                      </div>
-                      <span className="trash">
-                        <i className="icofont-close-circled" />
-                      </span>
-                    </li>
-                    <li>
-                      <div className="searched-user">
-                        <figure>
-                          <img src="images/resources/user5.jpg" alt="" />
-                        </figure>
-                        <span>Jack Carter</span>
-                      </div>
-                      <span className="trash">
-                        <i className="icofont-close-circled" />
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </form>
-            </div>
-            <ul className="web-elements">
-              <li>
-                <div className="user-dp">
-                  <Link to="/profile">
-                    <img alt="" src="images/resources/user.jpg" />
-                    <div className="name">
-                      <h4>Danial Cardos</h4>
-                    </div>
-                  </Link>
-                </div>
-              </li>
-
-              {/* <li className="go-live">
-                  <a
-                    href="live-stream.html"
-                    title="Go Live"
-                    data-toggle="tooltip"
-                  >
-                    <i>
-                      <svg
-                        fill="#f00"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 32 32"
-                        width="18px"
-                        height="18px"
-                      >
-                        <path d="M 6.1015625 6.1015625 C 3.5675625 8.6345625 2 12.134 2 16 C 2 19.866 3.5675625 23.365437 6.1015625 25.898438 L 7.5195312 24.480469 C 5.3465312 22.307469 4 19.308 4 16 C 4 12.692 5.3465312 9.6925313 7.5195312 7.5195312 L 6.1015625 6.1015625 z M 25.898438 6.1015625 L 24.480469 7.5195312 C 26.653469 9.6925312 28 12.692 28 16 C 28 19.308 26.653469 22.307469 24.480469 24.480469 L 25.898438 25.898438 C 28.432437 23.365437 30 19.866 30 16 C 30 12.134 28.432437 8.6345625 25.898438 6.1015625 z M 9.6367188 9.6367188 C 8.0077188 11.265719 7 13.515 7 16 C 7 18.485 8.0077187 20.734281 9.6367188 22.363281 L 11.052734 20.947266 C 9.7847344 19.680266 9 17.93 9 16 C 9 14.07 9.7847344 12.319734 11.052734 11.052734 L 9.6367188 9.6367188 z M 22.363281 9.6367188 L 20.947266 11.052734 C 22.215266 12.319734 23 14.07 23 16 C 23 17.93 22.215266 19.680266 20.947266 20.947266 L 22.363281 22.363281 C 23.992281 20.734281 25 18.485 25 16 C 25 13.515 23.992281 11.265719 22.363281 9.6367188 z M 16 12 A 4 4 0 0 0 16 20 A 4 4 0 0 0 16 12 z" />
-                      </svg>
-                    </i>
-                  </a>
-                </li> */}
-              <li>
-                <a href="index.html" title="Home" data-toggle="tooltip">
-                  <i>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={16}
-                      height={16}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-home"
-                    >
-                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                      <polyline points="9 22 9 12 15 12 15 22" />
-                    </svg>
-                  </i>
-                </a>
-              </li>
-              {/* <li>
-                  <a
-                    className="mesg-notif"
-                    href="#"
-                    title="Messages"
-                    data-toggle="tooltip"
-                  >
-                    <i>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width={16}
-                        height={16}
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="feather feather-message-square"
-                      >
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                      </svg>
-                    </i>
-                  </a>
-                  <span />
-                </li> */}
-              <li>
-                <a
-                  className="mesg-notif"
-                  href="#"
-                  title="Notifications"
-                  data-toggle="tooltip"
-                >
-                  <i>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={16}
-                      height={16}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-bell"
-                    >
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                    </svg>
-                  </i>
-                </a>
-                <span />
-              </li>
-              <li>
-                <a
-                  className="create"
-                  href="#"
-                  title="Add New"
-                  data-toggle="tooltip"
-                >
-                  <i>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={16}
-                      height={16}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-plus"
-                    >
-                      <line x1={12} y1={5} x2={12} y2={19} />
-                      <line x1={5} y1={12} x2={19} y2={12} />
-                    </svg>
-                  </i>
-                </a>
-              </li>
-              <li>
-                <a href="#" title>
-                  <i>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={16}
-                      height={16}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-grid"
-                    >
-                      <rect x={3} y={3} width={7} height={7} />
-                      <rect x={14} y={3} width={7} height={7} />
-                      <rect x={14} y={14} width={7} height={7} />
-                      <rect x={3} y={14} width={7} height={7} />
-                    </svg>
-                  </i>
-                </a>
-                <ul className="dropdown">
-                  <li>
-                    <a href="profile.html" title>
-                      <i className="icofont-user-alt-3" /> Your Profile
-                    </a>
-                  </li>
-
-                  <li>
-                    <a className="invite-new" href="#" title>
-                      <i className="icofont-brand-slideshare" /> Invite Collegue
-                    </a>
-                  </li>
-                  <li>
-                    <a href="pay-out.html" title>
-                      <i className="icofont-price" /> Payout
-                    </a>
-                  </li>
-
-                  <li>
-                    <a href="settings.html" title>
-                      <i className="icofont-gear" /> Setting
-                    </a>
-                  </li>
-
-                  <li className="logout">
-                    <a href="sign-in.html" title>
-                      <i className="icofont-power" /> Logout
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </header>
+        <HeaderPage />
         {/* header */}
         <nav className="sidebar">
           <ul className="menu-slide">
@@ -985,13 +758,13 @@ function Home() {
                     </div>
                   </div>
                   <div className="col-lg-8">
-                    <h1
+                    {/* <h1
                       style={{
                         textAlign: "center",
                       }}
                     >
                       Truong Xua
-                    </h1>
+                    </h1> */}
                   </div>
                   <div className="col-lg-2">
                     <div className="user-inf">
@@ -1029,7 +802,7 @@ function Home() {
                   <div id="page-contents" className="row merged20">
                     <div className="col-lg-3">
                       <aside className="sidebar static left">
-                        <div className="widget">
+                        {/* <div className="widget">
                           <h4 className="widget-title">
                             Explor Events{" "}
                             <a className="see-all" href="#" title>
@@ -1054,7 +827,7 @@ function Home() {
                             </h6>
                             <img alt="" src="images/clock.png" />
                           </div>
-                        </div>
+                        </div> */}
                         {/* popular courses */}
                         <div className="widget">
                           <h4 className="widget-title">
@@ -1347,13 +1120,13 @@ function Home() {
                       {clickHome && (
                         <div className="blogsInSchool">
                           <div className="main-wraper">
-                            <span className="new-title">Create New Post</span>
+                            <span className="new-title">Tạo bài đăng</span>
                             <div className="new-post">
                               <form method="post">
                                 <i className="icofont-pen-alt-1" />
                                 <input
                                   type="text"
-                                  placeholder="Create New Post"
+                                  placeholder="Đăng bài"
                                   onClick={() => {
                                     var element =
                                       document.getElementById("post-new");
@@ -2027,7 +1800,7 @@ function Home() {
                                   alt=""
                                   src="images/resources/sidebar-info.jpg"
                                 />
-                                <span>Members: 505K</span>
+                                <span>Thành viên: 505K</span>
                               </figure>
                               <div className="frnd-meta">
                                 <img
@@ -2051,7 +1824,7 @@ function Home() {
                                   alt=""
                                   src="images/resources/sidebar-info2.jpg"
                                 />
-                                <span>Members: 505K</span>
+                                <span>Thành viên: 505K</span>
                               </figure>
                               <div className="frnd-meta">
                                 <img

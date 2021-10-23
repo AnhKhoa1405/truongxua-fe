@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import HeaderPage from "./Header";
 
 function GroupDetails() {
   const [imgNotSave, setimgNotSave] = useState([]);
@@ -15,7 +17,7 @@ function GroupDetails() {
   const [postDetail, setPostDetail] = useState({});
   const [imgById, setImgById] = useState([]);
   const addApiImg = [];
-  const axios = require("axios").default;
+  //const axios = require("axios").default;
   const commentPost = async (event, idPost) => {
     event.preventDefault();
     await createComment(idPost);
@@ -23,19 +25,33 @@ function GroupDetails() {
 
   const renderComment = (idPost) => {
     return comment.map((element, index) => {
+      const d = new Date(element.createAt);
+      const userComment = memberInGroup.filter(
+        (user) => element.alumniId === user.id
+      );
+
       if (idPost === element.postId) {
         return (
           <li key={index}>
             <figure>
-              <img alt="" src="images/resources/user1.jpg" />
+              <img
+                alt=""
+                style={{
+                  width: 25,
+                  height: 25,
+                }}
+                src={memberInGroup.length > 0 ? userComment[0].img : "thua"}
+              />
             </figure>
             <div className="commenter">
               <h5>
                 <a title href="#">
-                  Jack Carter
+                  {memberInGroup.length > 0 ? userComment[0].name : "Khoa"}
                 </a>
               </h5>
-              <span>2 hours ago</span>
+              <span>
+                {d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear()}
+              </span>
               <p> {element.content}</p>
             </div>
             <a title="Like" href="#">
@@ -79,7 +95,7 @@ function GroupDetails() {
   const createComment = async (idPost) => {
     try {
       const data = {
-        alumniId: 125,
+        alumniId: JSON.parse(localStorage.infoUser).Id,
         postId: idPost,
         content: document.getElementById(idPost).value,
         createAt: new Date(),
@@ -648,10 +664,12 @@ function GroupDetails() {
       console.error(err);
     }
   };
+
   useEffect(async () => {
     const idGroup = await getGroup();
     await findUserInGroup(idGroup);
   }, []);
+
   useEffect(async () => {
     await getAllPost();
     setTimeout(() => getAllImg(), 3000);
@@ -718,27 +736,25 @@ function GroupDetails() {
   };
   const renderMember = () => {
     return memberInGroup.map((element, index) => {
-      if (index < 5) {
-        return (
-          <li key={index}>
-            <figure>
-              <img
-                style={{
-                  width: 45,
-                  height: 45,
-                }}
-                alt=""
-                src={element.img}
-              />
-              <a href>{element.name}</a>
-            </figure>
-            <button className="sug-like">
-              <i className="invit">Follow</i>
-              <i className="icofont-check-alt" />
-            </button>
-          </li>
-        );
-      }
+      return (
+        <li key={index}>
+          <figure>
+            <img
+              style={{
+                width: 45,
+                height: 45,
+              }}
+              alt=""
+              src={element.img}
+            />
+            <a href>{element.name}</a>
+          </figure>
+          <button className="sug-like">
+            <i className="invit">Follow</i>
+            <i className="icofont-check-alt" />
+          </button>
+        </li>
+      );
     });
   };
   const findImageByPostId = async (id) => {
@@ -953,12 +969,14 @@ function GroupDetails() {
   };
 
   const addPostApi = async () => {
+    console.log(groupRecent.id + "Khoa");
     const dataAddPost = {
-      alumniId: 1,
+      alumniId: JSON.parse(localStorage.infoUser).Id,
       content: content,
       createAt: new Date(),
       modifiedAt: null,
       status: true,
+      groupId: groupRecent.id,
     };
     try {
       const response = await axios.post(
@@ -980,8 +998,10 @@ function GroupDetails() {
   const addImgApi = async (imgData) => {
     let id = 0;
 
-    if (document.getElementById("popup-head-name").innerHTML != "Update Post") {
-
+    if (
+      document.getElementById("popup-head-name").innerHTML !=
+      "Chỉnh sửa bài đăng"
+    ) {
       id = await getAllPost();
     } else {
       id = deleteAPost;
@@ -1014,7 +1034,7 @@ function GroupDetails() {
     let classMove = document.getElementById("post-new");
     classMove.classList.add("active");
     let test = document.getElementById("popup-head-name");
-    test.innerHTML = "Update Post";
+    test.innerHTML = "Chỉnh sửa bài đăng";
     setUpdateAPost(element);
     document.getElementById("emojionearea1").value = element.content;
     setDeletePost(element.id);
@@ -1033,217 +1053,271 @@ function GroupDetails() {
     }
   };
 
-  function renderHome() {
+  const renderHome = () => {
     // alumni-alumniId-conmments-content-createAt-id-images-modifiedAt-postInGroups-status
 
     if (dataContent != undefined) {
       return dataContent.map((element, index) => {
         const d = new Date(element.createAt);
-        return (
-          <div key={index} className="main-wraper">
-            <div className="user-post">
-              <div className="friend-info">
-                <figure>
-                  <em>
-                    <svg
-                      style={{ verticalAlign: "middle" }}
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={15}
-                      height={15}
-                      viewBox="0 0 24 24"
+        const infoRender = memberInGroup.filter(
+          (user) => element.alumniId === user.id
+        );
+        if (JSON.parse(localStorage.infoUser).GroupId == element.groupId) {
+          return (
+            <div key={index} className="main-wraper">
+              <div className="user-post">
+                <div className="friend-info">
+                  <figure>
+                    <em>
+                      <svg
+                        style={{ verticalAlign: "middle" }}
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={15}
+                        height={15}
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          fill="#7fba00"
+                          stroke="#7fba00"
+                          d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"
+                        />
+                      </svg>
+                    </em>
+                    <img
+                      style={{
+                        width: 40,
+                        height: 40,
+                      }}
+                      alt=""
+                      src={
+                        memberInGroup.length > 0 ? infoRender[0].img : "thua"
+                      }
+                    />
+                  </figure>
+                  <div className="friend-name">
+                    <div className="more">
+                      <div className="more-post-optns">
+                        <i className>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width={24}
+                            height={24}
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="feather feather-more-horizontal"
+                          >
+                            <circle cx={12} cy={12} r={1} />
+                            <circle cx={19} cy={12} r={1} />
+                            <circle cx={5} cy={12} r={1} />
+                          </svg>
+                        </i>
+                        <ul>
+                          {JSON.parse(localStorage.infoUser).Id ==
+                          element.alumniId ? (
+                            <li onClick={() => updatePost(element)}>
+                              <i className="icofont-pen-alt-1" />
+                              Chỉnh sửa bài đăng
+                              <span>Edit This Post within a Hour</span>
+                            </li>
+                          ) : (
+                            ""
+                          )}
+
+                          <li>
+                            <i className="icofont-ban" />
+                            Ẩn bài đăng
+                            <span>Hide This Post</span>
+                          </li>
+                          {JSON.parse(localStorage.infoUser).Id ==
+                          element.alumniId ? (
+                            <li
+                              onClick={() => {
+                                var value =
+                                  document.getElementById("delete-post");
+                                value.classList.add("active");
+                                setDeletePost(element.id);
+                              }}
+                            >
+                              <i className="icofont-ui-delete" />
+                              Xóa bài đăng
+                              <span>If inappropriate Post By Mistake</span>
+                            </li>
+                          ) : (
+                            ""
+                          )}
+
+                          <li>
+                            <i className="icofont-flag" />
+                            Báo cáo bài đăng
+                            <span>Inappropriate content</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                    <ins>
+                      <a title href="#">
+                        {memberInGroup.length > 0 ? infoRender[0].name : "Khoa"}
+                      </a>{" "}
+                      Tạo bài đăng
+                    </ins>
+                    <span>
+                      <i className="icofont-globe" /> Ngày đăng:{" "}
+                      {d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear()}
+                    </span>
+                  </div>
+                  <div className="post-meta">
+                    {/* <a href="post-detail.html" className="post-title">
+                      Supervision as a Personnel Development Device
+                    </a> */}
+                    {renderImgInDB(element)}
+                    <p
+                      style={{
+                        marginTop: 20,
+                        fontSize: 20,
+                        fontWeight: 700,
+                      }}
                     >
-                      <path
-                        fill="#7fba00"
-                        stroke="#7fba00"
-                        d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"
-                      />
-                    </svg>
-                  </em>
-                  <img alt="" src="images/resources/user3.jpg" />
-                </figure>
-                <div className="friend-name">
-                  <div className="more">
-                    <div className="more-post-optns">
-                      <i className>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width={24}
-                          height={24}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="feather feather-more-horizontal"
-                        >
-                          <circle cx={12} cy={12} r={1} />
-                          <circle cx={19} cy={12} r={1} />
-                          <circle cx={5} cy={12} r={1} />
-                        </svg>
-                      </i>
+                      {element.content}
+                    </p>
+                    <div className="we-video-info">
                       <ul>
-                        <li onClick={() => updatePost(element)}>
-                          <i className="icofont-pen-alt-1" />
-                          Edit Post
-                          <span>Edit This Post within a Hour</span>
+                        <li>
+                          <span title="views" className="views">
+                            <i>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={16}
+                                height={16}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="feather feather-eye"
+                              >
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx={12} cy={12} r={3} />
+                              </svg>
+                            </i>
+                            <ins>1.2k</ins>
+                          </span>
                         </li>
                         <li>
-                          <i className="icofont-ban" />
-                          Hide Post
-                          <span>Hide This Post</span>
-                        </li>
-                        <li
-                          onClick={() => {
-                            var value = document.getElementById("delete-post");
-                            value.classList.add("active");
-                            setDeletePost(element.id);
-                          }}
-                        >
-                          <i className="icofont-ui-delete" />
-                          Delete Post
-                          <span>If inappropriate Post By Mistake</span>
+                          <span title="Comments" className="Recommend">
+                            <i>
+                              <svg
+                                className="feather feather-message-square"
+                                strokeLinejoin="round"
+                                strokeLinecap="round"
+                                strokeWidth={2}
+                                stroke="currentColor"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                height={16}
+                                width={16}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                              </svg>
+                            </i>
+                            <ins>54</ins>
+                          </span>
                         </li>
                         <li>
-                          <i className="icofont-flag" />
-                          Report
-                          <span>Inappropriate content</span>
+                          <span title="follow" className="Follow">
+                            <i>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={16}
+                                height={16}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="feather feather-star"
+                              >
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                            </i>
+                            <ins>5k</ins>
+                          </span>
+                        </li>
+                        <li>
+                          <span className="share-pst" title="Share">
+                            <i>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={16}
+                                height={16}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="feather feather-share-2"
+                              >
+                                <circle cx={18} cy={5} r={3} />
+                                <circle cx={6} cy={12} r={3} />
+                                <circle cx={18} cy={19} r={3} />
+                                <line
+                                  x1="8.59"
+                                  y1="13.51"
+                                  x2="15.42"
+                                  y2="17.49"
+                                />
+                                <line
+                                  x1="15.41"
+                                  y1="6.51"
+                                  x2="8.59"
+                                  y2="10.49"
+                                />
+                              </svg>
+                            </i>
+                            <ins>205</ins>
+                          </span>
                         </li>
                       </ul>
+                      <a href="post-detail.html" title className="reply">
+                        Reply <i className="icofont-reply" />
+                      </a>
                     </div>
-                  </div>
-                  <ins>
-                    <a title href="time-line.html">
-                      {element.id}
-                    </a>{" "}
-                    Create Post
-                  </ins>
-                  <span>
-                    <i className="icofont-globe" /> published:{" "}
-                    {d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear()}
-                  </span>
-                </div>
-                <div className="post-meta">
-                  {/* <a href="post-detail.html" className="post-title">
-                    Supervision as a Personnel Development Device
-                  </a> */}
-                  {renderImgInDB(element)}
-                  <p
-                    style={{
-                      marginTop: 20,
-                      fontSize: 20,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {element.content}
-                  </p>
-                  <div className="we-video-info">
-                    <ul>
-                      <li>
-                        <span title="views" className="views">
-                          <i>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width={16}
-                              height={16}
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="feather feather-eye"
-                            >
-                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                              <circle cx={12} cy={12} r={3} />
-                            </svg>
-                          </i>
-                          <ins>1.2k</ins>
-                        </span>
-                      </li>
-                      <li>
-                        <span title="Comments" className="Recommend">
-                          <i>
-                            <svg
-                              className="feather feather-message-square"
-                              strokeLinejoin="round"
-                              strokeLinecap="round"
-                              strokeWidth={2}
-                              stroke="currentColor"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              height={16}
-                              width={16}
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                            </svg>
-                          </i>
-                          <ins>54</ins>
-                        </span>
-                      </li>
-                      <li>
-                        <span title="follow" className="Follow">
-                          <i>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width={16}
-                              height={16}
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="feather feather-star"
-                            >
-                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                            </svg>
-                          </i>
-                          <ins>5k</ins>
-                        </span>
-                      </li>
-                      <li>
-                        <span className="share-pst" title="Share">
-                          <i>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width={16}
-                              height={16}
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              className="feather feather-share-2"
-                            >
-                              <circle cx={18} cy={5} r={3} />
-                              <circle cx={6} cy={12} r={3} />
-                              <circle cx={18} cy={19} r={3} />
-                              <line
-                                x1="8.59"
-                                y1="13.51"
-                                x2="15.42"
-                                y2="17.49"
-                              />
-                              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                            </svg>
-                          </i>
-                          <ins>205</ins>
-                        </span>
-                      </li>
-                    </ul>
-                    <a href="post-detail.html" title className="reply">
-                      Reply <i className="icofont-reply" />
-                    </a>
-                  </div>
-                  <div className="stat-tools">
-                    <div className="box">
-                      <div className="Like">
-                        <a className="Like__link">
-                          <i className="icofont-like" /> Like
-                        </a>
+                    <div className="stat-tools">
+                      <div className="box">
+                        <div className="Like">
+                          <a className="Like__link">
+                            <i className="icofont-like" /> Like
+                          </a>
+                          <div className="Emojis">
+                            <div className="Emoji Emoji--like">
+                              <div className="icon icon--like" />
+                            </div>
+                            <div className="Emoji Emoji--love">
+                              <div className="icon icon--heart" />
+                            </div>
+                            <div className="Emoji Emoji--haha">
+                              <div className="icon icon--haha" />
+                            </div>
+                            <div className="Emoji Emoji--wow">
+                              <div className="icon icon--wow" />
+                            </div>
+                            <div className="Emoji Emoji--sad">
+                              <div className="icon icon--sad" />
+                            </div>
+                            <div className="Emoji Emoji--angry">
+                              <div className="icon icon--angry" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="box">
                         <div className="Emojis">
                           <div className="Emoji Emoji--like">
                             <div className="icon icon--like" />
@@ -1265,136 +1339,115 @@ function GroupDetails() {
                           </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="box">
-                      <div className="Emojis">
-                        <div className="Emoji Emoji--like">
-                          <div className="icon icon--like" />
+                      <a title href="#" className="comment-to">
+                        <i className="icofont-comment" /> Comment
+                      </a>
+                      <a title href="#" className="share-to">
+                        <i className="icofont-share-alt" /> Share
+                      </a>
+                      <div className="emoji-state">
+                        <div className="popover_wrapper">
+                          <a className="popover_title" href="#" title>
+                            <img alt="" src="images/smiles/thumb.png" />
+                          </a>
+                          <div className="popover_content">
+                            <span>
+                              <img alt="" src="images/smiles/thumb.png" /> Likes
+                            </span>
+                            <ul className="namelist">
+                              <li>Jhon Doe</li>
+                              <li>Amara Sin</li>
+                              <li>Sarah K.</li>
+                              <li>
+                                <span>20+ more</span>
+                              </li>
+                            </ul>
+                          </div>
                         </div>
-                        <div className="Emoji Emoji--love">
-                          <div className="icon icon--heart" />
+                        <div className="popover_wrapper">
+                          <a className="popover_title" href="#" title>
+                            <img alt="" src="images/smiles/heart.png" />
+                          </a>
+                          <div className="popover_content">
+                            <span>
+                              <img alt="" src="images/smiles/heart.png" /> Love
+                            </span>
+                            <ul className="namelist">
+                              <li>Amara Sin</li>
+                              <li>Jhon Doe</li>
+                              <li>
+                                <span>10+ more</span>
+                              </li>
+                            </ul>
+                          </div>
                         </div>
-                        <div className="Emoji Emoji--haha">
-                          <div className="icon icon--haha" />
+                        <div className="popover_wrapper">
+                          <a className="popover_title" href="#" title>
+                            <img alt="" src="images/smiles/smile.png" />
+                          </a>
+                          <div className="popover_content">
+                            <span>
+                              <img alt="" src="images/smiles/smile.png" /> Happy
+                            </span>
+                            <ul className="namelist">
+                              <li>Sarah K.</li>
+                              <li>Jhon Doe</li>
+                              <li>Amara Sin</li>
+                              <li>
+                                <span>100+ more</span>
+                              </li>
+                            </ul>
+                          </div>
                         </div>
-                        <div className="Emoji Emoji--wow">
-                          <div className="icon icon--wow" />
+                        <div className="popover_wrapper">
+                          <a className="popover_title" href="#" title>
+                            <img alt="" src="images/smiles/weep.png" />
+                          </a>
+                          <div className="popover_content">
+                            <span>
+                              <img alt="" src="images/smiles/weep.png" />{" "}
+                              Dislike
+                            </span>
+                            <ul className="namelist">
+                              <li>Danial Carbal</li>
+                              <li>Amara Sin</li>
+                              <li>Sarah K.</li>
+                              <li>
+                                <span>15+ more</span>
+                              </li>
+                            </ul>
+                          </div>
                         </div>
-                        <div className="Emoji Emoji--sad">
-                          <div className="icon icon--sad" />
-                        </div>
-                        <div className="Emoji Emoji--angry">
-                          <div className="icon icon--angry" />
-                        </div>
+                        <p>30+</p>
                       </div>
                     </div>
-                    <a title href="#" className="comment-to">
-                      <i className="icofont-comment" /> Comment
-                    </a>
-                    <a title href="#" className="share-to">
-                      <i className="icofont-share-alt" /> Share
-                    </a>
-                    <div className="emoji-state">
-                      <div className="popover_wrapper">
-                        <a className="popover_title" href="#" title>
-                          <img alt="" src="images/smiles/thumb.png" />
-                        </a>
-                        <div className="popover_content">
-                          <span>
-                            <img alt="" src="images/smiles/thumb.png" /> Likes
-                          </span>
-                          <ul className="namelist">
-                            <li>Jhon Doe</li>
-                            <li>Amara Sin</li>
-                            <li>Sarah K.</li>
-                            <li>
-                              <span>20+ more</span>
-                            </li>
-                          </ul>
-                        </div>
+                    <div className="new-comment" style={{ display: "block" }}>
+                      <form
+                        onSubmit={(e) => commentPost(e, element.id)}
+                        method="post"
+                      >
+                        <input
+                          type="text"
+                          id={element.id}
+                          placeholder="Viết bình luận"
+                        />
+                        <button type="submit">
+                          <i className="icofont-paper-plane" />
+                        </button>
+                      </form>
+                      <div className="comments-area">
+                        <ul>{renderComment(element.id)}</ul>
                       </div>
-                      <div className="popover_wrapper">
-                        <a className="popover_title" href="#" title>
-                          <img alt="" src="images/smiles/heart.png" />
-                        </a>
-                        <div className="popover_content">
-                          <span>
-                            <img alt="" src="images/smiles/heart.png" /> Love
-                          </span>
-                          <ul className="namelist">
-                            <li>Amara Sin</li>
-                            <li>Jhon Doe</li>
-                            <li>
-                              <span>10+ more</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                      <div className="popover_wrapper">
-                        <a className="popover_title" href="#" title>
-                          <img alt="" src="images/smiles/smile.png" />
-                        </a>
-                        <div className="popover_content">
-                          <span>
-                            <img alt="" src="images/smiles/smile.png" /> Happy
-                          </span>
-                          <ul className="namelist">
-                            <li>Sarah K.</li>
-                            <li>Jhon Doe</li>
-                            <li>Amara Sin</li>
-                            <li>
-                              <span>100+ more</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                      <div className="popover_wrapper">
-                        <a className="popover_title" href="#" title>
-                          <img alt="" src="images/smiles/weep.png" />
-                        </a>
-                        <div className="popover_content">
-                          <span>
-                            <img alt="" src="images/smiles/weep.png" /> Dislike
-                          </span>
-                          <ul className="namelist">
-                            <li>Danial Carbal</li>
-                            <li>Amara Sin</li>
-                            <li>Sarah K.</li>
-                            <li>
-                              <span>15+ more</span>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                      <p>30+</p>
-                    </div>
-                  </div>
-                  <div className="new-comment" style={{ display: "block" }}>
-                    <form
-                      onSubmit={(e) => commentPost(e, element.id)}
-                      method="post"
-                    >
-                      <input
-                        type="text"
-                        id={element.id}
-                        placeholder="write comment"
-                      />
-                      <button type="submit">
-                        <i className="icofont-paper-plane" />
-                      </button>
-                    </form>
-                    <div className="comments-area">
-                      <ul>{renderComment(element.id)}</ul>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        );
+          );
+        }
       });
     }
-  }
+  };
 
   function renderImg() {
     if (imgNotSave.length > 0) {
@@ -1569,291 +1622,7 @@ function GroupDetails() {
           </div>
         </div>
         {/* responsive header */}
-        <header className>
-          <div className="topbar stick">
-            <div className="logo">
-              <img src="images/logo.png" alt="" />
-              <span>Socimo</span>
-            </div>
-            <div className="searches">
-              <form method="post">
-                <input type="text" placeholder="Search..." />
-                <button type="submit">
-                  <i className="icofont-search" />
-                </button>
-                <span className="cancel-search">
-                  <i className="icofont-close" />
-                </span>
-                <div className="recent-search">
-                  <h4 className="recent-searches">Your's Recent Search</h4>
-                  <ul className="so-history">
-                    <li>
-                      <div className="searched-user">
-                        <figure>
-                          <img src="images/resources/user1.jpg" alt="" />
-                        </figure>
-                        <span>Danial Carabal</span>
-                      </div>
-                      <span className="trash">
-                        <i className="icofont-close-circled" />
-                      </span>
-                    </li>
-                    <li>
-                      <div className="searched-user">
-                        <figure>
-                          <img src="images/resources/user2.jpg" alt="" />
-                        </figure>
-                        <span>Maria K</span>
-                      </div>
-                      <span className="trash">
-                        <i className="icofont-close-circled" />
-                      </span>
-                    </li>
-                    <li>
-                      <div className="searched-user">
-                        <figure>
-                          <img src="images/resources/user3.jpg" alt="" />
-                        </figure>
-                        <span>Fawad Khan</span>
-                      </div>
-                      <span className="trash">
-                        <i className="icofont-close-circled" />
-                      </span>
-                    </li>
-                    <li>
-                      <div className="searched-user">
-                        <figure>
-                          <img src="images/resources/user4.jpg" alt="" />
-                        </figure>
-                        <span>Danial Sandos</span>
-                      </div>
-                      <span className="trash">
-                        <i className="icofont-close-circled" />
-                      </span>
-                    </li>
-                    <li>
-                      <div className="searched-user">
-                        <figure>
-                          <img src="images/resources/user5.jpg" alt="" />
-                        </figure>
-                        <span>Jack Carter</span>
-                      </div>
-                      <span className="trash">
-                        <i className="icofont-close-circled" />
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </form>
-            </div>
-            <ul className="web-elements">
-              <li>
-                <div className="user-dp">
-                  <a href="profile-page2.html" title>
-                    <img alt="" src="images/resources/user.jpg" />
-                    <div className="name">
-                      <h4>Danial Cardos</h4>
-                    </div>
-                  </a>
-                </div>
-              </li>
-              <li className="go-live">
-                <a
-                  href="live-stream.html"
-                  title="Go Live"
-                  data-toggle="tooltip"
-                >
-                  <i>
-                    <svg
-                      fill="#f00"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 32 32"
-                      width="18px"
-                      height="18px"
-                    >
-                      <path d="M 6.1015625 6.1015625 C 3.5675625 8.6345625 2 12.134 2 16 C 2 19.866 3.5675625 23.365437 6.1015625 25.898438 L 7.5195312 24.480469 C 5.3465312 22.307469 4 19.308 4 16 C 4 12.692 5.3465312 9.6925313 7.5195312 7.5195312 L 6.1015625 6.1015625 z M 25.898438 6.1015625 L 24.480469 7.5195312 C 26.653469 9.6925312 28 12.692 28 16 C 28 19.308 26.653469 22.307469 24.480469 24.480469 L 25.898438 25.898438 C 28.432437 23.365437 30 19.866 30 16 C 30 12.134 28.432437 8.6345625 25.898438 6.1015625 z M 9.6367188 9.6367188 C 8.0077188 11.265719 7 13.515 7 16 C 7 18.485 8.0077187 20.734281 9.6367188 22.363281 L 11.052734 20.947266 C 9.7847344 19.680266 9 17.93 9 16 C 9 14.07 9.7847344 12.319734 11.052734 11.052734 L 9.6367188 9.6367188 z M 22.363281 9.6367188 L 20.947266 11.052734 C 22.215266 12.319734 23 14.07 23 16 C 23 17.93 22.215266 19.680266 20.947266 20.947266 L 22.363281 22.363281 C 23.992281 20.734281 25 18.485 25 16 C 25 13.515 23.992281 11.265719 22.363281 9.6367188 z M 16 12 A 4 4 0 0 0 16 20 A 4 4 0 0 0 16 12 z" />
-                    </svg>
-                  </i>
-                </a>
-              </li>
-              <li>
-                <a href="index.html" title="Home" data-toggle="tooltip">
-                  <i>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={16}
-                      height={16}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-home"
-                    >
-                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                      <polyline points="9 22 9 12 15 12 15 22" />
-                    </svg>
-                  </i>
-                </a>
-              </li>
-              <li>
-                <a
-                  className="mesg-notif"
-                  href="#"
-                  title="Messages"
-                  data-toggle="tooltip"
-                >
-                  <i>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={16}
-                      height={16}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-message-square"
-                    >
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    </svg>
-                  </i>
-                </a>
-                <span />
-              </li>
-              <li>
-                <a
-                  className="mesg-notif"
-                  href="#"
-                  title="Notifications"
-                  data-toggle="tooltip"
-                >
-                  <i>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={16}
-                      height={16}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-bell"
-                    >
-                      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                    </svg>
-                  </i>
-                </a>
-                <span />
-              </li>
-              <li>
-                <a
-                  className="create"
-                  href="#"
-                  title="Add New"
-                  data-toggle="tooltip"
-                >
-                  <i>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={16}
-                      height={16}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-plus"
-                    >
-                      <line x1={12} y1={5} x2={12} y2={19} />
-                      <line x1={5} y1={12} x2={19} y2={12} />
-                    </svg>
-                  </i>
-                </a>
-              </li>
-              <li>
-                <a href="#" title>
-                  <i>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={16}
-                      height={16}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-grid"
-                    >
-                      <rect x={3} y={3} width={7} height={7} />
-                      <rect x={14} y={3} width={7} height={7} />
-                      <rect x={14} y={14} width={7} height={7} />
-                      <rect x={3} y={14} width={7} height={7} />
-                    </svg>
-                  </i>
-                </a>
-                <ul className="dropdown">
-                  <li>
-                    <a href="profile.html" title>
-                      <i className="icofont-user-alt-3" /> Your Profile
-                    </a>
-                  </li>
-                  <li>
-                    <a href="add-new-course.html" title>
-                      <i className="icofont-plus" /> New Course
-                    </a>
-                  </li>
-                  <li>
-                    <a className="invite-new" href="#" title>
-                      <i className="icofont-brand-slideshare" /> Invite Collegue
-                    </a>
-                  </li>
-                  <li>
-                    <a href="pay-out.html" title>
-                      <i className="icofont-price" /> Payout
-                    </a>
-                  </li>
-                  <li>
-                    <a href="price-plan.html" title>
-                      <i className="icofont-flash" /> Upgrade
-                    </a>
-                  </li>
-                  <li>
-                    <a href="help-faq.html" title>
-                      <i className="icofont-question-circle" /> Help
-                    </a>
-                  </li>
-                  <li>
-                    <a href="settings.html" title>
-                      <i className="icofont-gear" /> Setting
-                    </a>
-                  </li>
-                  <li>
-                    <a href="privacy-n-policy.html" title>
-                      <i className="icofont-notepad" /> Privacy
-                    </a>
-                  </li>
-                  <li>
-                    <a className="dark-mod" href="#" title>
-                      <i className="icofont-moon" /> Dark Mode
-                    </a>
-                  </li>
-                  <li className="logout">
-                    <a href="sign-in.html" title>
-                      <i className="icofont-power" /> Logout
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </header>
+        <HeaderPage />
         {/* header */}
         <nav className="sidebar">
           <ul className="menu-slide">
@@ -2722,7 +2491,7 @@ function GroupDetails() {
                               <span>Ngày tạo nhóm:</span> April 2020
                             </li>
                             <li>
-                              <span>Thành viên:</span> 55K
+                              <span>Thành viên:</span> {memberInGroup.length}
                             </li>
                             <li>
                               <span>Số bài đăng:</span> {dataContent.length}
@@ -2762,13 +2531,13 @@ function GroupDetails() {
                         <div className="row">
                           <div className="col-lg-8">
                             <div className="main-wraper">
-                              <span className="new-title">Create New Post</span>
+                              <span className="new-title">Tạo bài đăng</span>
                               <div className="new-post">
                                 <form method="post">
                                   <i className="icofont-pen-alt-1" />
                                   <input
                                     type="text"
-                                    placeholder="Create New Post"
+                                    placeholder="Đăng bài"
                                     onClick={() => {
                                       var element =
                                         document.getElementById("post-new");
@@ -2815,72 +2584,7 @@ function GroupDetails() {
                             {/* create new post */}
 
                             {/* chat rooms */}
-                            <div className="main-wraper">
-                              <div className="user-post">
-                                <div className="friend-info">
-                                  <figure>
-                                    <i className="icofont-learn" />
-                                  </figure>
-                                  <div className="friend-name">
-                                    <ins>
-                                      <a title href="time-line.html">
-                                        Suggested
-                                      </a>
-                                    </ins>
-                                    <span>
-                                      <i className="icofont-runner-alt-1" />{" "}
-                                      Follow similar People
-                                    </span>
-                                  </div>
-                                  <ul
-                                    style={{
-                                      display: "flex",
-                                    }}
-                                    className="suggested-caro"
-                                  >
-                                    <li>
-                                      <figure>
-                                        <img
-                                          src="images/resources/speak-1.jpg"
-                                          alt=""
-                                        />
-                                      </figure>
-                                      <span>Amy Watson</span>
-                                      <ins>Department of Socilolgy</ins>
-                                      <a href="#" title data-ripple>
-                                        <i className="icofont-star" /> Follow
-                                      </a>
-                                    </li>
-                                    <li>
-                                      <figure>
-                                        <img
-                                          src="images/resources/speak-2.jpg"
-                                          alt=""
-                                        />
-                                      </figure>
-                                      <span>Muhammad Khan</span>
-                                      <ins>Department of Socilolgy</ins>
-                                      <a href="#" title data-ripple>
-                                        <i className="icofont-star" /> Follow
-                                      </a>
-                                    </li>
-                                    <li>
-                                      <figure>
-                                        <img
-                                          src="images/resources/speak-3.jpg"
-                                          alt=""
-                                        />
-                                      </figure>
-                                      <span>Sadia Gill</span>
-                                      <ins>Department of Socilolgy</ins>
-                                      <a href="#" title data-ripple>
-                                        <i className="icofont-star" /> Follow
-                                      </a>
-                                    </li>
-                                  </ul>
-                                </div>
-                              </div>
-                            </div>
+
                             {/* suggested friends */}
 
                             {/* share post without image */}
@@ -3378,9 +3082,9 @@ function GroupDetails() {
                               <div className="widget">
                                 <h4 className="widget-title">
                                   Thành viên
-                                  <a title href="#" className="see-all">
+                                  {/* <a title href="#" className="see-all">
                                     Xem thêm
-                                  </a>
+                                  </a> */}
                                 </h4>
                                 <ul className="invitepage">{renderMember()}</ul>
                               </div>
@@ -3707,7 +3411,7 @@ function GroupDetails() {
                     }}
                     id="popup-head-name"
                   >
-                    Create New Post
+                    Đăng Bài
                   </p>
                 </h5>
               </div>
@@ -3716,7 +3420,7 @@ function GroupDetails() {
                   <ul className="post-categoroes">
                     <li>
                       <label class="lablePhoto" for="upload-photo">
-                        <i className="icofont-camera" /> Photo / Video
+                        <i className="icofont-camera" /> Hình Ảnh
                       </label>
                       <input
                         type="file"
@@ -3735,7 +3439,7 @@ function GroupDetails() {
                 <form onSubmit={handleSubmit} className="c-form">
                   <textarea
                     id="emojionearea1"
-                    placeholder="What's On Your Mind?"
+                    placeholder="Bạn đang nghĩ gì?"
                     defaultValue={""}
                     style={{
                       height: 300,
@@ -3745,7 +3449,7 @@ function GroupDetails() {
                   />
 
                   <button type="submit" className="main-btn">
-                    Publish
+                    Đăng bài
                   </button>
                 </form>
               </div>

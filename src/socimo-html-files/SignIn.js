@@ -13,61 +13,63 @@ const uiConfig = {
 };
 
 class SignIn extends React.Component {
-
-  state ={
+  state = {
     email: "",
     password: "",
     loading: false,
     error: [],
-    currentUser:{},
+    currentUser: {},
     token: "",
-  }
+  };
 
+  handleChange = (e) => {
+    const { name, value } = e.target;
 
-  handleChange = (e)=> {
-    const {name, value} = e.target
+    this.setState({ [name]: value });
+  };
 
-    this.setState({[name]: value});
-  }
-
-  handleSubmit =  (e) => {
+  handleSubmit = (e) => {
     e.preventDefault();
 
-    if(this.isFormValid){
-      this.setState({error:[], loading: true})
-      const {email, password,error} = this.state;
-       firebase.auth()
-      .signInWithEmailAndPassword(email, password)
-      .then((signInUser)=>{
-        console.log(signInUser);
-      }).then(  ()=>{
-       firebase.auth().currentUser.getIdToken(/* forceRefresh */ true).then(async function(idToken) {
-  console.log("id token:" +idToken)
-           try {
-      const response = await axios.post(
-        `http://20.188.111.70:12347/api/users/log-in?idToken=${idToken}`,
-        idToken
-      );
-      console.log("response :" + response.data);
-      localStorage.setItem("accessToken", response.data);
-
-    } catch (err) {
-      console.log(err);
+    if (this.isFormValid) {
+      this.setState({ error: [], loading: true });
+      const { email, password, error } = this.state;
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password)
+        .then((signInUser) => {
+          console.log(signInUser);
+        })
+        .then(() => {
+          firebase
+            .auth()
+            .currentUser.getIdToken(/* forceRefresh */ true)
+            .then(async function (idToken) {
+              console.log("id token:" + idToken);
+              try {
+                console.log("haha");
+                const response = await axios.post(
+                  `http://20.188.111.70:12348/api/users/log-in?idToken=${idToken}`
+                );
+                console.log("response :" + response.data);
+                localStorage.setItem("accessToken", response.data);
+              } catch (err) {
+                console.log(err);
+              }
+            })
+            .catch(function (error) {
+              // Handle error
+            });
+        })
+        .catch((err) => {
+          console.log(err);
+          this.setState({ error: [...error, err], loading: false });
+          this.props.history.push("/");
+        });
     }
+  };
   
-}).catch(function(error) {
-  // Handle error
-});
-      })
-      .catch(err=>{
-        console.log(err);
-        this.setState({error:[...error, err] ,loading: false})
-        this.props.history.push('/');
-      })
-    }
-  }
-
-  isFormValid = () => (this.state.email && this.state.password)
+  isFormValid = () => this.state.email && this.state.password;
   render() {
     return (
       <div>
@@ -138,9 +140,19 @@ class SignIn extends React.Component {
                 <h4>
                   <i className="icofont-key-hole" /> Login
                 </h4>
-                <form  className="c-form">
-                  <input name="email" type="text" onChange={this.handleChange} placeholder="User Name @" />
-                  <input name="password" type="password" onChange ={this.handleChange} placeholder="Passwordxxxxxxxxxx" />
+                <form className="c-form">
+                  <input
+                    name="email"
+                    type="text"
+                    onChange={this.handleChange}
+                    placeholder="User Name @"
+                  />
+                  <input
+                    name="password"
+                    type="password"
+                    onChange={this.handleChange}
+                    placeholder="Passwordxxxxxxxxxx"
+                  />
 
                   {/* <input type="checkbox" id="checkbox" defaultChecked />
                     <label htmlFor="checkbox">
@@ -152,21 +164,25 @@ class SignIn extends React.Component {
                   />
 
                   {/* <Link to="/home"> */}
-                    <button onClick={this.handleSubmit} className="main-btn">
-                      <i className="icofont-key" /> Đăng nhập
-                    </button>
+                  <button onClick={this.handleSubmit} className="main-btn">
+                    <i className="icofont-key" /> Đăng nhập
+                  </button>
                   {/* </Link> */}
-                  
                 </form>
                 <Link to="/signup">
-                    <p style={{ marginTop: 20,
-                fontSize:16, 
-                  borderBottom:"2px solid #17a2b8",
-                  paddingBottom:4,
-                  width:"max-content",
-             
-                }}> Đăng ký tài khoản</p>
-                  </Link>
+                  <p
+                    style={{
+                      marginTop: 20,
+                      fontSize: 16,
+                      borderBottom: "2px solid #17a2b8",
+                      paddingBottom: 4,
+                      width: "max-content",
+                    }}
+                  >
+                    {" "}
+                    Đăng ký tài khoản
+                  </p>
+                </Link>
               </div>
             </div>
             <div className="mockup right">
