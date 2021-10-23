@@ -4281,10 +4281,22 @@ a.invite:hover,
 }
 /*--- invite popup ---*/
 .invitation-meta {
-  display: inline-block;
+  display: flex;
+  grid-template-columns: repeat(2,1fr);
+  column-gap: 20px;
   margin-top: 20px;
   width: 100%;
+  align-items: flex-start;
 }
+
+.invitation-meta .dropzone{
+  width: 250px;
+}
+
+.wraper-invite > .popup{
+  width: 1200px;
+}
+
 .invitation-meta > p {
   font-size: 13px;
   letter-spacing: 0.3px;
@@ -9914,11 +9926,11 @@ a.main-btn2:hover,
 .group-avatar > a {
   background: #fff none repeat scroll 0 0;
   border-radius: 20px;
-  bottom: 20px;
+  bottom: 80px;
   font-size: 13px;
   padding: 6px 18px;
   position: absolute;
-  right: 20px;
+  right: 10px;
 }
 .group-avatar > a > i {
   color: green;
