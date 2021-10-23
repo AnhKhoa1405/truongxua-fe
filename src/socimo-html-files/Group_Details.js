@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import HeaderPage from "./Header";
+import "../css/groupdetail.css";
 
 function GroupDetails() {
   const [imgNotSave, setimgNotSave] = useState([]);
@@ -22,6 +23,83 @@ function GroupDetails() {
     event.preventDefault();
     await createComment(idPost);
   };
+  
+  function renderImgEvent() {
+    if (imgEventNotSave.length > 0) {
+      return imgEventNotSave.map((element, index) => {
+        if (element.typeImg != "delete") {
+          return (
+            <div
+              key={index}
+              style={{
+                display: "inline",
+                paddingRight: 20,
+                position: "relative",
+              }}
+            >
+              <img
+                src={
+                  element.typeImg == undefined || element.typeImg == "new"
+                    ? URL.createObjectURL(element.img)
+                    : element.img
+                }
+                style={{
+                  width: 150,
+                  height: 120,
+                  marginBottom: 10,
+                }}
+              ></img>
+              <i
+                style={{
+                  position: "absolute",
+                  fontSize: 24,
+                  right: 25,
+                  top: -50,
+                  color: "black",
+                }}
+                onClick={() => deleteImgEvent(index)}
+                className="icofont-close-circled"
+              />
+            </div>
+          );
+        }
+      });
+    }
+  }
+
+  const deleteImgEvent = async (index) => {
+    let newNotSaveImg = [...imgEventNotSave];
+    let img = newNotSaveImg[index];
+    if (img.typeImg == "ImgApi") {
+      img.typeImg = "delete";
+    } else {
+      newNotSaveImg.splice(index, 1);
+    }
+    setimgEventNotSave(newNotSaveImg);
+  };
+
+const [imgEventNotSave, setimgEventNotSave] = useState([]);
+
+  function uploadImageEvent(event) {
+    let data = [];
+    if (event.target.files.length == 1) {
+      let imgNew = event.target.files[0];
+      data[0] = { img: imgNew, typeImg: "new" };
+    } else {
+      for (let i = 0; i < event.target.files.length; i++) {
+        let imgNew = event.target.files[i];
+        data[i] = { img: imgNew, typeImg: "new" };
+      }
+    }
+    console.log(data);
+    if (imgEventNotSave.length > 0) {
+      let oldImg = [...imgNotSave, ...data];
+      setimgEventNotSave(oldImg);
+    } else {
+      setimgEventNotSave(data);
+    }
+  }
+
 
   const renderComment = (idPost) => {
     return comment.map((element, index) => {
@@ -2480,8 +2558,15 @@ function GroupDetails() {
                             <i className="icofont-check-circled" />
                             Joined
                           </a>
+                            <div className="wall">
+                            <i class="icofont-camera"></i>
+                            <span>Thay đổi ảnh bìa</span>
+                          </div>
                           <figure className="group-dp">
                             <img src={groupRecent.avataImg} alt="" />
+                              <a className="icon-camera">
+                              <i class="icofont-camera"></i>
+                            </a>
                           </figure>
                         </div>
                         <div className="grp-info">
@@ -2582,7 +2667,9 @@ function GroupDetails() {
                               </div>
                             </div>
                             {/* create new post */}
-
+                                <div className="event-button">
+                              <p className="">Tạo sự kiện mới</p>
+                            </div>
                             {/* chat rooms */}
 
                             {/* suggested friends */}
@@ -3125,36 +3212,130 @@ function GroupDetails() {
             <div className="popup-meta">
               <div className="popup-head">
                 <h5>
-                  <i>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={24}
-                      height={24}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-mail"
-                    >
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                      <polyline points="22,6 12,13 2,6" />
-                    </svg>
-                  </i>{" "}
-                  Invite Colleagues
+                  <i class="icofont-megaphone-alt"></i>
+                  Sự kiện mới
                 </h5>
               </div>
               <div className="invitation-meta">
-                <p>
-                  Enter an email address to invite a colleague or co-author to
-                  join you on socimo. They will receive an email and, in some
-                  cases, up to two reminders.
-                </p>
+                <div className="imgWrap">
+                  <label class="lablePhoto" for="photoEvent">
+                    <i className="icofont-camera" /> Photo / Video
+                  </label>
+                  <input
+                    type="file"
+                    name="photoEvent"
+                    className="photoEvent"
+                    id="photoEvent"
+                    onChange={uploadImageEvent}
+                    accept="image/*"
+                    multiple
+                  />
+                  <div id="imgBAdd" className="imgBeforeAdd">
+                    {renderImgEvent()}
+                  </div>
+                </div>
                 <form method="post" className="c-form">
-                  <input type="text" placeholder="Enter Email" />
+                  <h6 className="event-name"> Tên sự kiện</h6>
+                  <input name="name" type="text" placeholder="Tên sự kiện" />
+                  <h6 className="event-name"> Mô tả </h6>
+                  <input name="description" type="text" placeholder="Mô tả" />
+
+                  <div className="datetime">
+                    <div className="date">
+                      <h6 className="event-name"> Ngày bắt đầu</h6>
+                      <input name="dateStart" type="date" />
+                    </div>
+                    <div className="time">
+                      <div>
+                        <h6 className="event-name"> Nhập giờ</h6>
+                        <input name="hourStart" type="text" placeholder="Giờ" />
+                      </div>
+                      <div>
+                        <h6 className="event-name"> Nhập phút</h6>
+                        <input
+                          name="minuteStart"
+                          type="text"
+                          placeholder="Phút"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="datetime">
+                    <div className="date">
+                      <h6 className="event-name"> Ngày kết thúc</h6>
+                      <input name="dateEnd" type="date" />
+                    </div>
+                    <div className="time">
+                      <div>
+                        <h6 className="event-name"> Nhập giờ</h6>
+                        <input name="hourEnd" type="text" placeholder="Giờ" />
+                      </div>
+                      <div>
+                        <h6 className="event-name"> Nhập phút</h6>
+                        <input
+                          name="minuteEnd"
+                          type="text"
+                          placeholder="Phút"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="activity">
+                    <h6 className="event-name"> Hoạt động sự kiện</h6>
+                    <div className="activity-input">
+                      <input
+                        name="activity"
+                        type="text"
+                        placeholder="Hoạt động"
+                      />
+                      <span className="add-activity">Thêm</span>
+                    </div>
+                    <div className="activity-item">
+                      
+                      <div className="item-wrap">
+                        <span className="activity-name">some activity </span>
+                       <i class="icofont-ui-close"></i>
+                      </div>
+                      <div className="item-wrap">
+                        <span className="activity-name">some activity </span>
+                       <i class="icofont-ui-close"></i>
+                      </div>
+                      <div className="item-wrap">
+                        <span className="activity-name">some activity </span>
+                       <i class="icofont-ui-close"></i>
+                      </div>
+                      <div className="item-wrap">
+                        <span className="activity-name">some activity </span>
+                       <i class="icofont-ui-close"></i>
+                      </div>
+                      <div className="item-wrap">
+                        <span className="activity-name">some activity </span>
+                       <i class="icofont-ui-close"></i>
+                      </div>
+                      <div className="item-wrap">
+                        <span className="activity-name">some activity </span>
+                       <i class="icofont-ui-close"></i>
+                      </div>
+                      <div className="item-wrap">
+                        <span className="activity-name">some activity </span>
+                       <i class="icofont-ui-close"></i>
+                      </div>
+                      <div className="item-wrap">
+                        <span className="activity-name">some activity </span>
+                       <i class="icofont-ui-close"></i>
+                      </div>
+                      <div className="item-wrap">
+                        <span className="activity-name">some activity </span>
+                       <i class="icofont-ui-close"></i>
+                      </div>
+                      
+                    </div>
+                  </div>
+                  <h6 className="event-name"> Giá vé</h6>
+                  <input name="price" type="number" placeholder="Giá vé" />
+
                   <button type="submit" className="main-btn">
-                    Invite
+                    Tạo
                   </button>
                 </form>
               </div>
