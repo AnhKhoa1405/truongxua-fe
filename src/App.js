@@ -1,7 +1,7 @@
 import firebase from "firebase";
-import "firebase/auth"
-import 'firebase/database'
-import 'firebase/storage'
+import "firebase/auth";
+import "firebase/database";
+import "firebase/storage";
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import AboutUniversity from "./socimo-html-files/AboutUniversity";
@@ -31,7 +31,7 @@ const config = {
   storageBucket: "truongxua-d9940.appspot.com",
   messagingSenderId: "78169522021",
   appId: "1:78169522021:web:13934f5f09fb08e97ceb8c",
-  measurementId: "G-2T9SQ4HENT"
+  measurementId: "G-2T9SQ4HENT",
 };
 firebase.initializeApp(config);
 
@@ -59,20 +59,36 @@ function App() {
   const encodeToDecode = async (tokenUser) => {
     try {
       const response = await axios.post(
-        `http://20.188.111.70:12347/api/users/log-in?idToken=${tokenUser}`
+        `http://20.188.111.70:12348/api/users/log-in?idToken=${tokenUser}`,
+        {
+          headers: {},
+        }
       );
       if (response.status == 200) {
-        console.log(response);
+        //console.log(response);
         let decoded = jwtDecode(response.data);
         decoded.author = response.data;
-        sessionStorage.setItem("infoUser", JSON.stringify(decoded));
+        const infoDe = await findUserById(decoded.Id);
+        decoded.infoDetail = infoDe;
+        localStorage.setItem("infoUser", JSON.stringify(decoded));
       }
     } catch (err) {
       console.log("Error");
       console.error(err);
     }
   };
-
+  const findUserById = async (id) => {
+    try {
+      const response = await axios.get(
+        `http://20.188.111.70:12348/api/v1/alumni/${id}`
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   return (
     <Router>
       <div>
