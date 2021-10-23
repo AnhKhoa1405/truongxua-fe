@@ -1,4 +1,5 @@
-//-----window.load start here
+//-----window.load start here	
+
 
 // Animate loader off screen
 $(window).on('load', function () {
@@ -123,14 +124,16 @@ if ($.isFunction($.fn.dropzone)) {
 		$('.popup-wraper').removeClass('active');
 	});
 
-// invite collegues popup	
-	$('.invite, .invite-new').on('click', function () {
-		$('.wraper-invite').addClass('active');
-		return false;
-	});
-	$('.popup-closed').on('click', function () {
-		$('.wraper-invite').removeClass('active');
-	});	
+// invite collegues popup
+//     $('.event-button').on('click', function () {
+// 		$('.wraper-invite').addClass('active');
+// 		return false;
+// 	});
+// 	$('.popup-closed').on('click', function () {
+// 		$('.wraper-invite').removeClass('active');
+// 	});	
+
+	
 	
 // side slide messages and notifications	
 	$('.mesg-notif').on('click', function () {
