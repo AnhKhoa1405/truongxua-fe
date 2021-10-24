@@ -59,17 +59,21 @@ function App() {
   const encodeToDecode = async (tokenUser) => {
     try {
       const response = await axios.post(
-        `http://20.188.111.70:12348/api/users/log-in?idToken=${tokenUser}`,
+        `https://truongxuaapp.online/api/users/log-in?idToken=${tokenUser}`,
         {
-          headers: {},
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Headers": "*",
+            //Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
         }
       );
       if (response.status == 200) {
-        //console.log(response);
         let decoded = jwtDecode(response.data);
         decoded.author = response.data;
         const infoDe = await findUserById(decoded.Id);
         decoded.infoDetail = infoDe;
+        console.log(decoded);
         localStorage.setItem("infoUser", JSON.stringify(decoded));
       }
     } catch (err) {
