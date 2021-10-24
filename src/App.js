@@ -59,7 +59,7 @@ function App() {
   const encodeToDecode = async (tokenUser) => {
     try {
       const response = await axios.post(
-        `http://20.188.111.70:12348/api/users/log-in?idToken=${tokenUser}`,
+        `https://truongxuaapp.online/api/users/log-in?idToken=${tokenUser}`,
         {
           headers: {},
         }

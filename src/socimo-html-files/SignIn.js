@@ -13,14 +13,20 @@ const uiConfig = {
 };
 
 class SignIn extends React.Component {
+
+  constructor(props) {
+    super(props);
+  }
   state = {
     email: "",
     password: "",
     loading: false,
-    error: [],
     currentUser: {},
     token: "",
+    errorUser:"",
+    errorPassword: "",
   };
+   jwtDecode = require("jwt-decode").default;
 
   handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,9 +34,43 @@ class SignIn extends React.Component {
     this.setState({ [name]: value });
   };
 
-  handleSubmit = (e) => {
-    e.preventDefault();
+   encodeToDecode = async (tokenUser) => {
+    try {
+      const response = await axios.post(
+        `https://truongxuaapp.online/api/users/log-in?idToken=${tokenUser}`,
+        {
+          headers: {},
+        }
+      );
+      if (response.status == 200) {
+        //console.log(response);
+        let decoded = this.jwtDecode(response.data);
+        decoded.author = response.data;
+        const infoDe = await this.findUserById(decoded.Id);
+        decoded.infoDetail = infoDe;
+        localStorage.setItem("infoUser", JSON.stringify(decoded));
+      }
+    } catch (err) {
+      console.log("Error");
+      console.error(err);
+    }
+  };
+   findUserById = async (id) => {
+    try {
+      const response = await axios.get(
+        `http://20.188.111.70:12348/api/v1/alumni/${id}`
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
+  handleSubmit = (e,history) => {
+    e.preventDefault();
+   
     if (this.isFormValid) {
       this.setState({ error: [], loading: true });
       const { email, password, error } = this.state;
@@ -46,31 +86,47 @@ class SignIn extends React.Component {
             .currentUser.getIdToken(/* forceRefresh */ true)
             .then(async function (idToken) {
               console.log("id token:" + idToken);
-              try {
-                console.log("haha");
-                const response = await axios.post(
-                  `http://20.188.111.70:12348/api/users/log-in?idToken=${idToken}`
-                );
-                console.log("response :" + response.data);
-                localStorage.setItem("accessToken", response.data);
-              } catch (err) {
-                console.log(err);
-              }
+              // try {
+              //   const response = await axios.post(
+              //     `https://truongxuaapp.online/api/users/log-in?idToken=${idToken}`
+              //   );
+              //   console.log("response :" + response.data);
+              //   // localStorage.setItem("accessToken", response.data);
+              //   await this.encodeToDecode(response. data);
+              //   //  history.push('/home') 
+              // } catch (err) {
+              //   console.log(err);
+              // }
+               await this.encodeToDecode(idToken);
             })
             .catch(function (error) {
               // Handle error
             });
+        }).then(()=>{
+         this.props.history.push('/home');
         })
         .catch((err) => {
           console.log(err);
-          this.setState({ error: [...error, err], loading: false });
-          this.props.history.push("/");
+         
+           if(err.message.includes('email address')){
+            this.setState({errorUser:"Sai Email"});
+            this.setState({errorPassword:""});
+          }
+          else if(err.message.includes('password is invalid')){
+            this.setState({errorPassword:"Sai mật khẩu"});
+            this.setState({errorUser:""});
+          }
+          else{
+             this.setState({errorUser:"Tài khoản không tồn tại vui lòng đăng ký"});
+             this.setState({errorPassword:""});
+          }
         });
     }
   };
   
   isFormValid = () => this.state.email && this.state.password;
   render() {
+      const {history}= this.props;
     return (
       <div>
         {/* <div className="page-loader" id="page-loader"> */}
@@ -147,13 +203,14 @@ class SignIn extends React.Component {
                     onChange={this.handleChange}
                     placeholder="User Name @"
                   />
+                  <p style={{color: 'red', marginLeft:10}}>{this.state.errorUser}</p>
                   <input
                     name="password"
                     type="password"
                     onChange={this.handleChange}
                     placeholder="Passwordxxxxxxxxxx"
                   />
-
+                    <p style={{color: 'red', marginLeft:10}}>{this.state.errorPassword}</p>
                   {/* <input type="checkbox" id="checkbox" defaultChecked />
                     <label htmlFor="checkbox">
                       <span>Remember Me</span>
