@@ -3291,6 +3291,7 @@ const [imgEventNotSave, setimgEventNotSave] = useState([]);
                         name="activity"
                         type="text"
                         placeholder="Hoạt động"
+                        
                       />
                       <span className="add-activity">Thêm</span>
                     </div>

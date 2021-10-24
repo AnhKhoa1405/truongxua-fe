@@ -22,7 +22,8 @@ function SignUp() {
     status: true,
     loading: false,
     error:[],
-    userRef: firebase.database().ref('users')
+    userRef: firebase.database().ref('users'),
+    errorUser: "",
   };
 
   const {
@@ -72,11 +73,16 @@ function SignUp() {
         saveUser(createUser).then(() => {
           
           console.log("user save");
-          this.setState({...formData,loading:false});
         })
       })
     }).catch((err) => {console.log(err);
-    this.setState({...formData, loading: false})});
+    if(err.message.includes('already in use')){
+            setFormData({...formData, errorUser:"Tài khoản đã tồn tại"})
+          }
+          else{
+            setFormData({...formData, errorUser:""})
+          }
+    });
   }
 
   const saveUser =(createUser) => {
@@ -174,6 +180,7 @@ function SignUp() {
                     {errors.email && (
                       <p className="error">{errors.email.message}</p>
                     )}
+                    <p style={{color: 'red', marginLeft:10}}>{formData.errorUser}</p>
                   </div>
                   <div className="col-lg-6 col-sm-6 col-md-6">
                     <input
