@@ -5,10 +5,10 @@ import HeaderPage from "./Header";
 import "../css/groupdetail.css";
 
 function GroupDetails() {
-  const [eventPopup,setEventPopup] = useState(false);
-  const showEventPopup =()=>{
+  const [eventPopup, setEventPopup] = useState(false);
+  const showEventPopup = () => {
     setEventPopup(true);
-  }
+  };
   const [imgNotSave, setimgNotSave] = useState([]);
   // const [imgSave, setImgSave] = useState([]);
   const [content, setContent] = useState("");
@@ -21,13 +21,25 @@ function GroupDetails() {
   const [noti, setNoti] = useState("");
   const [postDetail, setPostDetail] = useState({});
   const [imgById, setImgById] = useState([]);
+  const [updateCmt, setUpdateCmt] = useState(undefined);
   const addApiImg = [];
   //const axios = require("axios").default;
   const commentPost = async (event, idPost) => {
     event.preventDefault();
     await createComment(idPost);
   };
-  
+  const editComment = (element, idPost) => {
+    const newComment = [...comment];
+
+    for (let i = 0; i < newComment.length; i++) {
+      if (newComment[i].id == element.id) {
+        newComment[i].status = false;
+        document.getElementById(idPost).value = newComment[i].content;
+      }
+    }
+    setUpdateCmt(element);
+    setComment(newComment);
+  };
   function renderImgEvent() {
     if (imgEventNotSave.length > 0) {
       return imgEventNotSave.map((element, index) => {
@@ -82,7 +94,7 @@ function GroupDetails() {
     setimgEventNotSave(newNotSaveImg);
   };
 
-const [imgEventNotSave, setimgEventNotSave] = useState([]);
+  const [imgEventNotSave, setimgEventNotSave] = useState([]);
 
   function uploadImageEvent(event) {
     let data = [];
@@ -104,7 +116,6 @@ const [imgEventNotSave, setimgEventNotSave] = useState([]);
     }
   }
 
-
   const renderComment = (idPost) => {
     return comment.map((element, index) => {
       const d = new Date(element.createAt);
@@ -112,7 +123,7 @@ const [imgEventNotSave, setimgEventNotSave] = useState([]);
         (user) => element.alumniId === user.id
       );
 
-      if (idPost === element.postId) {
+      if (idPost === element.postId && element.status == true) {
         return (
           <li key={index}>
             <figure>
@@ -135,6 +146,50 @@ const [imgEventNotSave, setimgEventNotSave] = useState([]);
                 {d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear()}
               </span>
               <p> {element.content}</p>
+
+              <div
+                style={{
+                  zIndex: 10,
+                  float: "right",
+                }}
+                className="more-post-optns"
+              >
+                <i className>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={24}
+                    height={24}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="feather feather-more-horizontal"
+                  >
+                    <circle cx={12} cy={12} r={1} />
+                    <circle cx={19} cy={12} r={1} />
+                    <circle cx={5} cy={12} r={1} />
+                  </svg>
+                </i>
+                <ul>
+                  {JSON.parse(localStorage.infoUser).Id == element.alumniId ? (
+                    <li onClick={() => editComment(element, idPost)}>
+                      <i className="icofont-pen-alt-1" />
+                      Chỉnh sửa bình luận
+                      <span>Edit This Post within a Hour</span>
+                    </li>
+                  ) : (
+                    ""
+                  )}
+
+                  <li>
+                    <i className="icofont-ban" />
+                    Xóa bình luận
+                    <span>Hide This Post</span>
+                  </li>
+                </ul>
+              </div>
             </div>
             <a title="Like" href="#">
               <i className="icofont-heart" />
@@ -177,19 +232,44 @@ const [imgEventNotSave, setimgEventNotSave] = useState([]);
   const createComment = async (idPost) => {
     try {
       const data = {
-        alumniId: JSON.parse(localStorage.infoUser).Id,
-        postId: idPost,
+        alumniId:
+          updateCmt === undefined
+            ? JSON.parse(localStorage.infoUser).Id
+            : updateCmt.alumniId,
+        postId: updateCmt === undefined ? idPost : updateCmt.postId,
         content: document.getElementById(idPost).value,
-        createAt: new Date(),
-        modifiedAt: null,
+        createAt: updateCmt === undefined ? new Date() : updateCmt.createAt,
+        modifiedAt: updateCmt === undefined ? null : new Date(),
         status: true,
       };
-      const response = await axios.post(
-        "http://20.188.111.70:12348/api/v1/posts/comments",
-        data
-      );
+      console.log(JSON.parse(localStorage.infoUser).author);
+      const response =
+        updateCmt === undefined
+          ? await axios.post(
+              "https://truongxuaapp.online/api/v1/posts/comments",
+              data,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization:
+                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                },
+              }
+            )
+          : await axios.put(
+              `https://truongxuaapp.online/api/v1/posts/comments/${updateCmt.id}`,
+              data,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization:
+                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                },
+              }
+            );
       if (response.status === 200) {
         document.getElementById(idPost).value = "";
+        setUpdateAPost(undefined);
         await getAllComment();
       }
     } catch (err) {
@@ -2562,13 +2642,13 @@ const [imgEventNotSave, setimgEventNotSave] = useState([]);
                             <i className="icofont-check-circled" />
                             Joined
                           </a>
-                            <div className="wall">
+                          <div className="wall">
                             <i class="icofont-camera"></i>
                             <span>Thay đổi ảnh bìa</span>
                           </div>
                           <figure className="group-dp">
                             <img src={groupRecent.avataImg} alt="" />
-                              <a className="icon-camera">
+                            <a className="icon-camera">
                               <i class="icofont-camera"></i>
                             </a>
                           </figure>
@@ -2671,7 +2751,10 @@ const [imgEventNotSave, setimgEventNotSave] = useState([]);
                               </div>
                             </div>
                             {/* create new post */}
-                                <div className="event-button" onClick ={showEventPopup}>
+                            <div
+                              className="event-button"
+                              onClick={showEventPopup}
+                            >
                               <p className="">Tạo sự kiện mới</p>
                             </div>
                             {/* chat rooms */}
@@ -3208,9 +3291,14 @@ const [imgEventNotSave, setimgEventNotSave] = useState([]);
           </div>
         </div>
         {/* bottombar */}
-        <div className={`wraper-invite ${eventPopup === true?'active':''}`}>
+        <div className={`wraper-invite ${eventPopup === true ? "active" : ""}`}>
           <div className="popup">
-            <span className="popup-closed" onClick={() =>{setEventPopup(false)}}>
+            <span
+              className="popup-closed"
+              onClick={() => {
+                setEventPopup(false);
+              }}
+            >
               <i className="icofont-close" />
             </span>
             <div className="popup-meta">
@@ -3296,44 +3384,42 @@ const [imgEventNotSave, setimgEventNotSave] = useState([]);
                       <span className="add-activity">Thêm</span>
                     </div>
                     <div className="activity-item">
-                      
                       <div className="item-wrap">
                         <span className="activity-name">some activity </span>
-                       <i class="icofont-ui-close"></i>
+                        <i class="icofont-ui-close"></i>
                       </div>
                       <div className="item-wrap">
                         <span className="activity-name">some activity </span>
-                       <i class="icofont-ui-close"></i>
+                        <i class="icofont-ui-close"></i>
                       </div>
                       <div className="item-wrap">
                         <span className="activity-name">some activity </span>
-                       <i class="icofont-ui-close"></i>
+                        <i class="icofont-ui-close"></i>
                       </div>
                       <div className="item-wrap">
                         <span className="activity-name">some activity </span>
-                       <i class="icofont-ui-close"></i>
+                        <i class="icofont-ui-close"></i>
                       </div>
                       <div className="item-wrap">
                         <span className="activity-name">some activity </span>
-                       <i class="icofont-ui-close"></i>
+                        <i class="icofont-ui-close"></i>
                       </div>
                       <div className="item-wrap">
                         <span className="activity-name">some activity </span>
-                       <i class="icofont-ui-close"></i>
+                        <i class="icofont-ui-close"></i>
                       </div>
                       <div className="item-wrap">
                         <span className="activity-name">some activity </span>
-                       <i class="icofont-ui-close"></i>
+                        <i class="icofont-ui-close"></i>
                       </div>
                       <div className="item-wrap">
                         <span className="activity-name">some activity </span>
-                       <i class="icofont-ui-close"></i>
+                        <i class="icofont-ui-close"></i>
                       </div>
                       <div className="item-wrap">
                         <span className="activity-name">some activity </span>
-                       <i class="icofont-ui-close"></i>
+                        <i class="icofont-ui-close"></i>
                       </div>
-                      
                     </div>
                   </div>
                   <h6 className="event-name"> Giá vé</h6>
