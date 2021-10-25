@@ -18,15 +18,150 @@ function GroupDetails() {
   const [dataContent, setDataContent] = useState([]);
   const [updateAPost, setUpdateAPost] = useState({});
   const [deleteAPost, setDeletePost] = useState(0);
+  const [deleteAComment, setDeleteComment] = useState(-1);
   const [noti, setNoti] = useState("");
   const [postDetail, setPostDetail] = useState({});
   const [imgById, setImgById] = useState([]);
   const [updateCmt, setUpdateCmt] = useState(undefined);
   const addApiImg = [];
   //const axios = require("axios").default;
+
+  const updateAvaGroup = async (event) => {
+    let body = new FormData();
+    body.set("key", "71b6c3846105c92074f8e9a49b85887f");
+    let img = event.target.files[0];
+    body.append("image", img);
+    try {
+      const response = await axios({
+        method: "POST",
+        url: "https://api.imgbb.com/1/upload",
+        data: body,
+      });
+      if (response.status == 200) {
+        await updateGroupAva(response.data.data.display_url);
+        // newGroup.avataImg = response.data.data.display_url;
+        // setGroupRecent(newGroup);
+        // const dataImgSave = {
+        //   name: response.data.data.title,
+        //   url_display: response.data.data.display_url,
+        // };
+        // console.log(dataImgSave);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const updateGroupAva = async (newAvatar) => {
+    console.log(newAvatar);
+    try {
+      const data = {
+        name: groupRecent.name,
+        schoolYearId: groupRecent.schoolYearId,
+        policy: groupRecent.policy,
+        backgroundImg: groupRecent.backgroundImg,
+        avataImg: newAvatar,
+        description: groupRecent.description,
+        info: groupRecent.info,
+        groupAdminId: groupRecent.groupAdminId,
+      };
+      const response = await axios.put(
+        `https://truongxuaapp.online/api/v1/groups?id=${groupRecent.id}`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        await getGroup();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const updateCoverGroup = async (event) => {
+    let body = new FormData();
+    body.set("key", "71b6c3846105c92074f8e9a49b85887f");
+    let img = event.target.files[0];
+    body.append("image", img);
+    try {
+      const response = await axios({
+        method: "POST",
+        url: "https://api.imgbb.com/1/upload",
+        data: body,
+      });
+      if (response.status == 200) {
+        await updateGroupCover(response.data.data.display_url);
+        // newGroup.avataImg = response.data.data.display_url;
+        // setGroupRecent(newGroup);
+        // const dataImgSave = {
+        //   name: response.data.data.title,
+        //   url_display: response.data.data.display_url,
+        // };
+        // console.log(dataImgSave);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const updateGroupCover = async (newAvatar) => {
+    console.log(newAvatar);
+    try {
+      const data = {
+        name: groupRecent.name,
+        schoolYearId: groupRecent.schoolYearId,
+        policy: groupRecent.policy,
+        backgroundImg: newAvatar,
+        avataImg: groupRecent.avataImg,
+        description: groupRecent.description,
+        info: groupRecent.info,
+        groupAdminId: groupRecent.groupAdminId,
+      };
+      const response = await axios.put(
+        `https://truongxuaapp.online/api/v1/groups?id=${groupRecent.id}`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        await getGroup();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const commentPost = async (event, idPost) => {
     event.preventDefault();
     await createComment(idPost);
+  };
+  const deleteComment = async () => {
+    try {
+      const response = await axios.delete(
+        `https://truongxuaapp.online/api/v1/posts/comments/${deleteAComment}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setDeleteComment(-1);
+        await getAllComment();
+        var element = document.getElementById("delete-comment");
+        element.classList.remove("active");
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
   const editComment = (element, idPost) => {
     const newComment = [...comment];
@@ -122,7 +257,6 @@ function GroupDetails() {
       const userComment = memberInGroup.filter(
         (user) => element.alumniId === user.id
       );
-
       if (idPost === element.postId && element.status == true) {
         return (
           <li key={index}>
@@ -146,50 +280,72 @@ function GroupDetails() {
                 {d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear()}
               </span>
               <p> {element.content}</p>
-
-              <div
-                style={{
-                  zIndex: 10,
-                  float: "right",
-                }}
-                className="more-post-optns"
-              >
-                <i className>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={24}
-                    height={24}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="feather feather-more-horizontal"
+              {JSON.parse(localStorage.infoUser).Id == element.alumniId ||
+              JSON.parse(localStorage.infoUser).Id ==
+                groupRecent.groupAdminId ? (
+                <div
+                  style={{
+                    zIndex: 10,
+                    float: "right",
+                  }}
+                  className="more-post-optns"
+                >
+                  <i className>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width={24}
+                      height={24}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="feather feather-more-horizontal"
+                    >
+                      <circle cx={12} cy={12} r={1} />
+                      <circle cx={19} cy={12} r={1} />
+                      <circle cx={5} cy={12} r={1} />
+                    </svg>
+                  </i>
+                  <ul
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      width: 400,
+                    }}
                   >
-                    <circle cx={12} cy={12} r={1} />
-                    <circle cx={19} cy={12} r={1} />
-                    <circle cx={5} cy={12} r={1} />
-                  </svg>
-                </i>
-                <ul>
-                  {JSON.parse(localStorage.infoUser).Id == element.alumniId ? (
-                    <li onClick={() => editComment(element, idPost)}>
-                      <i className="icofont-pen-alt-1" />
-                      Chỉnh sửa bình luận
-                      <span>Edit This Post within a Hour</span>
-                    </li>
-                  ) : (
-                    ""
-                  )}
+                    {JSON.parse(localStorage.infoUser).Id ==
+                    element.alumniId ? (
+                      <li
+                        style={{ margin: 0 }}
+                        onClick={() => editComment(element, idPost)}
+                      >
+                        <i className="icofont-pen-alt-1" />
+                        Chỉnh sửa bình luận
+                        <span>Edit This Post within a Hour</span>
+                      </li>
+                    ) : (
+                      ""
+                    )}
 
-                  <li>
-                    <i className="icofont-ban" />
-                    Xóa bình luận
-                    <span>Hide This Post</span>
-                  </li>
-                </ul>
-              </div>
+                    <li
+                      style={{ margin: 0 }}
+                      onClick={() => {
+                        var value = document.getElementById("delete-comment");
+                        value.classList.add("active");
+                        setDeleteComment(element.id);
+                      }}
+                    >
+                      <i className="icofont-ban" />
+                      Xóa bình luận
+                      <span>Hide This Post</span>
+                    </li>
+                  </ul>
+                </div>
+              ) : (
+                ""
+              )}
             </div>
             <a title="Like" href="#">
               <i className="icofont-heart" />
@@ -206,7 +362,13 @@ function GroupDetails() {
   const getAllComment = async () => {
     try {
       const response = await axios.get(
-        "http://20.188.111.70:12348/api/v1/posts/comments?pageNumber=1&pageSize=0"
+        "https://truongxuaapp.online/api/v1/posts/comments?sort=desc&pageNumber=1&pageSize=0",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status === 200) {
         setComment(response.data);
@@ -216,19 +378,6 @@ function GroupDetails() {
     }
   };
 
-  const findUserByID = async (id) => {
-    try {
-      const response = await axios.get(
-        `http://20.188.111.70:12348/api/v1/alumni/${id}`
-      );
-      if (response.status === 200) {
-        console.log(response);
-        return response.data;
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
   const createComment = async (idPost) => {
     try {
       const data = {
@@ -242,7 +391,7 @@ function GroupDetails() {
         modifiedAt: updateCmt === undefined ? null : new Date(),
         status: true,
       };
-      console.log(JSON.parse(localStorage.infoUser).author);
+      //console.log(JSON.parse(localStorage.infoUser).author);
       const response =
         updateCmt === undefined
           ? await axios.post(
@@ -812,7 +961,13 @@ function GroupDetails() {
     const member = [];
     try {
       const response = await axios.get(
-        "http://20.188.111.70:12348/api/v1/alumni?pageNumber=1&pageSize=0"
+        "https://truongxuaapp.online/api/v1/alumni?pageNumber=1&pageSize=0",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status === 200) {
         for (let i = 0; i < response.data.length; i++) {
@@ -841,7 +996,13 @@ function GroupDetails() {
   const getGroup = async () => {
     try {
       const response = await axios.get(
-        "http://20.188.111.70:12348/api/v1/groups/33"
+        "https://truongxuaapp.online/api/v1/groups/33",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status == 200) {
         setGroupRecent(response.data);
@@ -853,31 +1014,16 @@ function GroupDetails() {
   };
 
   const getAllImg = async () => {
-    // const token = dataUser();
-    // console.log(token);
-    // try {
-    //   const response = await axios.get(
-    //     "http://20.188.111.70:12347/api/v1/groups?pageNumber=1&pageSize=5",
-    //     {
-    //       headers: {
-    //         "Access-Control-Allow": "*",
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //     }
-    //   );
-    //   if (response.status == 200) {
-    //     setImgById(response.data);
-    //   }
-    // } catch (err) {
-    //   console.error(err);
-    // }
-    // let headers = {
-    //   "Access-Control-Allow-Headers": "*",
-    //   Authorization: `Bearer ${token}`,
-    // };
-    // console.log(headers);
     await axios
-      .get("http://20.188.111.70:12348/api/v1/images?pageNumber=0&pageSize=0")
+      .get(
+        "https://truongxuaapp.online/api/v1/images?pageNumber=1&pageSize=0",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      )
       .then((response) => {
         setImgById(response.data);
       })
@@ -887,7 +1033,13 @@ function GroupDetails() {
   const getAllPost = async () => {
     try {
       const response = await axios.get(
-        "http://20.188.111.70:12348/api/v1/posts?sort=desc&pageNumber=1&pageSize=0"
+        "https://truongxuaapp.online/api/v1/posts?sort=desc&pageNumber=1&pageSize=0",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       setDataContent(response.data);
 
@@ -925,7 +1077,14 @@ function GroupDetails() {
       for (let i = 0; i < id.length; i++) {
         try {
           const response = await axios.get(
-            `http://20.188.111.70:12348/api/v1/Images/${id[i]}`
+            `https://truongxuaapp.online/api/v1/images/${id[i]}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization:
+                  "Bearer " + JSON.parse(localStorage.infoUser).author,
+              },
+            }
           );
           if (response.status == 200) {
             imgData[i] = response.data;
@@ -953,7 +1112,14 @@ function GroupDetails() {
     if (deleteOneImg != undefined) {
       try {
         const response = await axios.delete(
-          `http://20.188.111.70:12348/api/v1/images/${deleteOneImg}`
+          `https://truongxuaapp.online/api/v1/images/${deleteOneImg}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization:
+                "Bearer " + JSON.parse(localStorage.infoUser).author,
+            },
+          }
         );
       } catch (err) {
         console.error(err);
@@ -964,7 +1130,14 @@ function GroupDetails() {
         for (let i = 0; i < id.length; i++) {
           try {
             const response = await axios.delete(
-              `http://20.188.111.70:12348/api/v1/images/${id[i]}`
+              `https://truongxuaapp.online/api/v1/images/${id[i]}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization:
+                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                },
+              }
             );
           } catch (err) {
             console.error(err);
@@ -979,7 +1152,13 @@ function GroupDetails() {
   const findCommentById = async () => {
     try {
       const response = await axios.get(
-        "http://20.188.111.70:12348/api/v1/posts/comments?pageNumber=1&pageSize=0"
+        "https://truongxuaapp.online/api/v1/posts/comments?pageNumber=1&pageSize=0",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status == 200) {
         let data = [];
@@ -999,7 +1178,14 @@ function GroupDetails() {
     try {
       for (let i = 0; i < idCom.length; i++) {
         const response = await axios.delete(
-          `http://20.188.111.70:12348/api/v1/posts/comments/${idCom[i]}`
+          `https://truongxuaapp.online/api/v1/posts/comments/${idCom[i]}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization:
+                "Bearer " + JSON.parse(localStorage.infoUser).author,
+            },
+          }
         );
       }
       return;
@@ -1013,10 +1199,12 @@ function GroupDetails() {
     if (statusDeImg === 200) {
       try {
         const response = await axios.delete(
-          `http://20.188.111.70:12348/api/v1/posts/${deleteAPost}`,
+          `https://truongxuaapp.online/api/v1/posts/${deleteAPost}`,
           {
             headers: {
               "Content-Type": "application/json",
+              Authorization:
+                "Bearer " + JSON.parse(localStorage.infoUser).author,
             },
           }
         );
@@ -1097,6 +1285,7 @@ function GroupDetails() {
   };
 
   const updatePostApi = async () => {
+    //console.log(JSON.parse(localStorage.inf));
     const updatePost = {
       // alumniId: updateAPost.alumniId,
       // content: document.getElementById("emojionearea1").value,
@@ -1106,16 +1295,23 @@ function GroupDetails() {
       //id: updateAPost.id,
 
       alumniId: updateAPost.alumniId,
+      groupId: JSON.parse(localStorage.infoUser).GroupId,
       content: document.getElementById("emojionearea1").value,
       createAt: updateAPost.createAt,
       modifiedAt: new Date(),
       status: true,
     };
-    //http://20.188.111.70:12348/api/v1/posts/id=${updateAPost.id}
+
     try {
       const response = await axios.put(
-        `http://20.188.111.70:12348/api/v1/posts?id=${updateAPost.id}`,
-        updatePost
+        `https://truongxuaapp.online/api/v1/posts?id=${updateAPost.id}`,
+        updatePost,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status == 200) {
         setUpdateAPost({});
@@ -1142,8 +1338,14 @@ function GroupDetails() {
     };
     try {
       const response = await axios.post(
-        "http://20.188.111.70:12348/api/v1/Posts",
-        dataAddPost
+        "https://truongxuaapp.online/api/v1/posts",
+        dataAddPost,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status == 200) {
         var element = document.getElementById("post-new");
@@ -1178,8 +1380,15 @@ function GroupDetails() {
         };
         try {
           const response = await axios.post(
-            "http://20.188.111.70:12348/api/v1/images",
-            dataImg
+            "https://truongxuaapp.online/api/v1/images",
+            dataImg,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization:
+                  "Bearer " + JSON.parse(localStorage.infoUser).author,
+              },
+            }
           );
           if (response == 200) {
             setimgNotSave([]);
@@ -1295,7 +1504,9 @@ function GroupDetails() {
                             <span>Hide This Post</span>
                           </li>
                           {JSON.parse(localStorage.infoUser).Id ==
-                          element.alumniId ? (
+                            element.alumniId ||
+                          JSON.parse(localStorage.infoUser).Id ==
+                            groupRecent.groupAdminId ? (
                             <li
                               onClick={() => {
                                 var value =
@@ -2642,15 +2853,50 @@ function GroupDetails() {
                             <i className="icofont-check-circled" />
                             Joined
                           </a>
-                          <div className="wall">
-                            <i class="icofont-camera"></i>
-                            <span>Thay đổi ảnh bìa</span>
-                          </div>
+                          {JSON.parse(localStorage.infoUser).Id ==
+                          groupRecent.groupAdminId ? (
+                            <label for="imgCover">
+                              <div className="wall">
+                                <i class="icofont-camera"></i>
+                                <span>Thay đổi ảnh bìa</span>
+                                <input
+                                  type="file"
+                                  id="imgCover"
+                                  style={{
+                                    display: "none",
+                                  }}
+                                  onChange={(e) => updateCoverGroup(e)}
+                                  name="image"
+                                  accept="image/gif,image/jpeg,image/jpg,image/png"
+                                />
+                              </div>
+                            </label>
+                          ) : (
+                            ""
+                          )}
+
                           <figure className="group-dp">
                             <img src={groupRecent.avataImg} alt="" />
-                            <a className="icon-camera">
-                              <i class="icofont-camera"></i>
-                            </a>
+                            {JSON.parse(localStorage.infoUser).Id ==
+                            groupRecent.groupAdminId ? (
+                              <label for="imgAva">
+                                <a className="icon-camera">
+                                  <i class="icofont-camera"></i>
+                                  <input
+                                    type="file"
+                                    id="imgAva"
+                                    style={{
+                                      display: "none",
+                                    }}
+                                    name="image"
+                                    accept="image/gif,image/jpeg,image/jpg,image/png"
+                                    onChange={(e) => updateAvaGroup(e)}
+                                  />
+                                </a>
+                              </label>
+                            ) : (
+                              ""
+                            )}
                           </figure>
                         </div>
                         <div className="grp-info">
@@ -2751,12 +2997,18 @@ function GroupDetails() {
                               </div>
                             </div>
                             {/* create new post */}
-                            <div
-                              className="event-button"
-                              onClick={showEventPopup}
-                            >
-                              <p className="">Tạo sự kiện mới</p>
-                            </div>
+                            {JSON.parse(localStorage.infoUser).Id ==
+                            groupRecent.groupAdminId ? (
+                              <div
+                                className="event-button"
+                                onClick={showEventPopup}
+                              >
+                                <p className="">Tạo sự kiện mới</p>
+                              </div>
+                            ) : (
+                              ""
+                            )}
+
                             {/* chat rooms */}
 
                             {/* suggested friends */}
@@ -3379,7 +3631,6 @@ function GroupDetails() {
                         name="activity"
                         type="text"
                         placeholder="Hoạt động"
-                        
                       />
                       <span className="add-activity">Thêm</span>
                     </div>
@@ -3794,6 +4045,75 @@ function GroupDetails() {
             </div>
           </div>
         </div>
+
+        <div id="delete-comment" className="post-new-popup-delete">
+          <div className="popup" style={{ width: "800px" }}>
+            <span
+              onClick={() => {
+                var element = document.getElementById("delete-comment");
+                element.classList.remove("active");
+                setDeleteComment(-1);
+              }}
+              className="popup-closed"
+            >
+              <i className="icofont-close" />
+            </span>
+            <div className="popup-meta">
+              <div className="popup-head">
+                <h5>
+                  <p
+                    style={{
+                      fontSize: 18,
+                    }}
+                    id="popup-head-name"
+                  >
+                    Bạn có chắn muốn xóa bình luận này ?
+                  </p>
+                </h5>
+              </div>
+              <div className="post-new">
+                <button
+                  style={{
+                    paddingTop: 10,
+                    paddingBottom: 10,
+                    paddingRight: 20,
+                    paddingLeft: 20,
+
+                    borderWidth: 1,
+                    borderStyle: "solid",
+                    borderColor: "#EFEFEF",
+                    float: "right",
+                    marginLeft: 10,
+                  }}
+                  onClick={() => {
+                    var element = document.getElementById("delete-comment");
+                    element.classList.remove("active");
+                    setDeleteComment(-1);
+                  }}
+                >
+                  Hủy
+                </button>
+                <button
+                  style={{
+                    paddingTop: 10,
+                    paddingBottom: 10,
+                    paddingRight: 20,
+                    paddingLeft: 20,
+                    borderWidth: 1,
+                    borderStyle: "solid",
+                    borderColor: "red",
+                    backgroundColor: "red",
+                    float: "right",
+                  }}
+                  onClick={() => deleteComment()}
+                >
+                  Xóa
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* New post popup */}
         <div className="new-question-popup">
           <div className="popup">

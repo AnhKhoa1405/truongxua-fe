@@ -7,13 +7,20 @@ function Profile() {
   const [user, setUser] = useState({});
   useEffect(async () => {
     await getUserById();
-  });
+    console.log(user);
+  }, []);
   const getUserById = async () => {
     try {
       const response = await axios.get(
-        `http://20.188.111.70:12348/api/v1/alumni/${
+        `https://truongxuaapp.online/api/v1/alumni/${
           JSON.parse(localStorage.infoUser).Id
-        }`
+        }`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status == 200) {
         setUser(response.data);
@@ -1154,15 +1161,15 @@ function Profile() {
                                 </li>
                                 <li>
                                   <span>Facebook</span>
-                                  <p>{user.phone}</p>
+                                  <p>{user.facebook}</p>
                                 </li>
                                 <li>
                                   <span>Instagram</span>
-                                  <p>{user.bio}</p>
+                                  <p>{user.instagram}</p>
                                 </li>
                                 <li>
                                   <span>Zalo</span>
-                                  <p>Trường TH, THCS và THPT Trương Vĩnh Ký</p>
+                                  <p>{user.zalo}</p>
                                 </li>
                               </ul>
                             </div>

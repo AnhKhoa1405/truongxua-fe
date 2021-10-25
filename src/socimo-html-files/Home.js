@@ -6,7 +6,7 @@ import HeaderPage from "./Header";
 
 function Home() {
   const [clickGroups, setClickGroups] = useState(false);
-    const [clickEvent, setClickEvent] =useState(false);
+  const [clickEvent, setClickEvent] = useState(false);
   const [clickHome, setClickHome] = useState(true);
   const [dataContent, setDataContent] = useState([]);
   const [deleteAPost, setDeleteAPost] = useState(-1);
@@ -18,13 +18,13 @@ function Home() {
     await getNewsInSchool();
     console.log(JSON.parse(localStorage.infoUser).SchoolId);
   }, [deleteAPost]);
-  const findSchoolRecent = async() => {
-    try{
-      const response = await axios.get("")
-    }catch(err){
-      console.error(err)
+  const findSchoolRecent = async () => {
+    try {
+      const response = await axios.get("");
+    } catch (err) {
+      console.error(err);
     }
-  }
+  };
   const updateImg = (event) => {
     setImg(event.target.files[0]);
     // if (event != undefined) {
@@ -58,15 +58,22 @@ function Home() {
     const addNews = await addNewsInApi();
   };
   const addNewsInApi = async () => {
-    
     // console.log(
     //   document.getElementById("titleID").value +
     //     "-----" +
     //     document.getElementById("emojionearea1").value
     // );
+    //emojionearea-editor
+    //console.log(document.getElementById("emojionearea1").value);
     const body = {
-      schoolId: elementUpdate == undefined ? JSON.parse(localStorage.infoUser).SchoolId : elementUpdate.schoolId,
-      adminId: elementUpdate == undefined ? JSON.parse(localStorage.infoUser).Id : elementUpdate.adminId,
+      schoolId:
+        elementUpdate == undefined
+          ? JSON.parse(localStorage.infoUser).SchoolId
+          : elementUpdate.schoolId,
+      adminId:
+        elementUpdate == undefined
+          ? JSON.parse(localStorage.infoUser).Id
+          : elementUpdate.adminId,
       title: document.getElementById("titleID").value,
       content: document.getElementById("emojionearea1").value,
       createAt:
@@ -77,17 +84,31 @@ function Home() {
     try {
       const response =
         elementUpdate == undefined
-          ? await axios.post("http://20.188.111.70:12348/api/v1/news", body)
+          ? await axios.post("https://truongxuaapp.online/api/v1/news", body, {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization:
+                  "Bearer " + JSON.parse(localStorage.infoUser).author,
+              },
+            })
           : await axios.put(
-              `http://20.188.111.70:12348/api/v1/news?id=${elementUpdate.id}`,
-              body
+              `https://truongxuaapp.online/api/v1/news?id=${elementUpdate.id}`,
+              body,
+              {
+                headers: {
+                  "Access-Control-Allow-Origin": "*",
+                  "Content-Type": "application/json",
+                  Authorization:
+                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                },
+              }
             );
       if (response.status == 200) {
         var element = document.getElementById("post-new");
         element.classList.remove("active");
         document.getElementById("emojionearea1").value = "";
         document.getElementById("titleID").value = null;
-        console.log(response.headers.date);
+        //console.log(response.headers.date);
         setDeleteAPost(response.headers.date);
         setElementUpdate(undefined);
       }
@@ -98,7 +119,13 @@ function Home() {
   const deleteANews = async () => {
     try {
       const response = axios.delete(
-        `http://20.188.111.70:12348/api/v1/news/${deleteAPost}`
+        `https://truongxuaapp.online/api/v1/news/${deleteAPost}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if ((await response).status === 200) {
         setDeleteAPost(-1);
@@ -112,7 +139,13 @@ function Home() {
   const getNewsInSchool = async () => {
     try {
       const response = await axios.get(
-        "http://20.188.111.70:12348/api/v1/news?sort=desc&pageNumber=1&pageSize=0"
+        "https://truongxuaapp.online/api/v1/news?sort=desc&pageNumber=1&pageSize=0",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status === 200) {
         setDataContent(response.data);
@@ -146,7 +179,7 @@ function Home() {
     return dataImgSave;
   };
 
-const changeNav = (e) => {
+  const changeNav = (e) => {
     const { id } = e.target;
     console.log(id);
     if (id === "home") {
@@ -164,9 +197,7 @@ const changeNav = (e) => {
       setClickHome(false);
       setClickGroups(false);
     }
-    
   };
-
 
   function renderHome() {
     // alumni-alumniId-conmments-content-createAt-id-images-modifiedAt-postInGroups-status
@@ -201,7 +232,7 @@ const changeNav = (e) => {
                         width: 40,
                         height: 40,
                       }}
-                      src={JSON.parse(localStorage.infoUser).infoDetail.img}
+                      src={JSON.parse(localStorage.infoUser).infoSchool.image}
                     />
                   </figure>
                   <div className="friend-name">
@@ -273,7 +304,7 @@ const changeNav = (e) => {
                     </div>
                     <ins>
                       <a title="verified" href="time-line.html">
-                        {JSON.parse(localStorage.infoUser).infoDetail.name}
+                        {JSON.parse(localStorage.infoUser).infoSchool.name}
                       </a>{" "}
                       Đăng bài
                     </ins>
@@ -923,7 +954,7 @@ const changeNav = (e) => {
                         <li>
                           <a
                             onClick={changeNav}
-                            className= {`${clickHome === true ? 'active' :''}`}
+                            className={`${clickHome === true ? "active" : ""}`}
                             href="#"
                             id="home"
                             title
@@ -932,12 +963,26 @@ const changeNav = (e) => {
                           </a>
                         </li>
                         <li>
-                          <a onClick={changeNav} className = {`${clickGroups === true ? 'active' :''}`} id="groups" href="#" title>
+                          <a
+                            onClick={changeNav}
+                            className={`${
+                              clickGroups === true ? "active" : ""
+                            }`}
+                            id="groups"
+                            href="#"
+                            title
+                          >
                             Nhóm
                           </a>
                         </li>
                         <li>
-                          <a onClick={changeNav} className =  {`${clickEvent === true ? 'active' :''}`} id="event" href="#" title>
+                          <a
+                            onClick={changeNav}
+                            className={`${clickEvent === true ? "active" : ""}`}
+                            id="event"
+                            href="#"
+                            title
+                          >
                             Event của trường
                           </a>
                         </li>
@@ -2393,16 +2438,6 @@ const changeNav = (e) => {
                     required
                   />
 
-                  <input
-                    style={{
-                      borderWidth: 1,
-                      borderColor: "black",
-                    }}
-                    id="fileUpdateImg"
-                    type="file"
-                    onChange={updateImg}
-                    name="img"
-                  />
                   {/* <div id="loadImg"></div> */}
                   <button
                     style={{

@@ -63,8 +63,6 @@ function App() {
         {
           headers: {
             "Content-Type": "application/json",
-            "Access-Control-Allow-Headers": "*",
-            //Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
           },
         }
       );
@@ -73,6 +71,8 @@ function App() {
         decoded.author = response.data;
         const infoDe = await findUserById(decoded.Id);
         decoded.infoDetail = infoDe;
+        const schoolDe = await findSchoolById(decoded.SchoolId);
+        decoded.infoSchool = schoolDe;
         console.log(decoded);
         localStorage.setItem("infoUser", JSON.stringify(decoded));
       }
@@ -84,7 +84,12 @@ function App() {
   const findUserById = async (id) => {
     try {
       const response = await axios.get(
-        `http://20.188.111.70:12348/api/v1/alumni/${id}`
+        `https://truongxuaapp.online/api/v1/alumni/${id}`,{
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status === 200) {
         return response.data;
@@ -93,6 +98,24 @@ function App() {
       console.error(err);
     }
   };
+  const findSchoolById = async(id) => {
+
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/schools/${id}`,{
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
   return (
     <Router>
       <div>

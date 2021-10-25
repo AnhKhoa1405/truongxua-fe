@@ -13,7 +13,7 @@ function AboutUniversity() {
 
   const renderMemberInSchool = (range) => {
     return memberinSchool.map((element, index) => {
-      if (range != undefined && index <= range){
+      if (range != undefined && index <= range) {
         return (
           <div key={index} className="col-lg-3 col-md-3 col-sm-6">
             <div className="members">
@@ -35,7 +35,7 @@ function AboutUniversity() {
             </div>
           </div>
         );
-      }else if(range === undefined){
+      } else if (range === undefined) {
         return (
           <div key={index} className="col-lg-3 col-md-3 col-sm-6">
             <div className="members">
@@ -58,7 +58,6 @@ function AboutUniversity() {
           </div>
         );
       }
-        
     });
   };
 
@@ -66,7 +65,13 @@ function AboutUniversity() {
     try {
       const member = [];
       const response = await axios.get(
-        "http://20.188.111.70:12348/api/v1/alumni?pageNumber=1&pageSize=0"
+        "https://truongxuaapp.online/api/v1/alumni?pageNumber=1&pageSize=0",{
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status === 200) {
         for (let i = 0; i < response.data.length; i++) {
@@ -87,9 +92,15 @@ function AboutUniversity() {
   const getSchoolById = async () => {
     try {
       const response = await axios.get(
-        `http://20.188.111.70:12348/api/v1/schools/${
+        `https://truongxuaapp.online/api/v1/schools/${
           JSON.parse(localStorage.infoUser).SchoolId
-        }`
+        }`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status === 200) {
         setSchool(response.data);
@@ -770,7 +781,7 @@ function AboutUniversity() {
                       </figure>
                       <div className="uni-name">
                         <h4>{school.name}</h4>
-                        <span>Antalya, Turky</span>
+                        <span>{school.address}</span>
                       </div>
                       <ul className="sharing-options">
                         <li>
@@ -831,25 +842,27 @@ function AboutUniversity() {
                               <ul>
                                 <li>
                                   <span>Tên trường</span>
-                                  <p>
-                                    Dumlupınar Bulvarı, 07058, Antalya, Turkey
-                                  </p>
+                                  <p>{school.name}</p>
                                 </li>
                                 <li>
                                   <span>Hiệu trưởng</span>
-                                  <p>Prof. Dr. Mustafa ÜNAL</p>
+                                  <p>{school.headmaster}</p>
                                 </li>
                                 <li>
                                   <span>Website</span>
-                                  <p> http://www.akdeniz.edu.tr</p>
+                                  <p> {school.website}</p>
                                 </li>
                                 <li>
                                   <span>Số điện thoại liên hệ</span>
-                                  <p>90 242 2274400</p>
+                                  <p>{school.phone}</p>
                                 </li>
                                 <li>
-                                  <span>Fax</span>
-                                  <p>90 242 2275540</p>
+                                  <span>Địa chỉ</span>
+                                  <p>{school.address}</p>
+                                </li>
+                                <li>
+                                  <span>Mô tả về trường</span>
+                                  <p>{school.description}</p>
                                 </li>
                               </ul>
                             </div>
