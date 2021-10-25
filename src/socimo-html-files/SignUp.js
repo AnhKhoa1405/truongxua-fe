@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom";
-import '../css/signup.css'
+import "../css/signup.css";
 import firebase from "firebase";
 
 function SignUp() {
@@ -21,8 +21,8 @@ function SignUp() {
     bio: "",
     status: true,
     loading: false,
-    error:[],
-    userRef: firebase.database().ref('users'),
+    error: [],
+    userRef: firebase.database().ref("users"),
     errorUser: "",
   };
 
@@ -52,8 +52,14 @@ function SignUp() {
     const data = formData;
     try {
       const response = await axios.post(
-        "http://20.188.111.70:12348/api/v1/Alumni",
-        data
+        "https://truongxuaapp.online/api/v1/alumni",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       history.push("/");
     } catch (err) {
@@ -62,36 +68,40 @@ function SignUp() {
   };
 
   const handleCreate = (e) => {
-    setFormData({...formData, loading:true});
-    firebase.auth().createUserWithEmailAndPassword(formData.email, formData.password)
-    .then((createUser) => {
-      console.log(createUser.user.uid);
-      createUser.user.updateProfile({
-        displayName: formData.name,
-        // photoURL:`http://gravatar.com/avatar/${md5(createUser.user.email)}?d=identicon` 
-      }).then(() => {
-        saveUser(createUser).then(() => {
-          
-          console.log("user save");
-        })
+    setFormData({ ...formData, loading: true });
+    firebase
+      .auth()
+      .createUserWithEmailAndPassword(formData.email, formData.password)
+      .then((createUser) => {
+        console.log(createUser.user.uid);
+        createUser.user
+          .updateProfile({
+            displayName: formData.name,
+            // photoURL:`http://gravatar.com/avatar/${md5(createUser.user.email)}?d=identicon`
+          })
+          .then(() => {
+            saveUser(createUser).then(() => {
+              console.log("user save");
+            });
+          });
       })
-    }).catch((err) => {console.log(err);
-    if(err.message.includes('already in use')){
-            setFormData({...formData, errorUser:"Tài khoản đã tồn tại"})
-          }
-          else{
-            setFormData({...formData, errorUser:""})
-          }
-    });
-  }
+      .catch((err) => {
+        console.log(err);
+        if (err.message.includes("already in use")) {
+          setFormData({ ...formData, errorUser: "Tài khoản đã tồn tại" });
+        } else {
+          setFormData({ ...formData, errorUser: "" });
+        }
+      });
+  };
 
-  const saveUser =(createUser) => {
+  const saveUser = (createUser) => {
     saveUserToDb();
     return formData.userRef.child(createUser.user.uid).set({
       name: createUser.user.displayName,
       // avatar: createUser.user.photoURL
     });
-  }
+  };
   const onSubmit = (data) => {
     console.log(data);
     console.log(register);
@@ -180,7 +190,9 @@ function SignUp() {
                     {errors.email && (
                       <p className="error">{errors.email.message}</p>
                     )}
-                    <p style={{color: 'red', marginLeft:10}}>{formData.errorUser}</p>
+                    <p style={{ color: "red", marginLeft: 10 }}>
+                      {formData.errorUser}
+                    </p>
                   </div>
                   <div className="col-lg-6 col-sm-6 col-md-6">
                     <input
@@ -191,11 +203,11 @@ function SignUp() {
                           value: /^[A-Za-z0-9]+$/,
                           message: "Mật khẩu không chứa kí tự đặc biệt",
                         },
-                         minLength: {
-                        value: 6,
-                        message: 'mật khẩu lớn hơn hoặc bằng 6 ký tự' // JS only: <p>error message</p> TS only support string
-    }
-                         // JS only: <p>error message</p> TS only support string
+                        minLength: {
+                          value: 6,
+                          message: "mật khẩu lớn hơn hoặc bằng 6 ký tự", // JS only: <p>error message</p> TS only support string
+                        },
+                        // JS only: <p>error message</p> TS only support string
                       })}
                       onChange={handleChange}
                       name="password"
@@ -304,13 +316,18 @@ function SignUp() {
                 </div>
               </form>
               <Link to="/">
-                <p className="back" style={{ marginTop: 20,
-                fontSize:16, 
-                  borderBottom:"2px solid #17a2b8",
-                  paddingBottom:5,
-                  width:"max-content",
-             
-                }}>Quay về trang chủ</p>
+                <p
+                  className="back"
+                  style={{
+                    marginTop: 20,
+                    fontSize: 16,
+                    borderBottom: "2px solid #17a2b8",
+                    paddingBottom: 5,
+                    width: "max-content",
+                  }}
+                >
+                  Quay về trang chủ
+                </p>
               </Link>
             </div>
           </div>

@@ -48,6 +48,8 @@ class SignIn extends React.Component {
         decoded.author = response.data;
         const infoDe = await this.findUserById(decoded.Id);
         decoded.infoDetail = infoDe;
+        const schoolDe = await this.findSchoolById(decoded.SchoolId);
+        decoded.infoSchool = schoolDe;
         localStorage.setItem("infoUser", JSON.stringify(decoded));
       }
     } catch (err) {
@@ -58,7 +60,13 @@ class SignIn extends React.Component {
    findUserById = async (id) => {
     try {
       const response = await axios.get(
-        `http://20.188.111.70:12348/api/v1/alumni/${id}`
+        `https://truongxuaapp.online/api/v1/alumni/${id}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       if (response.status === 200) {
         return response.data;
@@ -67,6 +75,24 @@ class SignIn extends React.Component {
       console.error(err);
     }
   };
+  findSchoolById = async(id) => {
+   
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/schools/${id}`,{
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   handleSubmit = (e,history) => {
     e.preventDefault();
