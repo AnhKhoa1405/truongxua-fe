@@ -1253,21 +1253,30 @@ function GroupDetails() {
   };
   const renderMember = () => {
     return memberInGroup.map((element, index) => {
+      let url = "/profile/" + element.id;
       return (
         <li key={index}>
-          <figure>
-            <img
-              style={{
-                width: 45,
-                height: 45,
-              }}
-              alt=""
-              src={element.img}
-            />
-            <a href>{element.name}</a>
-          </figure>
-          <button className="sug-like">
-            <i className="invit">Follow</i>
+          <Link to={url}>
+            <figure>
+              <img
+                style={{
+                  width: 45,
+                  height: 45,
+                }}
+                alt=""
+                src={element.img}
+              />
+              <a href>{element.name}</a>
+            </figure>
+          </Link>
+
+          <button
+            style={{
+              width: 54,
+            }}
+            className="sug-like"
+          >
+            <i className="invit">Theo dõi</i>
             <i className="icofont-check-alt" />
           </button>
         </li>

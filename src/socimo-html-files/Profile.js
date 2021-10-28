@@ -1,20 +1,85 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import HeaderPage from "./Header";
 
 function Profile() {
+  const { id } = useParams();
   const [user, setUser] = useState({});
+  const [numFollow, setNumFollow] = useState(-1);
+  const [stateFollow, setStateFollow] = useState([
+    {
+      content: "Theo dõi",
+      status: false,
+    },
+    {
+      content: "Đã gửi lời theo dõi",
+      status: false,
+    },
+    {
+      content: "Đã theo dõi",
+      status: true,
+    },
+  ]);
+  const createFollow = async () => {
+    try {
+      const data ={
+        "alumniId": 0,
+        "followerAlumni": 0,
+        "status": true
+      }
+      const response = await axios.post(
+        "https://truongxuaapp.online/api/v1/followers",
+        data,
+        {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        console.log("tao thanh cong");
+        //await getFollower();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   useEffect(async () => {
+    if (JSON.parse(localStorage.infoUser).infoDetail.id != id) {
+      await getFollower();
+    }
     await getUserById();
-    console.log(user);
-  }, []);
+  }, [id]);
+
+  const getFollower = async () => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/followers/checkfollowed?alumniId=${id}&followerId=${
+          JSON.parse(localStorage.infoUser).infoDetail.id
+        }`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        //console.log(response.data + "Khoa ngoc ngek");
+        setNumFollow(response.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const getUserById = async () => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/alumni/${
-          JSON.parse(localStorage.infoUser).Id
-        }`,
+        `https://truongxuaapp.online/api/v1/alumni/${id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -731,12 +796,41 @@ function Profile() {
                           </a>{" "}
                         </li>
                       </ul>
-                      <a data-ripple title href="#" className="invite">
-                        Invite Colleagues
+                      <a
+                        style={{
+                          cursor:
+                            JSON.parse(localStorage.infoUser).infoDetail.id !=
+                              id && numFollow > -1
+                              ? "pointer"
+                              : "default",
+                        }}
+                        data-ripple
+                        title
+                        onClick={
+                          JSON.parse(localStorage.infoUser).infoDetail.id !=
+                            id && numFollow == 0
+                            ? () => createFollow()
+                            : console.log("ngu")
+                        }
+                        className="invite"
+                      >
+                        {JSON.parse(localStorage.infoUser).infoDetail.id !=
+                          id && numFollow > -1
+                          ? stateFollow[numFollow].content
+                          : "Trang cá nhân của bạn"}
                       </a>
                     </div>
                     <ul className="nav nav-tabs post-detail-btn">
-                      <li className="nav-item">
+                      <li
+                        style={{
+                          display:
+                            JSON.parse(localStorage.infoUser).infoDetail.id !=
+                            id
+                              ? "none"
+                              : "block",
+                        }}
+                        className="nav-item"
+                      >
                         <a
                           className="active"
                           href="#followers"
@@ -746,14 +840,33 @@ function Profile() {
                         </a>
                         <span>23</span>
                       </li>
-                      <li className="nav-item">
+                      <li
+                        style={{
+                          display:
+                            JSON.parse(localStorage.infoUser).infoDetail.id !=
+                            id
+                              ? "none"
+                              : "block",
+                        }}
+                        className="nav-item"
+                      >
                         <a className href="#follow" data-toggle="tab">
                           Người bạn đang theo dõi
                         </a>
                         <span>100</span>
                       </li>
+
                       <li className="nav-item">
-                        <a className href="#about" data-toggle="tab">
+                        <a
+                          className={
+                            JSON.parse(localStorage.infoUser).infoDetail.id !=
+                            id
+                              ? "active"
+                              : ""
+                          }
+                          href="#about"
+                          data-toggle="tab"
+                        >
                           Thông tin cá nhân
                         </a>
                       </li>
@@ -774,7 +887,12 @@ function Profile() {
                     <div className="col-lg-8">
                       <div className="tab-content">
                         <div
-                          className="tab-pane fade active show"
+                          className={
+                            JSON.parse(localStorage.infoUser).infoDetail.id !=
+                            id
+                              ? "tab-pane fade"
+                              : "tab-pane fade active show"
+                          }
                           id="followers"
                         >
                           <div className="row col-xs-6 merged-10">
@@ -1127,8 +1245,27 @@ function Profile() {
                             </div>
                           </div>
                         </div>
-                        <div className="tab-pane fade " id="about">
-                          <div className="main-wraper">
+                        <div
+                          className={
+                            JSON.parse(localStorage.infoUser).infoDetail.id !=
+                            id
+                              ? "tab-pane fade active show"
+                              : "tab-pane fade "
+                          }
+                          id="about"
+                        >
+                          <div
+                            style={{
+                              display:
+                                (numFollow == 2 &&
+                                  stateFollow[numFollow].status === true) ||
+                                JSON.parse(localStorage.infoUser).infoDetail
+                                  .id == id
+                                  ? "block"
+                                  : "none",
+                            }}
+                            className="main-wraper"
+                          >
                             <h4 className="main-title">Thông tin cá nhân</h4>
                             <div className="uni-info">
                               <ul>
@@ -1151,7 +1288,18 @@ function Profile() {
                               </ul>
                             </div>
                           </div>
-                          <div className="main-wraper">
+                          <div
+                            style={{
+                              display:
+                                (numFollow == 2 &&
+                                  stateFollow[numFollow].status === true) ||
+                                JSON.parse(localStorage.infoUser).infoDetail
+                                  .id == id
+                                  ? "block"
+                                  : "none",
+                            }}
+                            className="main-wraper"
+                          >
                             <h4 className="main-title">Thông tin liên hệ</h4>
                             <div className="uni-info">
                               <ul>
@@ -1173,6 +1321,29 @@ function Profile() {
                                 </li>
                               </ul>
                             </div>
+                          </div>
+
+                          <div
+                            style={{
+                              display:
+                                (numFollow == 2 &&
+                                  stateFollow[numFollow].status === true) ||
+                                JSON.parse(localStorage.infoUser).infoDetail
+                                  .id == id
+                                  ? "none"
+                                  : "block",
+                            }}
+                          >
+                            <h3
+                              style={{
+                                fontWeight: "700",
+                                fontSize: "24",
+                              }}
+                            >
+                              {numFollow == 1
+                                ? "Bạn theo dõi người này rồi. Hãy chờ chấp nhận để xem thông tin chi tiết nhé ^^"
+                                : "Bạn hãy theo dõi người này để có thể biết thông tin chi tiết của họ"}
+                            </h3>
                           </div>
                         </div>
                       </div>
