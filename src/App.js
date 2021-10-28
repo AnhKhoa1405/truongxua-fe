@@ -36,6 +36,7 @@ const config = {
 firebase.initializeApp(config);
 
 function App() {
+
   return (
     <Router>
       <div>

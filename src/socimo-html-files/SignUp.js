@@ -54,12 +54,7 @@ function SignUp() {
       const response = await axios.post(
         "https://truongxuaapp.online/api/v1/alumni",
         data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
-          },
-        }
+        
       );
       history.push("/");
     } catch (err) {

@@ -33,6 +33,7 @@ class SignIn extends React.Component {
     this.setState({ [name]: value });
   };
 
+
   encodeToDecode = async (tokenUser) => {
     try {
       const response = await axios.post(
@@ -44,9 +45,9 @@ class SignIn extends React.Component {
         }
       );
       if (response.status == 200) {
-        //console.log(response);
-        //console.log("test");
-        let decoded = this.jwtDecode(response.data);
+
+       let decoded = this.jwtDecode(response.data);
+        
         decoded.author = response.data;
 
         const infoDe = await this.findUserById(decoded.Id, response.data);
@@ -70,14 +71,19 @@ class SignIn extends React.Component {
       console.error(err);
     }
   };
-  findUserById = async (id, athor) => {
+
+   findUserById = async (id,token) => {
+
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/alumni/${id}`,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + athor,
+
+            Authorization:
+              "Bearer " + token,
+
           },
         }
       );
@@ -88,14 +94,19 @@ class SignIn extends React.Component {
       console.error(err);
     }
   };
-  findSchoolById = async (id, author) => {
+
+  findSchoolById = async(id,token) => {
+   
+
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/schools/${id}`,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + author,
+
+            Authorization: "Bearer " + token,
+
           },
         }
       );
@@ -141,6 +152,7 @@ class SignIn extends React.Component {
             .auth()
             .currentUser.getIdToken(/* forceRefresh */ true)
             .then(async function (idToken) {
+
               await localStorage.setItem("token", idToken);
               //  await this.encodeToDecode(idToken);
             })
