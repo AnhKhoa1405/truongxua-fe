@@ -36,86 +36,6 @@ const config = {
 firebase.initializeApp(config);
 
 function App() {
-  let jwtDecode = require("jwt-decode").default;
-  //handel firebase
-  useEffect(() => {
-    //indexedDB.deleteDatabase("firebaseLocalStorageDb");
-    const unregisterAuthObserver = firebase
-      .auth()
-      .onAuthStateChanged(async (user) => {
-        if (!user) {
-          console.log("User is not logged in");
-          //user logs out . handle somthing
-          return;
-        }
-        console.log("Login user: ", user.displayName);
-        const token = await user.getIdToken();
-        console.log("Logged in user: ", token);
-        await encodeToDecode(token);
-      });
-    return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
-  }, []);
-
-  const encodeToDecode = async (tokenUser) => {
-    try {
-      const response = await axios.post(
-        `https://truongxuaapp.online/api/users/log-in?idToken=${tokenUser}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (response.status == 200) {
-        let decoded = jwtDecode(response.data);
-        decoded.author = response.data;
-        const infoDe = await findUserById(decoded.Id);
-        decoded.infoDetail = infoDe;
-        const schoolDe = await findSchoolById(decoded.SchoolId);
-        decoded.infoSchool = schoolDe;
-        console.log(decoded);
-        localStorage.setItem("infoUser", JSON.stringify(decoded));
-      }
-    } catch (err) {
-      console.log("Error");
-      console.error(err);
-    }
-  };
-  const findUserById = async (id) => {
-    try {
-      const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/alumni/${id}`,{
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
-          },
-        }
-      );
-      if (response.status === 200) {
-        return response.data;
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  const findSchoolById = async(id) => {
-
-    try {
-      const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/schools/${id}`,{
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
-          },
-        }
-      );
-      if (response.status === 200) {
-        return response.data;
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
   return (
     <Router>
       <div>
@@ -131,7 +51,7 @@ function App() {
         <Route path="/groupDetails" component={GroupDetails} />
         <Route path="/setting" component={Settings} />
         <Route path="/signUp" component={SignUp} />
-        <Route path="/profile" component={Profile} />
+        <Route path="/profile/:id" component={Profile} />
         <Route path="/notifications" component={Notifications} />
         <Route path="/blogdetail" component={BlogDetail} />
         <Route path="/blogs" component={Blogs} />

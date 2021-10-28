@@ -16,15 +16,9 @@ function Home() {
 
   useEffect(async () => {
     await getNewsInSchool();
-    console.log(JSON.parse(localStorage.infoUser).SchoolId);
+    //console.log(JSON.parse(localStorage.infoUser).SchoolId);
   }, [deleteAPost]);
-  const findSchoolRecent = async () => {
-    try {
-      const response = await axios.get("");
-    } catch (err) {
-      console.error(err);
-    }
-  };
+
   const updateImg = (event) => {
     setImg(event.target.files[0]);
     // if (event != undefined) {
