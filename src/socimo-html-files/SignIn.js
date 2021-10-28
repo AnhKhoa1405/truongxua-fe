@@ -122,7 +122,11 @@ class SignIn extends React.Component {
       .catch((error) => {
         console.log(error.message);
       })
-      .then(() => this.props.history.push("/home"));
+      .then(() =>
+        setTimeout(() => {
+          this.props.history.push("/home");
+        }, 3000)
+      );
   };
   handleSubmit = (e, history) => {
     e.preventDefault();
