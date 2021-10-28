@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 function HeaderPage() {
+  const url = "/profile/" + JSON.parse(localStorage.infoUser).infoDetail.id;
   return (
     <header className>
       <div className="topbar stick">
@@ -83,7 +84,7 @@ function HeaderPage() {
         <ul className="web-elements">
           <li>
             <div className="user-dp">
-              <Link to="/profile">
+              <Link to={url} >
                 <img
                   alt=""
                   style={{

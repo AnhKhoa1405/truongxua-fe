@@ -13,7 +13,6 @@ const uiConfig = {
 };
 
 class SignIn extends React.Component {
-
   constructor(props) {
     super(props);
   }
@@ -23,10 +22,10 @@ class SignIn extends React.Component {
     loading: false,
     currentUser: {},
     token: "",
-    errorUser:"",
+    errorUser: "",
     errorPassword: "",
   };
-   jwtDecode = require("jwt-decode").default;
+  jwtDecode = require("jwt-decode").default;
 
   handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,37 +33,51 @@ class SignIn extends React.Component {
     this.setState({ [name]: value });
   };
 
-   encodeToDecode = async (tokenUser) => {
+  encodeToDecode = async (tokenUser) => {
     try {
       const response = await axios.post(
         `https://truongxuaapp.online/api/users/log-in?idToken=${tokenUser}`,
         {
-          headers: {},
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
         }
       );
       if (response.status == 200) {
         //console.log(response);
+        //console.log("test");
         let decoded = this.jwtDecode(response.data);
         decoded.author = response.data;
-        const infoDe = await this.findUserById(decoded.Id);
+
+        const infoDe = await this.findUserById(decoded.Id, response.data);
+
         decoded.infoDetail = infoDe;
-        const schoolDe = await this.findSchoolById(decoded.SchoolId);
-        decoded.infoSchool = schoolDe;
+        if (decoded.SchoolId === "") {
+          decoded.infoSchool = "";
+        } else {
+          const schoolDe = await this.findSchoolById(
+            decoded.SchoolId,
+            response.data
+          );
+          decoded.infoSchool = schoolDe;
+        }
+
         localStorage.setItem("infoUser", JSON.stringify(decoded));
+        console.log(decoded);
       }
     } catch (err) {
       console.log("Error");
       console.error(err);
     }
   };
-   findUserById = async (id) => {
+  findUserById = async (id, athor) => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/alumni/${id}`, {
+        `https://truongxuaapp.online/api/v1/alumni/${id}`,
+        {
           headers: {
             "Content-Type": "application/json",
-            Authorization:
-              "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + athor,
           },
         }
       );
@@ -75,14 +88,14 @@ class SignIn extends React.Component {
       console.error(err);
     }
   };
-  findSchoolById = async(id) => {
-   
+  findSchoolById = async (id, author) => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/schools/${id}`,{
+        `https://truongxuaapp.online/api/v1/schools/${id}`,
+        {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + author,
           },
         }
       );
@@ -92,11 +105,28 @@ class SignIn extends React.Component {
     } catch (err) {
       console.error(err);
     }
-  }
+  };
 
-  handleSubmit = (e,history) => {
+  signInWithGoogle = (e) => {
     e.preventDefault();
-   
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: "select_account" });
+    firebase
+      .auth()
+      .signInWithPopup(googleProvider)
+      .then(async (res) => {
+        await this.encodeToDecode(res.user.za);
+
+        console.log("haha");
+      })
+      .catch((error) => {
+        console.log(error.message);
+      })
+      .then(() => this.props.history.push("/home"));
+  };
+  handleSubmit = (e, history) => {
+    e.preventDefault();
+
     if (this.isFormValid) {
       this.setState({ error: [], loading: true });
       const { email, password, error } = this.state;
@@ -111,48 +141,42 @@ class SignIn extends React.Component {
             .auth()
             .currentUser.getIdToken(/* forceRefresh */ true)
             .then(async function (idToken) {
-              console.log("id token:" + idToken);
-              // try {
-              //   const response = await axios.post(
-              //     `https://truongxuaapp.online/api/users/log-in?idToken=${idToken}`
-              //   );
-              //   console.log("response :" + response.data);
-              //   // localStorage.setItem("accessToken", response.data);
-              //   await this.encodeToDecode(response. data);
-              //   //  history.push('/home') 
-              // } catch (err) {
-              //   console.log(err);
-              // }
-               await this.encodeToDecode(idToken);
+              await localStorage.setItem("token", idToken);
+              //  await this.encodeToDecode(idToken);
             })
-            .catch(function (error) {
-              // Handle error
+            .then(async () => {
+              //console.log(localStorage.getItem("token"));
+              const token = localStorage.getItem("token");
+              await this.encodeToDecode(token);
             });
-        }).then(()=>{
-         this.props.history.push('/home');
+        })
+        .then(() => {
+          setTimeout(() => {
+            this.props.history.push("/home");
+          }, 3000);
         })
         .catch((err) => {
           console.log(err);
-         
-           if(err.message.includes('email address')){
-            this.setState({errorUser:"Sai Email"});
-            this.setState({errorPassword:""});
-          }
-          else if(err.message.includes('password is invalid')){
-            this.setState({errorPassword:"Sai mật khẩu"});
-            this.setState({errorUser:""});
-          }
-          else{
-             this.setState({errorUser:"Tài khoản không tồn tại vui lòng đăng ký"});
-             this.setState({errorPassword:""});
+
+          if (err.message.includes("email address")) {
+            this.setState({ errorUser: "Sai Email" });
+            this.setState({ errorPassword: "" });
+          } else if (err.message.includes("password is invalid")) {
+            this.setState({ errorPassword: "Sai mật khẩu" });
+            this.setState({ errorUser: "" });
+          } else {
+            this.setState({
+              errorUser: "Tài khoản không tồn tại vui lòng đăng ký",
+            });
+            this.setState({ errorPassword: "" });
           }
         });
     }
   };
-  
+
   isFormValid = () => this.state.email && this.state.password;
   render() {
-      const {history}= this.props;
+    const { history } = this.props;
     return (
       <div>
         {/* <div className="page-loader" id="page-loader"> */}
@@ -229,22 +253,27 @@ class SignIn extends React.Component {
                     onChange={this.handleChange}
                     placeholder="User Name @"
                   />
-                  <p style={{color: 'red', marginLeft:10}}>{this.state.errorUser}</p>
+                  <p style={{ color: "red", marginLeft: 10 }}>
+                    {this.state.errorUser}
+                  </p>
                   <input
                     name="password"
                     type="password"
                     onChange={this.handleChange}
                     placeholder="Passwordxxxxxxxxxx"
                   />
-                    <p style={{color: 'red', marginLeft:10}}>{this.state.errorPassword}</p>
+                  <p style={{ color: "red", marginLeft: 10 }}>
+                    {this.state.errorPassword}
+                  </p>
                   {/* <input type="checkbox" id="checkbox" defaultChecked />
                     <label htmlFor="checkbox">
                       <span>Remember Me</span>
                     </label> */}
-                  <StyledFirebaseAuth
-                    uiConfig={uiConfig}
-                    firebaseAuth={firebase.auth()}
-                  />
+                  <div className="login-buttons">
+                    <button className="button" onClick={this.signInWithGoogle}>
+                      <i className="fab fa-google"></i>Sign in with google
+                    </button>
+                  </div>
 
                   {/* <Link to="/home"> */}
                   <button onClick={this.handleSubmit} className="main-btn">
