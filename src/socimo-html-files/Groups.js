@@ -9,7 +9,13 @@ function Groups(props) {
   async function featchGroups() {
     try {
       const response = await axios.get(
-        "http://20.188.111.70:12348/api/v1/groups?pageNumber=1&pageSize=5"
+        "https://truongxuaapp.online/api/v1/groups?pageNumber=1&pageSize=5",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       setListGroups(response.data);
     } catch (error) {
