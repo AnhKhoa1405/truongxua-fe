@@ -14,6 +14,10 @@ function Home() {
   const [elementUpdate, setElementUpdate] = useState(undefined);
   const axios = require("axios").default;
 
+  useEffect(() => {
+    console.log(JSON.parse(localStorage.infoUser).SchoolId);
+  },[])
+
   useEffect(async () => {
     await getNewsInSchool();
     console.log(JSON.parse(localStorage.infoUser).SchoolId);
@@ -713,7 +717,7 @@ function Home() {
           </div>
         </div>
         {/* responsive header */}
-        {/* < AccountPopup /> */}
+        {JSON.parse(localStorage.infoUser).SchoolId == "" ? < AccountPopup />: ""}
         <HeaderPage />
         {/* header */}
         <nav className="sidebar">

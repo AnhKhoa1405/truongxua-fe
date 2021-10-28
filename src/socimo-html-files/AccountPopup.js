@@ -15,6 +15,7 @@ function AccountPopup(props) {
     email: "",
     password: "",
     yearId:"",
+    name :"",
   };
 
   const [alumiId,setAluniId] = useState(9);
@@ -84,7 +85,11 @@ function AccountPopup(props) {
 
   const fetchScoolYear = async () =>{
     try {
-      const response = await axios.get('http://20.188.111.70:12348/api/v1/schools/schoolyears?pageNumber=0&pageSize=0');
+      const response = await axios.get('https://truongxuaapp.online/api/v1/schools/schoolyears?pageNumber=0&pageSize=0',
+      {
+        headers: {"Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+      });
       setSchoolYear(response.data);
     }
     catch (error) {
@@ -148,19 +153,24 @@ function AccountPopup(props) {
    const urlBB = await saveImgInImgBB();
      const data = {
       phone: formData.phone,
-    address: formData.address,
     bio: formData.bio,
     // img: formData.img,
     img:urlBB,
     schoolId: formData.schoolId,
-    email: formData.email,
-    password: formData.password,
     schoolYearId: formData.yearId,
+    name :formData.name,
+    email : formData.email,
+    password : formData.password,
+    address : formData.address,
+    
     };
     
   try{
-    const response  = await axios.put("http://20.188.111.70:12348/api/v1/alumni?id=9",
-    data
+    const response  = await axios.put(`https://truongxuaapp.online/api/v1/alumni?id=${JSON.parse(localStorage.infoUser).Id}`,
+    data,{
+        headers: {"Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+      }
     )
 	setTrigger(false);
  
@@ -175,7 +185,11 @@ function AccountPopup(props) {
   const getProfile = async () => {
     try {
       const response = await axios.get(
-        "http://20.188.111.70:12348/api/v1/alumni/9"
+        `https://truongxuaapp.online/api/v1/alumni/${JSON.parse(localStorage.infoUser).Id}`,
+        {
+        headers: {"Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+      }
   
       );
       initialState.name = response.data.name;
@@ -191,8 +205,10 @@ function AccountPopup(props) {
   async function fetchSearchData() {
     try {
       const response = await axios.get(
-        // `http://20.188.111.70:12348/api/v1/schools/name?searchName=${schoolName}&pageNumber=1&pageSize=4`
-        `http://20.188.111.70:12348/api/v1/schools/name?searchName=${formData.search}&pageNumber=1&pageSize=4`
+        `https://truongxuaapp.online/api/v1/schools/name?searchName=${formData.search}&pageNumber=1&pageSize=4`,{
+        headers: {"Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+      }
       );
       setSearchList(response.data);
     } catch (error) {
@@ -207,7 +223,7 @@ function AccountPopup(props) {
   }, [formData.search]);
 
   useEffect(() => {
-    getProfile();
+    // getProfile();
     fetchScoolYear();
   }, []);
 

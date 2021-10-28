@@ -38,23 +38,23 @@ firebase.initializeApp(config);
 function App() {
   let jwtDecode = require("jwt-decode").default;
   //handel firebase
-  useEffect(() => {
-    //indexedDB.deleteDatabase("firebaseLocalStorageDb");
-    const unregisterAuthObserver = firebase
-      .auth()
-      .onAuthStateChanged(async (user) => {
-        if (!user) {
-          console.log("User is not logged in");
-          //user logs out . handle somthing
-          return;
-        }
-        console.log("Login user: ", user.displayName);
-        const token = await user.getIdToken();
-        console.log("Logged in user: ", token);
-        await encodeToDecode(token);
-      });
-    return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
-  }, []);
+  // useEffect(() => {
+  //   //indexedDB.deleteDatabase("firebaseLocalStorageDb");
+  //   const unregisterAuthObserver = firebase
+  //     .auth()
+  //     .onAuthStateChanged(async (user) => {
+  //       if (!user) {
+  //         console.log("User is not logged in");
+  //         //user logs out . handle somthing
+  //         return;
+  //       }
+  //       console.log("Login user: ", user.displayName);
+  //       const token = await user.getIdToken();
+  //       console.log("Logged in user: ", token);
+  //       await encodeToDecode(token);
+  //     });
+  //   return () => unregisterAuthObserver(); // Make sure we un-register Firebase observers when the component unmounts.
+  // }, []);
 
   const encodeToDecode = async (tokenUser) => {
     try {

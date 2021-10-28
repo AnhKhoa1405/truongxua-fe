@@ -3,13 +3,57 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import HeaderPage from "./Header";
 import "../css/groupdetail.css";
+import { useForm } from "react-hook-form";
 
 function GroupDetails() {
+  const moment = require("moment-timezone");
   const [eventPopup, setEventPopup] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
+
   const showEventPopup = () => {
+    console.log(JSON.parse(localStorage.infoUser).infoDetail.name);
+    console.log(localStorage);
     setEventPopup(true);
   };
   const [imgNotSave, setimgNotSave] = useState([]);
+  const initialState = {
+    alumniCreatedId: JSON.parse(localStorage.infoUser).infoDetail.id,
+    schoolId: JSON.parse(localStorage.infoUser).infoDetail.schoolId,
+    startDate: "",
+    endDate: "",
+    name: "",
+    description: "",
+    ticketPrice: 0,
+    createAt: "",
+    hourStart: 0,
+    minuteStart: 0,
+    hourEnd: 0,
+    minuteEnd: 0,
+    activity: "",
+    add: "",
+    delete: "",
+  };
+
+  const onChange = (e) => {
+    const { name, value, type } = e.target;
+
+    setFormEvent({ ...formEvent, [name]: value });
+
+    setErrorStart("");
+    setErrorEnd("");
+    setActivityError("");
+  };
+
+  
+  const [errorStart, setErrorStart] = useState("");
+  const [errorEnd, setErrorEnd] = useState("");
+  
+  const [formEvent, setFormEvent] = useState(initialState);
   // const [imgSave, setImgSave] = useState([]);
   const [content, setContent] = useState("");
   const [comment, setComment] = useState([]);
@@ -25,6 +69,165 @@ function GroupDetails() {
   const [updateCmt, setUpdateCmt] = useState(undefined);
   const addApiImg = [];
   //const axios = require("axios").default;
+  const [activityEvent, setActivityEvent] = useState([]);
+
+  const RenderActivity = ({ item, index }) => {
+    // return activity.map((item,index) => {
+    return (
+      <div className="item-wrap">
+        <span className="activity-name">{item} </span>
+        <i
+          name="delete"
+          onClick={(e) => {
+            deleteActivity(index);
+            onChange(e);
+          }}
+          class="icofont-ui-close"
+        ></i>
+      </div>
+    );
+    // });
+  };
+
+  const deleteActivity = (index) => {
+    const listActivity = activityEvent;
+    listActivity.splice(index, 1);
+    setActivityEvent(listActivity);
+    console.log(index);
+    console.log(activityEvent);
+  };
+  const [activityError, setActivityError] = useState("");
+  const createEvent = async () => {
+    const m = moment().tz("Asia/Ho_Chi_Minh").format();
+    let hourStart = formEvent.hourStart.toString();
+    let minuteStart = formEvent.minuteStart.toString();
+    let hourEnd = formEvent.hourEnd.toString();
+    let minuteEnd = formEvent.minuteEnd.toString();
+    if(hourStart<10) hourStart= "0"+hourStart;
+    if(minuteStart<10) minuteStart= "0"+minuteStart;
+    if(hourEnd<10) hourEnd= "0"+hourEnd;
+    if(minuteEnd<10) minuteEnd= "0"+minuteEnd;
+   if(formEvent.startDate == "") {
+       setErrorStart("Nhập ngày bắt đầu");
+    }
+     if(formEvent.endDate == "") {
+       setErrorEnd("Nhập ngày kết thúc");
+    }
+
+    if (formEvent.startDate != "" || formEvent.endDate != "" || activityEvent.length ==0) {
+
+      const start = moment
+        .tz(
+          `${formEvent.startDate} ${hourStart}:${minuteStart}`,
+          "Asia/Ho_Chi_Minh"
+        )
+        .format();
+        const end = moment
+      .tz(
+        `${
+          formEvent.endDate
+        } ${hourEnd}:${minuteEnd}`,
+        "Asia/Ho_Chi_Minh"
+      )
+      .format();
+      if (start < m) {
+        console.log(start);
+        setErrorStart("Ngày bắt đầu và thời gian phải lớn hơn thời gian hiện tại");
+        return;
+      }
+       if(start >= end) {
+        console.log(end);
+        setErrorEnd("Ngày kết thúc và thời gian phải lớn hơn thời gian bắt đầu");
+        return;
+        
+      }
+      if(activityEvent.length == 0) {
+        setActivityError("Thêm ít nhất 1 hoạt động ")
+        return;
+      }
+
+    }
+ 
+    const start = moment
+      .tz(
+        `${
+          formEvent.startDate
+        } ${hourStart}:${minuteStart}`,
+        "Asia/Ho_Chi_Minh"
+      )
+      .format();
+    const end = moment
+      .tz(
+        `${
+          formEvent.endDate
+        } ${hourEnd}:${minuteEnd}`,
+        "Asia/Ho_Chi_Minh"
+      )
+      .format();
+    const data = {
+      alumniCreatedId: formEvent.alumniCreatedId,
+      schoolId: formEvent.schoolId,
+      startDate: start,
+      endDate: end,
+      name: formEvent.name,
+      description: formEvent.description,
+      ticketPrice: formEvent.ticketPrice,
+      createAt: m,
+      schoolId: JSON.parse(localStorage.infoUser).SchoolId,
+    };
+    try {
+      const response = await axios.post(
+        "https://truongxuaapp.online/api/v1/events",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status == 200) {
+        const dataImage = await saveImgEventInImgBB();
+        console.log(dataImage);
+        const eventId = parseInt(response.data);
+        console.log(eventId);
+        await saveEventImage(eventId, dataImage);
+        await saveEventActivity(eventId);
+        setEventPopup(false);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+ 
+  };
+
+  const saveEventActivity = async (eventId) => {
+    try {
+      if (activityEvent.length > 0) {
+        for (let i = 0; i < activityEvent.length; i++) {
+          const response = await axios.post(
+            "https://truongxuaapp.online/api/v1/activities",
+            {
+              eventId: eventId,
+              name: activityEvent[i],
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization:
+                  "Bearer " + JSON.parse(localStorage.infoUser).author,
+              },
+            }
+          );
+          console.log(eventId + "dass");
+          console.log(activityEvent[i] + "ds");
+          if (response.status === 200) console.log(activityEvent[0]);
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const updateAvaGroup = async (event) => {
     let body = new FormData();
@@ -1283,6 +1486,59 @@ function GroupDetails() {
     }
     return dataImgSave;
   };
+  const saveImgEventInImgBB = async () => {
+    let dataImgSave = [];
+    if (imgEventNotSave.length >= 1) {
+      let body = new FormData();
+      body.set("key", "801bd3a925ecfac0e693d493198af86c");
+      for (let i = 0; i < imgEventNotSave.length; i++) {
+        if (imgEventNotSave[i].typeImg == "new") {
+          let img = imgEventNotSave[i].img;
+          body.append("image", img);
+          try {
+            const response = await axios({
+              method: "POST",
+              url: "https://api.imgbb.com/1/upload",
+              data: body,
+            });
+            if (response.status == 200) {
+              dataImgSave[i] = {
+                name: response.data.data.title,
+                url_display: response.data.data.display_url,
+              };
+            }
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      }
+    }
+    return dataImgSave;
+  };
+
+  const saveEventImage = async (eventId, dataImage) => {
+    if (dataImage.length > 0) {
+      for (let i = 0; i < dataImage.length; i++) {
+        const response = await axios.post(
+          "https://truongxuaapp.online/api/v1/images",
+          {
+            eventId: eventId,
+            imageUrl: dataImage[i].url_display,
+          },
+
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization:
+                "Bearer " + JSON.parse(localStorage.infoUser).author,
+            },
+          }
+        );
+        if (response.status === 200) console.log(dataImage[i].url_display);
+      }
+      setimgEventNotSave([]);
+    }
+  };
 
   const updatePostApi = async () => {
     //console.log(JSON.parse(localStorage.inf));
@@ -1900,7 +2156,7 @@ function GroupDetails() {
     setContent(event.target.value);
   }
 
-  const handleSubmit = async (event) => {
+  const handleSubmitPost = async (event) => {
     event.preventDefault();
 
     if (updateAPost.id == undefined) {
@@ -2997,7 +3253,7 @@ function GroupDetails() {
                               </div>
                             </div>
                             {/* create new post */}
-                            {JSON.parse(localStorage.infoUser).Id ==
+                            {/* {JSON.parse(localStorage.infoUser).Id ==
                             groupRecent.groupAdminId ? (
                               <div
                                 className="event-button"
@@ -3007,7 +3263,14 @@ function GroupDetails() {
                               </div>
                             ) : (
                               ""
-                            )}
+                            )} */}
+
+                            <div
+                              className="event-button"
+                              onClick={showEventPopup}
+                            >
+                              <p className="">Tạo sự kiện mới</p>
+                            </div>
 
                             {/* chat rooms */}
 
@@ -3580,47 +3843,144 @@ function GroupDetails() {
                 </div>
                 <form method="post" className="c-form">
                   <h6 className="event-name"> Tên sự kiện</h6>
-                  <input name="name" type="text" placeholder="Tên sự kiện" />
+                  <input
+                    name="name"
+                    type="text"
+                    placeholder="Tên sự kiện"
+                    
+                    {...register("name", {
+                      required: "Nhập tên sự kiện ",
+                    })}
+                    onChange={onChange}
+                  />
+                  {errors.name && (
+                    <p className="error">{errors.name.message}</p>
+                  )}
                   <h6 className="event-name"> Mô tả </h6>
-                  <input name="description" type="text" placeholder="Mô tả" />
-
+                  <input
+                    name="description"
+                    type="text"
+                    placeholder="Mô tả"
+                    
+                    {...register("description", {
+                      required: "Nhập mô tả ",
+                    })}
+                    onChange={onChange}
+                  />
+                  {errors.description && (
+                    <p className="error">{errors.description.message}</p>
+                  )}
                   <div className="datetime">
                     <div className="date">
                       <h6 className="event-name"> Ngày bắt đầu</h6>
-                      <input name="dateStart" type="date" />
+                      <input name="startDate" type="date" onChange={onChange} />
+                      <p className="error">{errorStart}</p>
                     </div>
                     <div className="time">
                       <div>
                         <h6 className="event-name"> Nhập giờ</h6>
-                        <input name="hourStart" type="text" placeholder="Giờ" />
+                        <input
+                          name="hourStart"
+                          type="number"
+                          placeholder="Giờ"
+                          
+                          {...register("hourStart", {
+                            max: {
+                              value: 24,
+                              message: "Giờ trong khoảng 0-24h ",
+                            },
+                            min: {
+                              value: 0,
+                              message: "Giờ trong khoảng 0-24h ",
+                            },
+                            required: "Nhập giờ ",
+                          })
+                        }onChange={onChange}
+                        
+                        />
+                        {errors.hourStart && (
+                          <p className="error">{errors.hourStart.message}</p>
+                        )}
                       </div>
                       <div>
                         <h6 className="event-name"> Nhập phút</h6>
                         <input
                           name="minuteStart"
-                          type="text"
+                          type="number"
                           placeholder="Phút"
+                         
+                          {...register("minuteStart", {
+                            max: {
+                              value: 60,
+                              message: "Phút trong khoảng 0-60 phút ",
+                            },
+                            min: {
+                              value: 0,
+                              message: "Giờ trong khoảng 0-60 phút ",
+                            },
+                          })} 
+                          onChange={onChange}
                         />
+                        {errors.minuteStart && (
+                          <p className="error">{errors.minuteStart.message}</p>
+                        )}
                       </div>
                     </div>
                   </div>
                   <div className="datetime">
                     <div className="date">
                       <h6 className="event-name"> Ngày kết thúc</h6>
-                      <input name="dateEnd" type="date" />
+                      <input name="endDate" type="date" onChange={onChange} />
+                      <p className="error">{errorEnd}</p>
                     </div>
                     <div className="time">
                       <div>
                         <h6 className="event-name"> Nhập giờ</h6>
-                        <input name="hourEnd" type="text" placeholder="Giờ" />
+                        <input
+                          name="hourEnd"
+                          type="number"
+                          placeholder="Giờ"
+                         
+                          {...register("hourEnd", {
+                            max: {
+                              value: 24,
+                              message: "Giờ trong khoảng 0-24h ",
+                            },
+                            min: {
+                              value: 0,
+                              message: "Giờ trong khoảng 0-24h ",
+                            },
+                            required: "Nhập giờ ",
+                          })
+                       }onChange={onChange} 
+                      
+                        />
+                        {errors.hourEnd && (
+                          <p className="error">{errors.hourEnd.message}</p>
+                        )}
                       </div>
                       <div>
                         <h6 className="event-name"> Nhập phút</h6>
                         <input
                           name="minuteEnd"
-                          type="text"
+                          type="number"
                           placeholder="Phút"
+                         
+                          {...register("minuteEnd", {
+                            max: {
+                              value: 60,
+                              message: "Phút trong khoảng 0-60 phút ",
+                            },
+                            min: {
+                              value: 0,
+                              message: "Phút trong khoảng 0-60 phút ",
+                            },
+                          })}
+                           onChange={onChange}
                         />
+                        {errors.minuteEnd && (
+                          <p className="error">{errors.minuteEnd.message}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -3631,52 +3991,53 @@ function GroupDetails() {
                         name="activity"
                         type="text"
                         placeholder="Hoạt động"
+                        onChange={onChange}
+                        value={formEvent.activity}
                       />
-                      <span className="add-activity">Thêm</span>
+                      <span
+                        className="add-activity"
+                        name="add"
+                        onClick={(e) => {
+                          if (formEvent.activity != "") {
+                            const listActivity = activityEvent;
+                            listActivity.push(formEvent.activity);
+                            setActivityEvent(listActivity);
+                            onChange(e);
+                            setFormEvent({ ...formEvent, activity: "" });
+                          }
+                        }}
+                      >
+                        Thêm
+                      </span>
+
                     </div>
+                    <p className="error">{activityError}</p>
                     <div className="activity-item">
-                      <div className="item-wrap">
-                        <span className="activity-name">some activity </span>
-                        <i class="icofont-ui-close"></i>
-                      </div>
-                      <div className="item-wrap">
-                        <span className="activity-name">some activity </span>
-                        <i class="icofont-ui-close"></i>
-                      </div>
-                      <div className="item-wrap">
-                        <span className="activity-name">some activity </span>
-                        <i class="icofont-ui-close"></i>
-                      </div>
-                      <div className="item-wrap">
-                        <span className="activity-name">some activity </span>
-                        <i class="icofont-ui-close"></i>
-                      </div>
-                      <div className="item-wrap">
-                        <span className="activity-name">some activity </span>
-                        <i class="icofont-ui-close"></i>
-                      </div>
-                      <div className="item-wrap">
-                        <span className="activity-name">some activity </span>
-                        <i class="icofont-ui-close"></i>
-                      </div>
-                      <div className="item-wrap">
-                        <span className="activity-name">some activity </span>
-                        <i class="icofont-ui-close"></i>
-                      </div>
-                      <div className="item-wrap">
-                        <span className="activity-name">some activity </span>
-                        <i class="icofont-ui-close"></i>
-                      </div>
-                      <div className="item-wrap">
-                        <span className="activity-name">some activity </span>
-                        <i class="icofont-ui-close"></i>
-                      </div>
+                      {/* {RenderActivity()} */}
+                      {activityEvent.map((item, index) => {
+                        return (
+                          <RenderActivity
+                            key={item}
+                            item={item}
+                            index={index}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                   <h6 className="event-name"> Giá vé</h6>
-                  <input name="price" type="number" placeholder="Giá vé" />
+                  <input
+                    name="ticketPrice"
+                    type="number"
+                    placeholder="Giá vé"
+                    onChange={onChange}
+                  />
 
-                  <button type="submit" className="main-btn">
+                  <button
+                    type="submit"
+                    onClick={handleSubmit(createEvent)}
+                    className="main-btn"
+                  >
                     Tạo
                   </button>
                 </form>
@@ -3959,7 +4320,7 @@ function GroupDetails() {
                     {renderImg()}
                   </div>
                 </div>
-                <form onSubmit={handleSubmit} className="c-form">
+                <form onSubmit={handleSubmitPost} className="c-form">
                   <textarea
                     id="emojionearea1"
                     placeholder="Bạn đang nghĩ gì?"

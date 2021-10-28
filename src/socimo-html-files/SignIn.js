@@ -33,8 +33,8 @@ class SignIn extends React.Component {
 
     this.setState({ [name]: value });
   };
-
-   encodeToDecode = async (tokenUser) => {
+ 
+     encodeToDecode = async (tokenUser) => {  
     try {
       const response = await axios.post(
         `https://truongxuaapp.online/api/users/log-in?idToken=${tokenUser}`,
@@ -43,28 +43,38 @@ class SignIn extends React.Component {
         }
       );
       if (response.status == 200) {
-        //console.log(response);
-        let decoded = this.jwtDecode(response.data);
+       let decoded = this.jwtDecode(response.data);
         decoded.author = response.data;
-        const infoDe = await this.findUserById(decoded.Id);
+
+        const infoDe = await this.findUserById(decoded.Id, response.data);
+
         decoded.infoDetail = infoDe;
-        const schoolDe = await this.findSchoolById(decoded.SchoolId);
-        decoded.infoSchool = schoolDe;
+        if (decoded.SchoolId === "") {
+          decoded.infoSchool = "";
+        } else {
+          const schoolDe = await this.findSchoolById(
+            decoded.SchoolId,
+            response.data
+          );
+          decoded.infoSchool = schoolDe;
+        }
+
         localStorage.setItem("infoUser", JSON.stringify(decoded));
+        console.log(decoded);
       }
     } catch (err) {
       console.log("Error");
       console.error(err);
     }
   };
-   findUserById = async (id) => {
+   findUserById = async (id,token) => {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/alumni/${id}`, {
           headers: {
             "Content-Type": "application/json",
             Authorization:
-              "Bearer " + JSON.parse(localStorage.infoUser).author,
+              "Bearer " + token,
           },
         }
       );
@@ -75,14 +85,14 @@ class SignIn extends React.Component {
       console.error(err);
     }
   };
-  findSchoolById = async(id) => {
+  findSchoolById = async(id,token) => {
    
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/schools/${id}`,{
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + token,
           },
         }
       );
@@ -123,12 +133,23 @@ class SignIn extends React.Component {
               // } catch (err) {
               //   console.log(err);
               // }
-               await this.encodeToDecode(idToken);
+
+              await localStorage.setItem("token", idToken);
+              //  await this.encodeToDecode(idToken);
+               
             })
+            .then( async () => {
+          console.log(localStorage.getItem("token"));
+          const token = localStorage.getItem("token");
+          await this.encodeToDecode(token)
+        })
             .catch(function (error) {
               // Handle error
             });
-        }).then(()=>{
+            
+        })
+        
+        .then(()=>{
          this.props.history.push('/home');
         })
         .catch((err) => {
