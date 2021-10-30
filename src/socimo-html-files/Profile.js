@@ -21,13 +21,14 @@ function Profile() {
       status: true,
     },
   ]);
+  const [listFollow, setListFollow] = useState(undefined);
   const createFollow = async () => {
     try {
-      const data ={
-        "alumniId": 0,
-        "followerAlumni": 0,
-        "status": true
-      }
+      const data = {
+        alumniId: id,
+        followerAlumni: JSON.parse(localStorage.infoUser).infoDetail.id,
+        status: false,
+      };
       const response = await axios.post(
         "https://truongxuaapp.online/api/v1/followers",
         data,
@@ -40,8 +41,7 @@ function Profile() {
         }
       );
       if (response.status === 200) {
-        console.log("tao thanh cong");
-        //await getFollower();
+        await getFollower();
       }
     } catch (err) {
       console.error(err);
@@ -53,7 +53,152 @@ function Profile() {
     }
     await getUserById();
   }, [id]);
+  useEffect(async () => {
+    if (JSON.parse(localStorage.infoUser).infoDetail.id == id) {
+      await getFollowerNotAccept();
 
+    }
+  }, [id]);
+
+  const getFollowerNotAccept = async () => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/followers/Follower/${
+          JSON.parse(localStorage.infoUser).infoDetail.id
+        }`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        //setListFollow(response.data);
+        //console.log(response.data);
+        let listAlumni = [];
+        for (let i = 0; i < response.data.length; i++) {
+          const alumni = await getAlumniById(response.data[i].followerId);
+          response.data[i].alumniDetail = alumni;
+          listAlumni.push(response.data[i]);
+        }
+        setListFollow(listAlumni);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const getAlumniById = async (idAlum) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/alumni/${idAlum}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const renderFollower = () => {
+    if (listFollow != undefined) {
+      return listFollow.map((element, index) => {
+        //console.log(element)
+        return (
+          <div key={index} className="col-lg-4 col-md-4 col-sm-6">
+            <div className="friendz">
+              <figure>
+                <img src={element.alumniDetail.img} alt="" />
+              </figure>
+              <span>
+                <a href="#" title>
+                  {element.alumniDetail.name}
+                </a>
+              </span>
+              <a
+                style={{
+                  marginRight: 16,
+                  cursor: element.status === false ? "pointer" : "default",
+                }}
+                onClick={() => acceptFollow(element)}
+                title
+                data-ripple
+              >
+                {element.status === false ? (
+                  <i class="icofont-check-alt" />
+                ) : (
+                  <i class="icofont-users-social"></i>
+                )}
+                {element.status === false ? "Đồng ý" : "Đã theo dõi"}
+              </a>
+              <a
+                onClick={() => deleteFollow(element.id)}
+                style={{
+                  cursor: "pointer",
+                }}
+                title
+                data-ripple
+              >
+                <i class="icofont-close-line" /> Từ chối
+              </a>
+            </div>
+          </div>
+        );
+      });
+    }
+  };
+
+  const deleteFollow = async (id) => {
+    try {
+      const response = await axios.delete(
+        `https://truongxuaapp.online/api/v1/followers/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setListFollow(undefined);
+        await getFollowerNotAccept();
+
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const acceptFollow = async (element) => {
+    try {
+      const data = {
+        alumniId: element.alumniId,
+        followerAlumni: element.followerId,
+        status: true,
+      };
+      const respone = await axios.put(
+        `https://truongxuaapp.online/api/v1/followers?id=${element.id}`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (respone.status === 200) {
+        setListFollow(undefined);
+        await getFollowerNotAccept();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const getFollower = async () => {
     try {
       const response = await axios.get(
@@ -68,7 +213,6 @@ function Profile() {
         }
       );
       if (response.status === 200) {
-        //console.log(response.data + "Khoa ngoc ngek");
         setNumFollow(response.data);
       }
     } catch (err) {
@@ -836,24 +980,11 @@ function Profile() {
                           href="#followers"
                           data-toggle="tab"
                         >
-                          Người đang muốn theo dõi bạn
+                          Kết nối
                         </a>
-                        <span>23</span>
-                      </li>
-                      <li
-                        style={{
-                          display:
-                            JSON.parse(localStorage.infoUser).infoDetail.id !=
-                            id
-                              ? "none"
-                              : "block",
-                        }}
-                        className="nav-item"
-                      >
-                        <a className href="#follow" data-toggle="tab">
-                          Người bạn đang theo dõi
-                        </a>
-                        <span>100</span>
+                        <span>
+                          {listFollow != undefined ? listFollow.length : ""}
+                        </span>
                       </li>
 
                       <li className="nav-item">
@@ -896,353 +1027,12 @@ function Profile() {
                           id="followers"
                         >
                           <div className="row col-xs-6 merged-10">
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-1.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Amy Watson
-                                  </a>
-                                </span>
-                                <ins>Bz University, Pakistan</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-2.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Muhammad Khan
-                                  </a>
-                                </span>
-                                <ins>Oxford University, UK</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-3.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Sadia Gill
-                                  </a>
-                                </span>
-                                <ins>Wb University, USA</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-4.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Rjapal
-                                  </a>
-                                </span>
-                                <ins>Km University, India</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-5.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Amy watson
-                                  </a>
-                                </span>
-                                <ins>Oxford University, UK</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-6.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Bob Frank
-                                  </a>
-                                </span>
-                                <ins>WB University, Canada</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-7.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Amy Watson
-                                  </a>
-                                </span>
-                                <ins>Bz University, Pakistan</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-8.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Muhammad Khan
-                                  </a>
-                                </span>
-                                <ins>Oxford University, UK</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-9.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Sadia Gill
-                                  </a>
-                                </span>
-                                <ins>WB University, USA</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Follow
-                                </a>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="tab-pane fade" id="follow">
-                          <div className="row merged-10 col-xs-6">
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-10.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Amy Watson
-                                  </a>
-                                </span>
-                                <ins>Bz University, Pakistan</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" />
-                                  Unfollow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-11.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Muhammad Khan
-                                  </a>
-                                </span>
-                                <ins>Oxford University, UK</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Unfollow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-12.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Sadia Gill
-                                  </a>
-                                </span>
-                                <ins>WB University, USA</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Unfollow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-4.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Rjapal
-                                  </a>
-                                </span>
-                                <ins>Km University, India</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Unfollow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-1.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Amy watson
-                                  </a>
-                                </span>
-                                <ins>Oxford University, UK</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Unfollow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-2.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Bob Frank
-                                  </a>
-                                </span>
-                                <ins>WB University, Canada</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Unfollow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-5.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Amy Watson
-                                  </a>
-                                </span>
-                                <ins>Bz University, Pakistan</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Unfollow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-7.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Muhammad Khan
-                                  </a>
-                                </span>
-                                <ins>Oxford University, UK</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Unfollow
-                                </a>
-                              </div>
-                            </div>
-                            <div className="col-lg-4 col-md-4 col-sm-6">
-                              <div className="friendz">
-                                <figure>
-                                  <img
-                                    src="images/resources/speak-10.jpg"
-                                    alt=""
-                                  />
-                                </figure>
-                                <span>
-                                  <a href="#" title>
-                                    Sadia Gill
-                                  </a>
-                                </span>
-                                <ins>WB University, USA</ins>
-                                <a href="#" title data-ripple>
-                                  <i className="icofont-star" /> Unfollow
-                                </a>
-                              </div>
-                            </div>
+                            {listFollow != undefined &&
+                            listFollow.length > 0 ? (
+                              renderFollower()
+                            ) : (
+                              <h3>Bạn chưa có cựu học sinh nào theo dõi</h3>
+                            )}
                           </div>
                         </div>
                         <div

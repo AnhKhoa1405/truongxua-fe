@@ -25,18 +25,17 @@ import axios from "axios";
 
 // Configure Firebase.
 const config = {
-  apiKey: process.env.REACT_APP_FIREBASE_API,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: "truongxua-d9940",
-  storageBucket: "truongxua-d9940.appspot.com",
-  messagingSenderId: "78169522021",
-  appId: "1:78169522021:web:13934f5f09fb08e97ceb8c",
-  measurementId: "G-2T9SQ4HENT",
+  apiKey: process.env.REACT_APP_API_KEY,
+  authDomain: process.env.REACT_APP_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_APP_ID,
+  measurementId: process.env.REACT_APP_MEASUREMENT_ID,
 };
 firebase.initializeApp(config);
 
 function App() {
-
   return (
     <Router>
       <div>
