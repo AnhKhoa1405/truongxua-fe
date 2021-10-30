@@ -3,64 +3,292 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 
 function EventLoad(props) {
-
   const initialState = {
-    name:"",
-    img:""
-  }
+    name: "",
+    img: "",
+  };
 
-  const [imageEvent , setImageEvent] = useState([]);
-
-  const formatDate = (date)=>{
+  const [imageEvent, setImageEvent] = useState([]);
+  const [feedBackInEvent, setFeedBackInEvent] = useState([]);
+  const [idUpdate, setIdUpdate] = useState(-1);
+  const formatDate = (date) => {
     const dayTime = date.split("T");
     const day = dayTime[0].split("-").reverse();
     const time = dayTime[1].split(":");
-    return `${day[0]}/${day[1]}/${day[2]} ${time[0]} giờ, ${time[1]} phút`
-
-
-  }
+    return `${day[0]}/${day[1]}/${day[2]} ${time[0]} giờ, ${time[1]} phút`;
+  };
 
   const [profile, setProfile] = useState(initialState);
 
-   const getProfile = async (alumniCreatedId) => {
+  const getProfile = async (alumniCreatedId) => {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/alumni/${alumniCreatedId}`,
         {
-        headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
-      }
-  
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       initialState.name = response.data.name;
       initialState.img = response.data.img;
-      
     } catch (error) {
       console.log(error);
     }
   };
 
-   const getImageEvent = async (eventId) => {
+  const getImageEvent = async (eventId) => {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/images/eventid?eventid=${eventId}`,
         {
-        headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
-      }
-  
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
       );
       setImageEvent(response.data);
     } catch (error) {
       console.log(error);
     }
   };
+  const getFeedbackByEventId = async (eventID) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/feedbacks/eventid?eventid=${eventID}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        if (response.data.length > 0) {
+          let feedback = response.data;
+          for (let i = 0; i < feedback.length; i++) {
+            feedback[i].status = true;
+          }
+          setFeedBackInEvent(feedback);
+        } else {
+          setFeedBackInEvent(response.data);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-  useEffect(async()=>{
+  const renderFeedBack = () => {
+    return feedBackInEvent.map((element, index) => {
+      if (element.status != undefined && element.status == true) {
+        return (
+          <li key={index}>
+            <figure>
+              <img alt="" src="images/resources/user1.jpg" />
+            </figure>
+            <div className="commenter">
+              <h5>
+                <a title href="#">
+                  Jack Carter
+                </a>
+              </h5>
+              <span>2 hours ago</span>
+              <p>{element.content}</p>
+              <div
+                style={{
+                  zIndex: 10,
+                  float: "right",
+                }}
+                className="more-post-optns"
+              >
+                <i className>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={24}
+                    height={24}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="feather feather-more-horizontal"
+                  >
+                    <circle cx={12} cy={12} r={1} />
+                    <circle cx={19} cy={12} r={1} />
+                    <circle cx={5} cy={12} r={1} />
+                  </svg>
+                </i>
+                <ul
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    width: 400,
+                  }}
+                >
+                  <li
+                    style={{ margin: 0 }}
+                    onClick={() => {
+                      //updateFeedback(element.id)
+                      const newFeedback = [...feedBackInEvent];
+                      newFeedback[index].status = false;
+                      document.getElementById(props.props.id).value =
+                        newFeedback[index].content;
+                      setFeedBackInEvent(newFeedback);
+                      setIdUpdate(element.id);
+                    }}
+                  >
+                    <i className="icofont-pen-alt-1" />
+                    Chỉnh sửa bình luận
+                    <span>Edit This Post within a Hour</span>
+                  </li>
+
+                  <li
+                    style={{ margin: 0 }}
+                    onClick={() => {
+                      deleteFeedback(element.id);
+                    }}
+                  >
+                    <i className="icofont-ban" />
+                    Xóa bình luận
+                    <span>Hide This Post</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <a title="Like" href="#">
+              <i className="icofont-heart" />
+            </a>
+            <a title="Reply" href="#" className="reply-coment">
+              <i className="icofont-reply" />
+            </a>
+          </li>
+        );
+      }
+    });
+  };
+  const handelSubmit = async (e) => {
+    e.preventDefault();
+    await createFeedBack(props.props.id);
+  };
+  const updateFeedback = async (idComment) => {
+    try {
+      const data = {
+        eventId: props.props.id,
+        rateStart: 5,
+        content: document.getElementById(props.props.id).value,
+      };
+      const response = await axios.put(
+        `https://truongxuaapp.online/api/v1/feedbacks?id=${idComment}`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        document.getElementById(props.props.id).value = "";
+        await getFeedbackByEventId(props.props.id);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const createFeedBack = async (id) => {
+    try {
+      const data = {
+        eventId: id,
+        rateStart: 5,
+        content: document.getElementById(id).value,
+      };
+      const response =
+        idUpdate == -1
+          ? await axios.post(
+              "https://truongxuaapp.online/api/v1/feedbacks",
+              data,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization:
+                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                },
+              }
+            )
+          : await axios.put(
+              `https://truongxuaapp.online/api/v1/feedbacks?id=${idUpdate}`,
+              data,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization:
+                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                },
+              }
+            );
+      if (response.status === 200) {
+        document.getElementById(id).value = "";
+        setIdUpdate(-1);
+        await getFeedbackByEventId(props.props.id);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const editFeedback = async (id) => {
+    try {
+      const data = {
+        eventId: 0,
+        rateStart: 0,
+        content: "string",
+      };
+      const response = await axios.put(
+        `https://truongxuaapp.online/api/v1/feedbacks?id=${id}`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        //await getFeedBackInEvent(id);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const deleteFeedback = async (id) => {
+    try {
+      const response = await axios.delete(
+        `https://truongxuaapp.online/api/v1/feedbacks/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        await getFeedbackByEventId(props.props.id);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(async () => {
     await getProfile(props.props.alumniCreatedId);
     await getImageEvent(props.props.id);
-    console.log(imageEvent);
-  },[])
+    await getFeedbackByEventId(props.props.id);
+  }, []);
 
   return (
     <div className="main-wraper">
@@ -131,37 +359,36 @@ function EventLoad(props) {
             </div>
             <ins>
               <a title href="time-line.html">
-               {profile.name}
+                {profile.name}
               </a>{" "}
               Người tạo
             </ins>
             <span>
               <i className="icofont-globe" /> phát hành :
-               { formatDate(props.props.createAt)}
+              {formatDate(props.props.createAt)}
             </span>
           </div>
           <div className="post-meta">
             <figure className="premium-post">
-              <img src={imageEvent.length>0 ?imageEvent[0].imageUrl :""} alt="" />
+              <img
+                src={imageEvent.length > 0 ? imageEvent[0].imageUrl : ""}
+                alt=""
+              />
             </figure>
             <div className="premium">
               <a href="book-detail.html" className="post-title">
                 {props.props.name}
               </a>
-              <p >
-                {props.description}
-              </p>
+              <p>{props.description}</p>
               <p>
-                Thời gian bắt đầu:  
+                Thời gian bắt đầu:
                 {formatDate(props.props.startDate)}
               </p>
               <p>
-                Thời gian kết thúc:  
+                Thời gian kết thúc:
                 {formatDate(props.props.endDate)}
               </p>
-              <p>
-                {props.props.ticketPrice}đ
-              </p>
+              <p>{props.props.ticketPrice}đ</p>
               <a
                 className="main-btn purchase-btn"
                 title
@@ -171,23 +398,23 @@ function EventLoad(props) {
               </a>
             </div>
             <div className="we-video-info">
-              <Link to={`eventDetail?id=${props.props.id}`} >
-              <a
-                href="#"
-                style={{
-                  backgroundColor: "#007bff",
-                  color: "#fff",
-                  fontSize: 15,
-                  fontWeight: "bold",
-                  padding: 10,
-                  marginTop: 10,
-                  display: "block",
-                  textAlign: "center",
-                  borderRadius: 20,
-                }}
-              >
-                Xem chi tiết
-              </a>
+              <Link to={`eventDetail?id=${props.props.id}`}>
+                <a
+                  href="#"
+                  style={{
+                    backgroundColor: "#007bff",
+                    color: "#fff",
+                    fontSize: 15,
+                    fontWeight: "bold",
+                    padding: 10,
+                    marginTop: 10,
+                    display: "block",
+                    textAlign: "center",
+                    borderRadius: 20,
+                  }}
+                >
+                  Xem chi tiết
+                </a>
               </Link>
             </div>
             <div className="stat-tools">
@@ -321,65 +548,18 @@ function EventLoad(props) {
                 <p>10+</p>
               </div>
               <div className="new-comment" style={{ display: "block" }}>
-                <form method="post">
-                  <input type="text" placeholder="write comment" />
+                <form onSubmit={handelSubmit} method="post">
+                  <input
+                    id={props.props.id}
+                    type="text"
+                    placeholder="write comment"
+                  />
                   <button type="submit">
                     <i className="icofont-paper-plane" />
                   </button>
                 </form>
                 <div className="comments-area">
-                  <ul>
-                    <li>
-                      <figure>
-                        <img alt="" src="images/resources/user1.jpg" />
-                      </figure>
-                      <div className="commenter">
-                        <h5>
-                          <a title href="#">
-                            Jack Carter
-                          </a>
-                        </h5>
-                        <span>2 hours ago</span>
-                        <p>
-                          i think that some how, we learn who we really are and
-                          then live with that decision, great post!
-                        </p>
-                        <span>you can view the more detail via link</span>
-                        <a title href="#">
-                          https://www.youtube.com/watch?v=HpZgwHU1GcI
-                        </a>
-                      </div>
-                      <a title="Like" href="#">
-                        <i className="icofont-heart" />
-                      </a>
-                      <a title="Reply" href="#" className="reply-coment">
-                        <i className="icofont-reply" />
-                      </a>
-                    </li>
-                    <li>
-                      <figure>
-                        <img alt="" src="images/resources/user2.jpg" />
-                      </figure>
-                      <div className="commenter">
-                        <h5>
-                          <a title href="#">
-                            Ching xang
-                          </a>
-                        </h5>
-                        <span>2 hours ago</span>
-                        <p>
-                          i think that some how, we learn who we really are and
-                          then live with that decision, great post!
-                        </p>
-                      </div>
-                      <a title="Like" href="#">
-                        <i className="icofont-heart" />
-                      </a>
-                      <a title="Reply" href="#" className="reply-coment">
-                        <i className="icofont-reply" />
-                      </a>
-                    </li>
-                  </ul>
+                  <ul>{renderFeedBack()}</ul>
                 </div>
               </div>
             </div>
