@@ -1,0 +1,393 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+
+function EventLoad(props) {
+
+  const initialState = {
+    name:"",
+    img:""
+  }
+
+  const [imageEvent , setImageEvent] = useState([]);
+
+  const formatDate = (date)=>{
+    const dayTime = date.split("T");
+    const day = dayTime[0].split("-").reverse();
+    const time = dayTime[1].split(":");
+    return `${day[0]}/${day[1]}/${day[2]} ${time[0]} giờ, ${time[1]} phút`
+
+
+  }
+
+  const [profile, setProfile] = useState(initialState);
+
+   const getProfile = async (alumniCreatedId) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/alumni/${alumniCreatedId}`,
+        {
+        headers: {"Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+      }
+  
+      );
+      initialState.name = response.data.name;
+      initialState.img = response.data.img;
+      
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+   const getImageEvent = async (eventId) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/images/eventid?eventid=${eventId}`,
+        {
+        headers: {"Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+      }
+  
+      );
+      setImageEvent(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(async()=>{
+    await getProfile(props.props.alumniCreatedId);
+    await getImageEvent(props.props.id);
+    console.log(imageEvent);
+  },[])
+
+  return (
+    <div className="main-wraper">
+      <div className="user-post">
+        <div className="friend-info">
+          <figure>
+            <em>
+              <svg
+                style={{ verticalAlign: "middle" }}
+                xmlns="http://www.w3.org/2000/svg"
+                width={15}
+                height={15}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  fill="#82828e"
+                  stroke="#82828e"
+                  d="M23,12L20.56,9.22L20.9,5.54L17.29,4.72L15.4,1.54L12,3L8.6,1.54L6.71,4.72L3.1,5.53L3.44,9.21L1,12L3.44,14.78L3.1,18.47L6.71,19.29L8.6,22.47L12,21L15.4,22.46L17.29,19.28L20.9,18.46L20.56,14.78L23,12M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"
+                />
+              </svg>
+            </em>
+            <img alt="" src="images/resources/user2.jpg" />
+          </figure>
+          <div className="friend-name">
+            <div className="more">
+              <div className="more-post-optns">
+                <i className>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={24}
+                    height={24}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="feather feather-more-horizontal"
+                  >
+                    <circle cx={12} cy={12} r={1} />
+                    <circle cx={19} cy={12} r={1} />
+                    <circle cx={5} cy={12} r={1} />
+                  </svg>
+                </i>
+                <ul>
+                  <li>
+                    <i className="icofont-pen-alt-1" />
+                    Edit Post
+                    <span>Edit This Post within a Hour</span>
+                  </li>
+                  <li>
+                    <i className="icofont-ban" />
+                    Hide Post
+                    <span>Hide This Post</span>
+                  </li>
+                  <li>
+                    <i className="icofont-ui-delete" />
+                    Delete Post
+                    <span>If inappropriate Post By Mistake</span>
+                  </li>
+                  <li>
+                    <i className="icofont-flag" />
+                    Report
+                    <span>Inappropriate content</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <ins>
+              <a title href="time-line.html">
+               {profile.name}
+              </a>{" "}
+              Người tạo
+            </ins>
+            <span>
+              <i className="icofont-globe" /> phát hành :
+               { formatDate(props.props.createAt)}
+            </span>
+          </div>
+          <div className="post-meta">
+            <figure className="premium-post">
+              <img src={imageEvent.length>0 ?imageEvent[0].imageUrl :""} alt="" />
+            </figure>
+            <div className="premium">
+              <a href="book-detail.html" className="post-title">
+                {props.props.name}
+              </a>
+              <p >
+                {props.description}
+              </p>
+              <p>
+                Thời gian bắt đầu:  
+                {formatDate(props.props.startDate)}
+              </p>
+              <p>
+                Thời gian kết thúc:  
+                {formatDate(props.props.endDate)}
+              </p>
+              <p>
+                {props.props.ticketPrice}đ
+              </p>
+              <a
+                className="main-btn purchase-btn"
+                title
+                href="book-detail.html"
+              >
+                <i className="icofont-cart-alt" /> Buy Now
+              </a>
+            </div>
+            <div className="we-video-info">
+              <Link to={`eventDetail?id=${props.props.id}`} >
+              <a
+                href="#"
+                style={{
+                  backgroundColor: "#007bff",
+                  color: "#fff",
+                  fontSize: 15,
+                  fontWeight: "bold",
+                  padding: 10,
+                  marginTop: 10,
+                  display: "block",
+                  textAlign: "center",
+                  borderRadius: 20,
+                }}
+              >
+                Xem chi tiết
+              </a>
+              </Link>
+            </div>
+            <div className="stat-tools">
+              <div className="box">
+                <div className="Like">
+                  <a className="Like__link">
+                    <i className="icofont-like" /> Like
+                  </a>
+                  <div className="Emojis">
+                    <div className="Emoji Emoji--like">
+                      <div className="icon icon--like" />
+                    </div>
+                    <div className="Emoji Emoji--love">
+                      <div className="icon icon--heart" />
+                    </div>
+                    <div className="Emoji Emoji--haha">
+                      <div className="icon icon--haha" />
+                    </div>
+                    <div className="Emoji Emoji--wow">
+                      <div className="icon icon--wow" />
+                    </div>
+                    <div className="Emoji Emoji--sad">
+                      <div className="icon icon--sad" />
+                    </div>
+                    <div className="Emoji Emoji--angry">
+                      <div className="icon icon--angry" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="box">
+                <div className="Emojis">
+                  <div className="Emoji Emoji--like">
+                    <div className="icon icon--like" />
+                  </div>
+                  <div className="Emoji Emoji--love">
+                    <div className="icon icon--heart" />
+                  </div>
+                  <div className="Emoji Emoji--haha">
+                    <div className="icon icon--haha" />
+                  </div>
+                  <div className="Emoji Emoji--wow">
+                    <div className="icon icon--wow" />
+                  </div>
+                  <div className="Emoji Emoji--sad">
+                    <div className="icon icon--sad" />
+                  </div>
+                  <div className="Emoji Emoji--angry">
+                    <div className="icon icon--angry" />
+                  </div>
+                </div>
+              </div>
+              <a title href="#" className="comment-to">
+                <i className="icofont-comment" /> Comment
+              </a>
+              <a title href="#" className="share-to">
+                <i className="icofont-share-alt" /> Share
+              </a>
+              <div className="emoji-state">
+                <div className="popover_wrapper">
+                  <a className="popover_title" href="#" title>
+                    <img alt="" src="images/smiles/thumb.png" />
+                  </a>
+                  <div className="popover_content">
+                    <span>
+                      <img alt="" src="images/smiles/thumb.png" /> Likes
+                    </span>
+                    <ul className="namelist">
+                      <li>Jhon Doe</li>
+                      <li>Amara Sin</li>
+                      <li>Sarah K.</li>
+                      <li>
+                        <span>20+ more</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="popover_wrapper">
+                  <a className="popover_title" href="#" title>
+                    <img alt="" src="images/smiles/heart.png" />
+                  </a>
+                  <div className="popover_content">
+                    <span>
+                      <img alt="" src="images/smiles/heart.png" /> Love
+                    </span>
+                    <ul className="namelist">
+                      <li>Amara Sin</li>
+                      <li>Jhon Doe</li>
+                      <li>
+                        <span>10+ more</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="popover_wrapper">
+                  <a className="popover_title" href="#" title>
+                    <img alt="" src="images/smiles/smile.png" />
+                  </a>
+                  <div className="popover_content">
+                    <span>
+                      <img alt="" src="images/smiles/smile.png" /> Happy
+                    </span>
+                    <ul className="namelist">
+                      <li>Sarah K.</li>
+                      <li>Jhon Doe</li>
+                      <li>Amara Sin</li>
+                      <li>
+                        <span>100+ more</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="popover_wrapper">
+                  <a className="popover_title" href="#" title>
+                    <img alt="" src="images/smiles/weep.png" />
+                  </a>
+                  <div className="popover_content">
+                    <span>
+                      <img alt="" src="images/smiles/weep.png" /> Dislike
+                    </span>
+                    <ul className="namelist">
+                      <li>Danial Carbal</li>
+                      <li>Amara Sin</li>
+                      <li>Sarah K.</li>
+                      <li>
+                        <span>15+ more</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <p>10+</p>
+              </div>
+              <div className="new-comment" style={{ display: "block" }}>
+                <form method="post">
+                  <input type="text" placeholder="write comment" />
+                  <button type="submit">
+                    <i className="icofont-paper-plane" />
+                  </button>
+                </form>
+                <div className="comments-area">
+                  <ul>
+                    <li>
+                      <figure>
+                        <img alt="" src="images/resources/user1.jpg" />
+                      </figure>
+                      <div className="commenter">
+                        <h5>
+                          <a title href="#">
+                            Jack Carter
+                          </a>
+                        </h5>
+                        <span>2 hours ago</span>
+                        <p>
+                          i think that some how, we learn who we really are and
+                          then live with that decision, great post!
+                        </p>
+                        <span>you can view the more detail via link</span>
+                        <a title href="#">
+                          https://www.youtube.com/watch?v=HpZgwHU1GcI
+                        </a>
+                      </div>
+                      <a title="Like" href="#">
+                        <i className="icofont-heart" />
+                      </a>
+                      <a title="Reply" href="#" className="reply-coment">
+                        <i className="icofont-reply" />
+                      </a>
+                    </li>
+                    <li>
+                      <figure>
+                        <img alt="" src="images/resources/user2.jpg" />
+                      </figure>
+                      <div className="commenter">
+                        <h5>
+                          <a title href="#">
+                            Ching xang
+                          </a>
+                        </h5>
+                        <span>2 hours ago</span>
+                        <p>
+                          i think that some how, we learn who we really are and
+                          then live with that decision, great post!
+                        </p>
+                      </div>
+                      <a title="Like" href="#">
+                        <i className="icofont-heart" />
+                      </a>
+                      <a title="Reply" href="#" className="reply-coment">
+                        <i className="icofont-reply" />
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default EventLoad;

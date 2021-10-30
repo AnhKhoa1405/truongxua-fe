@@ -223,7 +223,9 @@ function AccountPopup(props) {
   }, [formData.search]);
 
   useEffect(() => {
-     getProfile();
+
+    getProfile();
+
     fetchScoolYear();
   }, []);
 
