@@ -1,7 +1,24 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import firebase from "firebase";
 
 function HeaderPage() {
+  const deletestorage = () => {
+    firebase
+      .auth()
+      .signOut()
+      .then(
+        function () {
+          // Sign-out successful.
+          localStorage.removeItem("infoUser");
+          console.log("Log out successful");
+        },
+        function (err) {
+          // An error happened.
+          console.error(err);
+        }
+      );
+  };
   const url = "/profile/" + JSON.parse(localStorage.infoUser).infoDetail.id;
   return (
     <header className>
@@ -84,7 +101,7 @@ function HeaderPage() {
         <ul className="web-elements">
           <li>
             <div className="user-dp">
-              <Link to={url} >
+              <Link to={url}>
                 <img
                   alt=""
                   style={{
@@ -267,12 +284,20 @@ function HeaderPage() {
                   <i className="icofont-gear" /> Setting
                 </a>
               </li>
-
-              <li className="logout">
-                <a href="sign-in.html" title>
-                  <i className="icofont-power" /> Logout
-                </a>
-              </li>
+              
+                <li onClick={() => deletestorage()} className="logout">
+                <Link to="/">
+                  <a
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    title
+                  >
+                    <i className="icofont-power" /> Đăng xuất
+                  </a>
+                  </Link>
+                </li>
+              
             </ul>
           </li>
         </ul>

@@ -22,7 +22,6 @@ function Profile() {
     },
   ]);
   const [listFollow, setListFollow] = useState(undefined);
-  const [listFollowByMe, setListFollowByMe] = useState(undefined);
   const createFollow = async () => {
     try {
       const data = {
@@ -57,35 +56,10 @@ function Profile() {
   useEffect(async () => {
     if (JSON.parse(localStorage.infoUser).infoDetail.id == id) {
       await getFollowerNotAccept();
-      await getFollowred();
+
     }
   }, [id]);
-  const getFollowred = async () => {
-    try {
-      const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/followers/Followed/${
-          JSON.parse(localStorage.infoUser).infoDetail.id
-        }`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
-          },
-        }
-      );
-      if (response.status === 200) {
-        let listAlumni = [];
-        for (let i = 0; i < response.data.length; i++) {
-          const alumni = await getAlumniById(response.data[i].alumniId);
-          response.data[i].alumniDetail = alumni;
-          listAlumni.push(response.data[i]);
-        }
-        setListFollowByMe(listAlumni);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+
   const getFollowerNotAccept = async () => {
     try {
       const response = await axios.get(
@@ -179,52 +153,7 @@ function Profile() {
       });
     }
   };
-  const renderFolloweredByMe = () => {
-    if (listFollowByMe != undefined) {
-      return listFollowByMe.map((element, index) => {
-        //console.log(element)
-        return (
-          <div key={index} className="col-lg-4 col-md-4 col-sm-6">
-            <div className="friendz">
-              <figure>
-                <img src={element.alumniDetail.img} alt="" />
-              </figure>
-              <span>
-                <a href="#" title>
-                  {element.alumniDetail.name}
-                </a>
-              </span>
-              <a
-                style={{
-                  marginRight: 16,
-                  cursor: "default",
-                }}
-                title
-                data-ripple
-              >
-                {element.status === false ? (
-                  <i class="icofont-check-alt" />
-                ) : (
-                  <i class="icofont-users-social"></i>
-                )}
-                {element.status === false ? "Chưa chấp nhận" : "Đã theo dõi"}
-              </a>
-              <a
-                onClick={() => deleteFollow(element.id)}
-                style={{
-                  cursor: "pointer",
-                }}
-                title
-                data-ripple
-              >
-                <i class="icofont-close-line" /> Bỏ theo dõi
-              </a>
-            </div>
-          </div>
-        );
-      });
-    }
-  };
+
   const deleteFollow = async (id) => {
     try {
       const response = await axios.delete(
@@ -239,7 +168,7 @@ function Profile() {
       if (response.status === 200) {
         setListFollow(undefined);
         await getFollowerNotAccept();
-        await getFollowred();
+
       }
     } catch (err) {
       console.error(err);
@@ -1051,29 +980,10 @@ function Profile() {
                           href="#followers"
                           data-toggle="tab"
                         >
-                          Người đang muốn theo dõi bạn
+                          Kết nối
                         </a>
                         <span>
                           {listFollow != undefined ? listFollow.length : ""}
-                        </span>
-                      </li>
-                      <li
-                        style={{
-                          display:
-                            JSON.parse(localStorage.infoUser).infoDetail.id !=
-                            id
-                              ? "none"
-                              : "block",
-                        }}
-                        className="nav-item"
-                      >
-                        <a className href="#follow" data-toggle="tab">
-                          Người bạn đang theo dõi
-                        </a>
-                        <span>
-                          {listFollowByMe != undefined
-                            ? listFollowByMe.length
-                            : ""}
                         </span>
                       </li>
 
@@ -1122,16 +1032,6 @@ function Profile() {
                               renderFollower()
                             ) : (
                               <h3>Bạn chưa có cựu học sinh nào theo dõi</h3>
-                            )}
-                          </div>
-                        </div>
-                        <div className="tab-pane fade" id="follow">
-                          <div className="row merged-10 col-xs-6">
-                            {listFollowByMe != undefined &&
-                            listFollowByMe.length > 0 ? (
-                              renderFolloweredByMe()
-                            ) : (
-                              <h3>Bạn chưa theo dõi cựu học sinh nào</h3>
                             )}
                           </div>
                         </div>
