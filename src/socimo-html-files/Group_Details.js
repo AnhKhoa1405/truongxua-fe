@@ -1592,7 +1592,6 @@ function GroupDetails() {
   };
 
   const addPostApi = async () => {
-    console.log(groupRecent.id + "Khoa");
     const dataAddPost = {
       alumniId: JSON.parse(localStorage.infoUser).Id,
       content: content,
