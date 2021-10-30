@@ -16,7 +16,7 @@ function Home() {
 
   useEffect(() => {
     console.log(JSON.parse(localStorage.infoUser).SchoolId);
-  },[])
+  }, []);
 
   useEffect(async () => {
     await getNewsInSchool();
@@ -137,7 +137,9 @@ function Home() {
   const getNewsInSchool = async () => {
     try {
       const response = await axios.get(
-        "https://truongxuaapp.online/api/v1/news?sort=desc&pageNumber=1&pageSize=0",
+        `https://truongxuaapp.online/api/v1/news/schoolid?schoolId=${
+          JSON.parse(localStorage.infoUser).SchoolId
+        }`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -711,7 +713,11 @@ function Home() {
           </div>
         </div>
         {/* responsive header */}
-        {JSON.parse(localStorage.infoUser).SchoolId == "" ? < AccountPopup />: ""}
+        {JSON.parse(localStorage.infoUser).SchoolId == "" ? (
+          <AccountPopup />
+        ) : (
+          ""
+        )}
         <HeaderPage />
         {/* header */}
         <nav className="sidebar">

@@ -9,25 +9,30 @@ function Profile() {
   const [numFollow, setNumFollow] = useState(-1);
   const [stateFollow, setStateFollow] = useState([
     {
-      content: "Theo dõi",
-      status: false,
-    },
-    {
-      content: "Đã gửi lời theo dõi",
-      status: false,
-    },
-    {
-      content: "Đã theo dõi",
+      content: "Chờ xác nhận từ bạn",
       status: true,
+    },
+    {
+      content: "Đã gửi lời mời kết nối",
+      status: false,
+    },
+    {
+      content: "Đã kết nối",
+      status: true,
+    },
+    {
+      content: "Kết nối",
+      status: false,
     },
   ]);
   const [listFollow, setListFollow] = useState(undefined);
-  const createFollow = async () => {
+
+  const createFollow = async (alumID, followerID, statusCreate) => {
     try {
       const data = {
-        alumniId: id,
-        followerAlumni: JSON.parse(localStorage.infoUser).infoDetail.id,
-        status: false,
+        alumniId: alumID,
+        followerAlumni: followerID,
+        status: statusCreate,
       };
       const response = await axios.post(
         "https://truongxuaapp.online/api/v1/followers",
@@ -56,7 +61,6 @@ function Profile() {
   useEffect(async () => {
     if (JSON.parse(localStorage.infoUser).infoDetail.id == id) {
       await getFollowerNotAccept();
-
     }
   }, [id]);
 
@@ -114,7 +118,14 @@ function Profile() {
           <div key={index} className="col-lg-4 col-md-4 col-sm-6">
             <div className="friendz">
               <figure>
-                <img src={element.alumniDetail.img} alt="" />
+                <img
+                  style={{
+                    width: 80,
+                    height: 80,
+                  }}
+                  src={element.alumniDetail.img}
+                  alt=""
+                />
               </figure>
               <span>
                 <a href="#" title>
@@ -135,7 +146,7 @@ function Profile() {
                 ) : (
                   <i class="icofont-users-social"></i>
                 )}
-                {element.status === false ? "Đồng ý" : "Đã theo dõi"}
+                {element.status === false ? "Đồng ý" : "Đã kết nối"}
               </a>
               <a
                 onClick={() => deleteFollow(element.id)}
@@ -168,7 +179,6 @@ function Profile() {
       if (response.status === 200) {
         setListFollow(undefined);
         await getFollowerNotAccept();
-
       }
     } catch (err) {
       console.error(err);
@@ -194,6 +204,27 @@ function Profile() {
       if (respone.status === 200) {
         setListFollow(undefined);
         await getFollowerNotAccept();
+        createFollow(element.followerId, element.alumniId, true);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const getFollowerSwap = async () => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/followers/checkfollowed?alumniId=${
+          JSON.parse(localStorage.infoUser).infoDetail.id
+        }&followerId=${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
       }
     } catch (err) {
       console.error(err);
@@ -213,7 +244,14 @@ function Profile() {
         }
       );
       if (response.status === 200) {
-        setNumFollow(response.data);
+        const dataSwap = await getFollowerSwap();
+
+        if (dataSwap == 0 && response.data == 0) {
+          console.log("kaka");
+          setNumFollow(3);
+        } else {
+          setNumFollow(response.data);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -952,9 +990,15 @@ function Profile() {
                         title
                         onClick={
                           JSON.parse(localStorage.infoUser).infoDetail.id !=
-                            id && numFollow == 0
-                            ? () => createFollow()
-                            : console.log("ngu")
+                            id && numFollow == 3
+                            ? () =>
+                                createFollow(
+                                  id,
+                                  JSON.parse(localStorage.infoUser).infoDetail
+                                    .id,
+                                  false
+                                )
+                            : ""
                         }
                         className="invite"
                       >
@@ -1031,10 +1075,11 @@ function Profile() {
                             listFollow.length > 0 ? (
                               renderFollower()
                             ) : (
-                              <h3>Bạn chưa có cựu học sinh nào theo dõi</h3>
+                              <h3>Bạn chưa theo dõi cựu học sinh nào hết!!!</h3>
                             )}
                           </div>
                         </div>
+
                         <div
                           className={
                             JSON.parse(localStorage.infoUser).infoDetail.id !=
@@ -1131,8 +1176,8 @@ function Profile() {
                               }}
                             >
                               {numFollow == 1
-                                ? "Bạn theo dõi người này rồi. Hãy chờ chấp nhận để xem thông tin chi tiết nhé ^^"
-                                : "Bạn hãy theo dõi người này để có thể biết thông tin chi tiết của họ"}
+                                ? "Bạn kết nối người này rồi. Hãy chờ chấp nhận để xem thông tin chi tiết nhé ^^"
+                                : "Bạn hãy kết nối người này để có thể biết thông tin chi tiết của họ"}
                             </h3>
                           </div>
                         </div>
@@ -1290,7 +1335,7 @@ function Profile() {
                       <polyline points="22,6 12,13 2,6" />
                     </svg>
                   </i>{" "}
-                  Theo Dõi
+                  Kết nối
                 </h5>
               </div>
               <div className="invitation-meta">
