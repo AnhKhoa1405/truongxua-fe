@@ -33,7 +33,6 @@ class SignIn extends React.Component {
     this.setState({ [name]: value });
   };
 
-
   encodeToDecode = async (tokenUser) => {
     try {
       const response = await axios.post(
@@ -45,9 +44,8 @@ class SignIn extends React.Component {
         }
       );
       if (response.status == 200) {
+        let decoded = this.jwtDecode(response.data);
 
-       let decoded = this.jwtDecode(response.data);
-        
         decoded.author = response.data;
 
         const infoDe = await this.findUserById(decoded.Id, response.data);
@@ -67,13 +65,11 @@ class SignIn extends React.Component {
         console.log(decoded);
       }
     } catch (err) {
-      console.log("Error");
       console.error(err);
     }
   };
 
-   findUserById = async (id,token) => {
-
+  findUserById = async (id, token) => {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/alumni/${id}`,
@@ -81,9 +77,7 @@ class SignIn extends React.Component {
           headers: {
             "Content-Type": "application/json",
 
-            Authorization:
-              "Bearer " + token,
-
+            Authorization: "Bearer " + token,
           },
         }
       );
@@ -95,9 +89,7 @@ class SignIn extends React.Component {
     }
   };
 
-  findSchoolById = async(id,token) => {
-   
-
+  findSchoolById = async (id, token) => {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/schools/${id}`,
@@ -106,7 +98,6 @@ class SignIn extends React.Component {
             "Content-Type": "application/json",
 
             Authorization: "Bearer " + token,
-
           },
         }
       );
@@ -127,8 +118,6 @@ class SignIn extends React.Component {
       .signInWithPopup(googleProvider)
       .then(async (res) => {
         await this.encodeToDecode(res.user.za);
-
-        console.log("haha");
       })
       .catch((error) => {
         console.log(error.message);
@@ -156,12 +145,13 @@ class SignIn extends React.Component {
             .auth()
             .currentUser.getIdToken(/* forceRefresh */ true)
             .then(async function (idToken) {
-
               await localStorage.setItem("token", idToken);
+              console.log(idToken)
               //  await this.encodeToDecode(idToken);
             })
             .then(async () => {
               //console.log(localStorage.getItem("token"));
+              
               const token = localStorage.getItem("token");
               await this.encodeToDecode(token);
             });

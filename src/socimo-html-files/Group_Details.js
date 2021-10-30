@@ -3262,7 +3262,7 @@ function GroupDetails() {
                               </div>
                             </div>
                             {/* create new post */}
-                            {/* {JSON.parse(localStorage.infoUser).Id ==
+                            {JSON.parse(localStorage.infoUser).Id ==
                             groupRecent.groupAdminId ? (
                               <div
                                 className="event-button"
@@ -3272,14 +3272,14 @@ function GroupDetails() {
                               </div>
                             ) : (
                               ""
-                            )} */}
+                            )}
 
-                            <div
+                            {/* <div
                               className="event-button"
                               onClick={showEventPopup}
                             >
                               <p className="">Tạo sự kiện mới</p>
-                            </div>
+                            </div> */}
 
                             {/* chat rooms */}
 
