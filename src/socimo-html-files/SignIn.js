@@ -4,6 +4,8 @@ import firebase from "firebase";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import { withRouter } from "react-router-dom";
 import axios from "axios";
+import {connect } from "react-redux"
+import {userInfo} from '../redux/actions/userInfo'
 const uiConfig = {
   // Popup signin flow rather than redirect flow.
   signInFlow: "popup", //redirect
@@ -64,7 +66,10 @@ class SignIn extends React.Component {
         }
 
         localStorage.setItem("infoUser", JSON.stringify(decoded));
+        let info = JSON.stringify(decoded);
+        this.props.userInfo(decoded);
         console.log(decoded);
+        console.log(this.props.user.Id)
       }
     } catch (err) {
       console.log("Error");
@@ -319,4 +324,6 @@ class SignIn extends React.Component {
   }
 }
 
-export default withRouter(SignIn);
+const mapStateToProps =(state) => ({user: state.userReducer.user})
+const mapDispatchToProps = (dispatch) => ({userInfo: (info) => dispatch(userInfo(info))})
+export default withRouter(connect(mapStateToProps ,mapDispatchToProps)(SignIn));
