@@ -1,9 +1,92 @@
-import React from "react";
-import HeaderPage from "./Header";
-import { Link } from "react-router-dom";
 
-class EventDetail extends React.Component {
-  render() {
+import React ,{ useState, useEffect} from "react";
+import { Link ,useLocation } from "react-router-dom";
+import axios from "axios";
+
+function EventDetail()  {
+  let location = useLocation();
+  
+  const [eventDetail, setEventDetail] = useState({});
+  const [imageEvent , setImageEvent] = useState([]);
+  const [activity,setActivity]  = useState([]);
+
+   const getEventDetail = async (id) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/events/${id}`,
+        {
+        headers: {"Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+      }
+  
+      );
+      if(response.status === 200) {
+        let final = response.data
+      final.startDate =  formatDate(response.data.startDate.toString())
+      final.endDate =   formatDate(response.data.endDate.toString())
+        setEventDetail(final);
+      }
+      
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const formatDate = (date)=>{
+     const dayTime =  date.split("T");
+    const day =  dayTime[0].split("-").reverse();
+    const time =  dayTime[1].split(":");
+    return  `${day[0]}/${day[1]}/${day[2]} ${time[0]} giờ, ${time[1]} phút`
+
+
+  }
+
+
+  const getImageEvent = async (eventId) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/images/eventid?eventid=${eventId}`,
+        {
+        headers: {"Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+      }
+  
+      );
+      
+      setImageEvent(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
+  const getActivityEvent = async (eventId) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/activities/eventid?eventId=${eventId}`,
+        {
+        headers: {"Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+      }
+  
+      );
+      
+      if(response.status === 200){
+        setActivity(response.data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect( async ()=>{
+    let query = new URLSearchParams(location.search);
+    await getEventDetail(query.get("id"));
+     await getImageEvent(query.get("id"));
+     await getActivityEvent(query.get("id"));
+  },[])
+
+
     return (
       <div className="theme-layout">
         <div className="responsive-header">
@@ -646,15 +729,15 @@ class EventDetail extends React.Component {
                   <div id="page-contents" className="row merged20">
                     <div className="col-lg-9">
                       <div className="main-wraper">
-                        <h4 className="main-title">
-                          Amazon FBA Mastery Follow up!
+                        <h4 style={{fontSize:28}} className="main-title">
+                          {eventDetail.name}
                         </h4>
                         <figure className="event-detail-img">
-                          <img src="images/resources/event-detail.jpg" alt="" />
+                          <img src={imageEvent.length > 0 && imageEvent[0].imageUrl} alt="" />
                         </figure>
                         <div className="event-schedule">
-                          <h6>schedule</h6>
-                          <span>Next date of your event</span>
+                          <h6 style={{fontSize:22}}>Thời gian</h6>
+                          {/* <span>Next date of your event</span> */}
                           <h5>
                             <i className>
                               <svg
@@ -682,41 +765,63 @@ class EventDetail extends React.Component {
                                 <line x1={3} y1={10} x2={21} y2={10} />
                               </svg>
                             </i>{" "}
-                            Friday, July 15, 2021 at <b>3:45PM</b> GMT+5:30
+                            Bắt đầu vào :
+                             { eventDetail.startDate}
+            
+                          </h5>
+                          <h5>
+                            <i className>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width={24}
+                                height={24}
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="feather feather-calendar"
+                              >
+                                <rect
+                                  x={3}
+                                  y={4}
+                                  width={18}
+                                  height={18}
+                                  rx={2}
+                                  ry={2}
+                                />
+                                <line x1={16} y1={2} x2={16} y2={6} />
+                                <line x1={8} y1={2} x2={8} y2={6} />
+                                <line x1={3} y1={10} x2={21} y2={10} />
+                              </svg>
+                            </i>{" "}
+                            Kết thúc lúc : 
+                            {eventDetail.endDate}
                           </h5>
                           <a href="#" title>
                             Edit
                           </a>
-                          <a className="invite-co" href="#" title>
+                          {/* <a className="invite-co" href="#" title>
                             <i className="icofont-user-alt-1" /> Invite
                             Co-pesenters &amp; Moderators
-                          </a>
+                          </a> */}
                         </div>
                         <div className="event-desc">
-                          <h6>Event Description</h6>
+                          <h6 style={{fontSize:22}}>Mô tả sự kiện</h6>
                           <p>
-                            Moms are the ones who bandage our boo-boos when
-                            we’re little and continue to take care of us as we
-                            get older—often sacrificing their own needs so they
-                            can help with ours. Cruising on a bike to help heal
-                            our injuries is the most mom thing one can do.
+                            {eventDetail.description}
                           </p>
-                          <p>
-                            Moms are the ones who bandage our boo-boos when
-                            we’re little and continue to take care of us as we
-                            get older—often sacrificing their own needs so they
-                            can help with ours. Cruising on a bike to help heal
-                            our injuries is the most mom thing one can do.
-                          </p>
-                          <h6>Event Website</h6>
+                          
+                          {/* <h6>Event Website</h6>
                           <em>
                             <a href="#" title>
                               https://www.sample.com/event
                             </a>
-                          </em>
+                          </em> */}
                         </div>
                         <div className="event-loc">
-                          <h6>Event Location</h6>
+                          {/* <h6>Event Location</h6>
                           <span>
                             <i className="icofont-map-pins" /> 150 garden town,
                             street 24 ontatio, Canada
@@ -726,32 +831,27 @@ class EventDetail extends React.Component {
                             style={{ height: "400px", width: "100%" }}
                           >
                             <div id="map-canvas" />
-                          </div>
+                          </div> */}
                           <div className="row">
-                            <div className="col-lg-6 col-md-6 col-sm-6">
+                            {imageEvent.length > 0 && imageEvent.map((item)=>{
+                              return(
+                              <div className="col-lg-6 col-md-6 col-sm-6">
                               <figure>
                                 <img
                                   alt=""
-                                  src="images/resources/event-small.jpg"
+                                  src={item.imageUrl}
                                 />
                               </figure>
-                            </div>
-                            <div className="col-lg-6 col-md-6 col-sm-6">
-                              <figure>
-                                <img
-                                  alt=""
-                                  src="images/resources/event-small2.jpg"
-                                />
-                              </figure>
-                            </div>
+                            </div>)
+                            }) 
+                            }
                           </div>
-                          <p>
-                            Moms are the ones who bandage our boo-boos when
-                            we’re little and continue to take care of us as we
-                            get older—often sacrificing their own needs so they
-                            can help with ours. Cruising on a bike to help heal
-                            our injuries is the most mom thing one can do.
-                          </p>
+                          <h6 style={{marginTop:20 , fontSize:22}}>Các hoạt động có trong sự kiện </h6>
+                         {activity.map((item)=>{
+                           return (
+                             <p key = {item.id}>{item.name}</p>
+                           )
+                         })}
                           <strong>
                             365 peoples has reached to join this event.
                           </strong>
@@ -1518,6 +1618,6 @@ class EventDetail extends React.Component {
       </div>
     );
   }
-}
+
 
 export default EventDetail;
