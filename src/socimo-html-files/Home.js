@@ -1250,70 +1250,7 @@ function Home() {
                               </ul>
                             </div>
                           </div>
-                          <div className="main-wraper">
-                            <div className="user-post">
-                              <div className="friend-info">
-                                <figure>
-                                  <i className="icofont-learn" />
-                                </figure>
-                                <div className="friend-name">
-                                  <ins>
-                                    <a title href="time-line.html">
-                                      Suggested
-                                    </a>
-                                  </ins>
-                                  <span>
-                                    <i className="icofont-runner-alt-1" />{" "}
-                                    Follow similar People
-                                  </span>
-                                </div>
-                                <ul
-                                  style={{ display: "flex" }}
-                                  className="suggested-caro"
-                                >
-                                  <li>
-                                    <figure>
-                                      <img
-                                        src="images/resources/speak-1.jpg"
-                                        alt=""
-                                      />
-                                    </figure>
-                                    <span>Amy Watson</span>
-                                    <ins>Department of Socilolgy</ins>
-                                    <a href="#" title data-ripple>
-                                      <i className="icofont-star" /> Follow
-                                    </a>
-                                  </li>
-                                  <li>
-                                    <figure>
-                                      <img
-                                        src="images/resources/speak-2.jpg"
-                                        alt=""
-                                      />
-                                    </figure>
-                                    <span>Muhammad Khan</span>
-                                    <ins>Department of Socilolgy</ins>
-                                    <a href="#" title data-ripple>
-                                      <i className="icofont-star" /> Follow
-                                    </a>
-                                  </li>
-                                  <li>
-                                    <figure>
-                                      <img
-                                        src="images/resources/speak-3.jpg"
-                                        alt=""
-                                      />
-                                    </figure>
-                                    <span>Sadia Gill</span>
-                                    <ins>Department of Socilolgy</ins>
-                                    <a href="#" title data-ripple>
-                                      <i className="icofont-star" /> Follow
-                                    </a>
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
+                         
                           {
                             eventInSchool.map((event) => {
                               return <EventLoad props = {event}/>

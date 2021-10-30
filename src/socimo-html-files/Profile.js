@@ -60,16 +60,16 @@ function Profile() {
   }, [id]);
   useEffect(async () => {
     if (JSON.parse(localStorage.infoUser).infoDetail.id == id) {
-      await getFollowerNotAccept();
+      await getFollowerNotAccept(
+        JSON.parse(localStorage.infoUser).infoDetail.id
+      );
     }
   }, [id]);
 
-  const getFollowerNotAccept = async () => {
+  const getFollowerNotAccept = async (idAlum) => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/followers/Follower/${
-          JSON.parse(localStorage.infoUser).infoDetail.id
-        }`,
+        `https://truongxuaapp.online/api/v1/followers/Follower/${idAlum}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -133,8 +133,15 @@ function Profile() {
                 </a>
               </span>
               <a
+                onClick={() => deleteFollow(element)}
+                style={{ marginRight: 16, cursor: "pointer" }}
+                title
+                data-ripple
+              >
+                <i class="icofont-close-line" /> Từ chối
+              </a>
+              <a
                 style={{
-                  marginRight: 16,
                   cursor: element.status === false ? "pointer" : "default",
                 }}
                 onClick={() => acceptFollow(element)}
@@ -148,16 +155,6 @@ function Profile() {
                 )}
                 {element.status === false ? "Đồng ý" : "Đã kết nối"}
               </a>
-              <a
-                onClick={() => deleteFollow(element.id)}
-                style={{
-                  cursor: "pointer",
-                }}
-                title
-                data-ripple
-              >
-                <i class="icofont-close-line" /> Từ chối
-              </a>
             </div>
           </div>
         );
@@ -165,7 +162,30 @@ function Profile() {
     }
   };
 
-  const deleteFollow = async (id) => {
+  const deleteFollow = async (element) => {
+    console.log(element);
+    try {
+      const response = await axios.delete(
+        `https://truongxuaapp.online/api/v1/followers/${element.id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setListFollow(undefined);
+        await getFollowerNotAccept(
+          JSON.parse(localStorage.infoUser).infoDetail.id
+        );
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const deleteFollowSwap = async (id) => {
     try {
       const response = await axios.delete(
         `https://truongxuaapp.online/api/v1/followers/${id}`,
@@ -178,12 +198,15 @@ function Profile() {
       );
       if (response.status === 200) {
         setListFollow(undefined);
-        await getFollowerNotAccept();
+        await getFollowerNotAccept(
+          JSON.parse(localStorage.infoUser).infoDetail.id
+        );
       }
     } catch (err) {
       console.error(err);
     }
   };
+
   const acceptFollow = async (element) => {
     try {
       const data = {
@@ -203,7 +226,9 @@ function Profile() {
       );
       if (respone.status === 200) {
         setListFollow(undefined);
-        await getFollowerNotAccept();
+        await getFollowerNotAccept(
+          JSON.parse(localStorage.infoUser).infoDetail.id
+        );
         createFollow(element.followerId, element.alumniId, true);
       }
     } catch (err) {
@@ -247,7 +272,6 @@ function Profile() {
         const dataSwap = await getFollowerSwap();
 
         if (dataSwap == 0 && response.data == 0) {
-          console.log("kaka");
           setNumFollow(3);
         } else {
           setNumFollow(response.data);
