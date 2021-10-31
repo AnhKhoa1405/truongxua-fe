@@ -70,6 +70,8 @@ function EventLoad(props) {
           let feedback = response.data;
           for (let i = 0; i < feedback.length; i++) {
             feedback[i].status = true;
+            const profileAlum = await getProfileinComment(feedback[i].alumniId);
+            feedback[i].profile = profileAlum;
           }
           setFeedBackInEvent(feedback);
         } else {
@@ -80,84 +82,113 @@ function EventLoad(props) {
       console.error(err);
     }
   };
-
+  const getProfileinComment = async (alumId) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/alumni/${alumId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
   const renderFeedBack = () => {
     return feedBackInEvent.map((element, index) => {
       if (element.status != undefined && element.status == true) {
         return (
           <li key={index}>
             <figure>
-              <img alt="" src="images/resources/user1.jpg" />
+              <img
+                style={{
+                  width: 25,
+                  height: 25,
+                }}
+                alt=""
+                src={element.profile.img}
+              />
             </figure>
             <div className="commenter">
               <h5>
                 <a title href="#">
-                  Jack Carter
+                  {element.profile.name}
                 </a>
               </h5>
               <span>2 hours ago</span>
               <p>{element.content}</p>
-              <div
-                style={{
-                  zIndex: 10,
-                  float: "right",
-                }}
-                className="more-post-optns"
-              >
-                <i className>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={24}
-                    height={24}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="feather feather-more-horizontal"
-                  >
-                    <circle cx={12} cy={12} r={1} />
-                    <circle cx={19} cy={12} r={1} />
-                    <circle cx={5} cy={12} r={1} />
-                  </svg>
-                </i>
-                <ul
+             
+              {element.profile.id == JSON.parse(localStorage.infoUser).Id ? (
+                <div
                   style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    width: 400,
+                    zIndex: 10,
+                    float: "right",
                   }}
+                  className="more-post-optns"
                 >
-                  <li
-                    style={{ margin: 0 }}
-                    onClick={() => {
-                      //updateFeedback(element.id)
-                      const newFeedback = [...feedBackInEvent];
-                      newFeedback[index].status = false;
-                      document.getElementById(props.props.id).value =
-                        newFeedback[index].content;
-                      setFeedBackInEvent(newFeedback);
-                      setIdUpdate(element.id);
+                  <i className>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width={24}
+                      height={24}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="feather feather-more-horizontal"
+                    >
+                      <circle cx={12} cy={12} r={1} />
+                      <circle cx={19} cy={12} r={1} />
+                      <circle cx={5} cy={12} r={1} />
+                    </svg>
+                  </i>
+                  <ul
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      width: 400,
                     }}
                   >
-                    <i className="icofont-pen-alt-1" />
-                    Chỉnh sửa bình luận
-                    <span>Edit This Post within a Hour</span>
-                  </li>
+                    <li
+                      style={{ margin: 0 }}
+                      onClick={() => {
+                        //updateFeedback(element.id)
+                        const newFeedback = [...feedBackInEvent];
+                        newFeedback[index].status = false;
+                        document.getElementById(props.props.id).value =
+                          newFeedback[index].content;
+                        setFeedBackInEvent(newFeedback);
+                        setIdUpdate(element.id);
+                      }}
+                    >
+                      <i className="icofont-pen-alt-1" />
+                      Chỉnh sửa bình luận
+                      <span>Edit This Post within a Hour</span>
+                    </li>
 
-                  <li
-                    style={{ margin: 0 }}
-                    onClick={() => {
-                      deleteFeedback(element.id);
-                    }}
-                  >
-                    <i className="icofont-ban" />
-                    Xóa bình luận
-                    <span>Hide This Post</span>
-                  </li>
-                </ul>
-              </div>
+                    <li
+                      style={{ margin: 0 }}
+                      onClick={() => {
+                        deleteFeedback(element.id);
+                      }}
+                    >
+                      <i className="icofont-ban" />
+                      Xóa bình luận
+                      <span>Hide This Post</span>
+                    </li>
+                  </ul>
+                </div>
+              ) : (
+                ""
+              )}
             </div>
             <a title="Like" href="#">
               <i className="icofont-heart" />
@@ -174,37 +205,14 @@ function EventLoad(props) {
     e.preventDefault();
     await createFeedBack(props.props.id);
   };
-  const updateFeedback = async (idComment) => {
-    try {
-      const data = {
-        eventId: props.props.id,
-        rateStart: 5,
-        content: document.getElementById(props.props.id).value,
-      };
-      const response = await axios.put(
-        `https://truongxuaapp.online/api/v1/feedbacks?id=${idComment}`,
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
-          },
-        }
-      );
-      if (response.status === 200) {
-        document.getElementById(props.props.id).value = "";
-        await getFeedbackByEventId(props.props.id);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+
   const createFeedBack = async (id) => {
     try {
       const data = {
         eventId: id,
         rateStart: 5,
         content: document.getElementById(id).value,
+        alumniId: JSON.parse(localStorage.infoUser).Id,
       };
       const response =
         idUpdate == -1
@@ -234,31 +242,6 @@ function EventLoad(props) {
         document.getElementById(id).value = "";
         setIdUpdate(-1);
         await getFeedbackByEventId(props.props.id);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const editFeedback = async (id) => {
-    try {
-      const data = {
-        eventId: 0,
-        rateStart: 0,
-        content: "string",
-      };
-      const response = await axios.put(
-        `https://truongxuaapp.online/api/v1/feedbacks?id=${id}`,
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
-          },
-        }
-      );
-      if (response.status === 200) {
-        //await getFeedBackInEvent(id);
       }
     } catch (err) {
       console.error(err);
