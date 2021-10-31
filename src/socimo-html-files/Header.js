@@ -1,8 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import firebase from "firebase";
+import {useSelector} from "react-redux"
 
 function HeaderPage() {
+  const userInfo = useSelector(state => state.userReducer.user)
+  console.log(userInfo)
   const deletestorage = () => {
     firebase
       .auth()
@@ -19,7 +22,7 @@ function HeaderPage() {
         }
       );
   };
-  const url = "/profile/" + JSON.parse(localStorage.infoUser).infoDetail.id;
+  const url = "/profile/" + userInfo.infoDetail.id;
   return (
     <header className>
       <div className="topbar stick">
@@ -109,10 +112,10 @@ function HeaderPage() {
                     height: 30,
                     marginRight: 5,
                   }}
-                  src={JSON.parse(localStorage.infoUser).infoDetail.img}
+                  src={userInfo.infoDetail.img}
                 />
                 <div className="name">
-                  <h4>{JSON.parse(localStorage.infoUser).infoDetail.name}</h4>
+                  <h4>{userInfo.infoDetail.name}</h4>
                 </div>
               </Link>
             </div>

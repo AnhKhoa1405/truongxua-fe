@@ -1,11 +1,12 @@
 import axios from "axios";
 import React, { Component, useState, useEffect } from "react";
 import HeaderPage from "./Header";
+import {useSelector} from "react-redux"
 
 function AboutUniversity() {
   const [school, setSchool] = useState({});
   const [memberinSchool, setMemberinSchool] = useState([]);
-
+  const userInfo = useSelector(state => state.userReducer.user)
   useEffect(async () => {
     await getSchoolById();
     await getStudentInSchool();
@@ -69,14 +70,14 @@ function AboutUniversity() {
           headers: {
             "Content-Type": "application/json",
             Authorization:
-              "Bearer " + JSON.parse(localStorage.infoUser).author,
+              "Bearer " + userInfo.author,
           },
         }
       );
       if (response.status === 200) {
         for (let i = 0; i < response.data.length; i++) {
           if (
-            JSON.parse(localStorage.infoUser).SchoolId ==
+            userInfo.SchoolId ==
             response.data[i].schoolId
           ) {
             member.push(response.data[i]);
@@ -93,12 +94,12 @@ function AboutUniversity() {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/schools/${
-          JSON.parse(localStorage.infoUser).SchoolId
+          userInfo.SchoolId
         }`,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );

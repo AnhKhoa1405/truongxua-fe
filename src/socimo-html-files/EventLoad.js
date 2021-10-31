@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-
+import {useSelector} from "react-redux"
 function EventLoad(props) {
   const initialState = {
     name: "",
     img: "",
   };
+   const userInfo = useSelector(state => state.userReducer.user)
 
   const [imageEvent, setImageEvent] = useState([]);
   const [feedBackInEvent, setFeedBackInEvent] = useState([]);
@@ -27,7 +28,7 @@ function EventLoad(props) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -45,7 +46,7 @@ function EventLoad(props) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -61,7 +62,7 @@ function EventLoad(props) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -187,7 +188,7 @@ function EventLoad(props) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -215,7 +216,7 @@ function EventLoad(props) {
                 headers: {
                   "Content-Type": "application/json",
                   Authorization:
-                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                    "Bearer " + userInfo.author,
                 },
               }
             )
@@ -226,7 +227,7 @@ function EventLoad(props) {
                 headers: {
                   "Content-Type": "application/json",
                   Authorization:
-                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                    "Bearer " + userInfo.author,
                 },
               }
             );
@@ -253,7 +254,7 @@ function EventLoad(props) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -272,7 +273,7 @@ function EventLoad(props) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );

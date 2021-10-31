@@ -1,5 +1,6 @@
 const initialState = { 
 	user: {},
+	token:"",
 }
 
 const userReducer = (state = initialState ,action) => {
@@ -9,6 +10,17 @@ const userReducer = (state = initialState ,action) => {
 				...state,
 				user: action.payload
 			}
+		case 'TOKEN': return{
+			...state,
+			token: action.payload
+		}
+
+		case 'NEWUSER': {
+			const newUser = action.payload;
+			return{
+			...state,
+			user: newUser
+		}}
 		default: return state
 	}
 }
