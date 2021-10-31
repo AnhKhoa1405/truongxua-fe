@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-
+import {useSelector} from "react-redux"
 function EventLoad(props) {
   const initialState = {
     name: "",
     img: "",
   };
+   const userInfo = useSelector(state => state.userReducer.user)
 
   const [imageEvent, setImageEvent] = useState([]);
   const [feedBackInEvent, setFeedBackInEvent] = useState([]);
@@ -27,7 +28,7 @@ function EventLoad(props) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -45,7 +46,7 @@ function EventLoad(props) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -61,7 +62,7 @@ function EventLoad(props) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -206,6 +207,32 @@ function EventLoad(props) {
     await createFeedBack(props.props.id);
   };
 
+  const updateFeedback = async (idComment) => {
+    try {
+      const data = {
+        eventId: props.props.id,
+        rateStart: 5,
+        content: document.getElementById(props.props.id).value,
+      };
+      const response = await axios.put(
+        `https://truongxuaapp.online/api/v1/feedbacks?id=${idComment}`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        document.getElementById(props.props.id).value = "";
+        await getFeedbackByEventId(props.props.id);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const createFeedBack = async (id) => {
     try {
       const data = {
@@ -223,7 +250,7 @@ function EventLoad(props) {
                 headers: {
                   "Content-Type": "application/json",
                   Authorization:
-                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                    "Bearer " + userInfo.author,
                 },
               }
             )
@@ -234,7 +261,7 @@ function EventLoad(props) {
                 headers: {
                   "Content-Type": "application/json",
                   Authorization:
-                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                    "Bearer " + userInfo.author,
                 },
               }
             );
@@ -248,6 +275,32 @@ function EventLoad(props) {
     }
   };
 
+  const editFeedback = async (id) => {
+    try {
+      const data = {
+        eventId: 0,
+        rateStart: 0,
+        content: "string",
+      };
+      const response = await axios.put(
+        `https://truongxuaapp.online/api/v1/feedbacks?id=${id}`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        //await getFeedBackInEvent(id);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
   const deleteFeedback = async (id) => {
     try {
       const response = await axios.delete(
@@ -255,7 +308,7 @@ function EventLoad(props) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );

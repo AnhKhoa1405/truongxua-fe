@@ -4,6 +4,7 @@ import axios from "axios";
 import HeaderPage from "./Header";
 import "../css/groupdetail.css";
 import { useForm } from "react-hook-form";
+import {useSelector} from "react-redux"
 
 function GroupDetails() {
   const moment = require("moment-timezone");
@@ -14,16 +15,15 @@ function GroupDetails() {
     watch,
     formState: { errors },
   } = useForm();
-
+   const userInfo = useSelector(state => state.userReducer.user)
   const showEventPopup = () => {
-    console.log(JSON.parse(localStorage.infoUser).infoDetail.name);
-    console.log(localStorage);
+    console.log(userInfo.infoDetail.name);
     setEventPopup(true);
   };
   const [imgNotSave, setimgNotSave] = useState([]);
   const initialState = {
-    alumniCreatedId: JSON.parse(localStorage.infoUser).infoDetail.id,
-    schoolId: JSON.parse(localStorage.infoUser).infoDetail.schoolId,
+    alumniCreatedId: userInfo.infoDetail.id,
+    schoolId: userInfo.infoDetail.schoolId,
     startDate: "",
     endDate: "",
     name: "",
@@ -173,7 +173,7 @@ function GroupDetails() {
       description: formEvent.description,
       ticketPrice: formEvent.ticketPrice,
       createAt: m,
-      schoolId: JSON.parse(localStorage.infoUser).SchoolId,
+      schoolId: userInfo.SchoolId,
     };
     try {
       const response = await axios.post(
@@ -182,7 +182,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -215,7 +215,7 @@ function GroupDetails() {
               headers: {
                 "Content-Type": "application/json",
                 Authorization:
-                  "Bearer " + JSON.parse(localStorage.infoUser).author,
+                  "Bearer " + userInfo.author,
               },
             }
           );
@@ -274,7 +274,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -330,7 +330,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -352,7 +352,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -483,8 +483,8 @@ function GroupDetails() {
                 {d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear()}
               </span>
               <p> {element.content}</p>
-              {JSON.parse(localStorage.infoUser).Id == element.alumniId ||
-              JSON.parse(localStorage.infoUser).Id ==
+              {userInfo.Id == element.alumniId ||
+              userInfo.Id ==
                 groupRecent.groupAdminId ? (
                 <div
                   style={{
@@ -518,7 +518,7 @@ function GroupDetails() {
                       width: 400,
                     }}
                   >
-                    {JSON.parse(localStorage.infoUser).Id ==
+                    {userInfo.Id ==
                     element.alumniId ? (
                       <li
                         style={{ margin: 0 }}
@@ -569,7 +569,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -586,7 +586,7 @@ function GroupDetails() {
       const data = {
         alumniId:
           updateCmt === undefined
-            ? JSON.parse(localStorage.infoUser).Id
+            ? userInfo.Id
             : updateCmt.alumniId,
         postId: updateCmt === undefined ? idPost : updateCmt.postId,
         content: document.getElementById(idPost).value,
@@ -604,7 +604,7 @@ function GroupDetails() {
                 headers: {
                   "Content-Type": "application/json",
                   Authorization:
-                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                    "Bearer " + userInfo.author,
                 },
               }
             )
@@ -615,7 +615,7 @@ function GroupDetails() {
                 headers: {
                   "Content-Type": "application/json",
                   Authorization:
-                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                    "Bearer " + userInfo.author,
                 },
               }
             );
@@ -1168,7 +1168,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -1203,7 +1203,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -1223,7 +1223,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       )
@@ -1240,7 +1240,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -1294,7 +1294,7 @@ function GroupDetails() {
               headers: {
                 "Content-Type": "application/json",
                 Authorization:
-                  "Bearer " + JSON.parse(localStorage.infoUser).author,
+                  "Bearer " + userInfo.author,
               },
             }
           );
@@ -1329,7 +1329,7 @@ function GroupDetails() {
             headers: {
               "Content-Type": "application/json",
               Authorization:
-                "Bearer " + JSON.parse(localStorage.infoUser).author,
+                "Bearer " + userInfo.author,
             },
           }
         );
@@ -1347,7 +1347,7 @@ function GroupDetails() {
                 headers: {
                   "Content-Type": "application/json",
                   Authorization:
-                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                    "Bearer " + userInfo.author,
                 },
               }
             );
@@ -1368,7 +1368,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -1395,7 +1395,7 @@ function GroupDetails() {
             headers: {
               "Content-Type": "application/json",
               Authorization:
-                "Bearer " + JSON.parse(localStorage.infoUser).author,
+                "Bearer " + userInfo.author,
             },
           }
         );
@@ -1416,7 +1416,7 @@ function GroupDetails() {
             headers: {
               "Content-Type": "application/json",
               Authorization:
-                "Bearer " + JSON.parse(localStorage.infoUser).author,
+                "Bearer " + userInfo.author,
             },
           }
         );
@@ -1539,7 +1539,7 @@ function GroupDetails() {
             headers: {
               "Content-Type": "application/json",
               Authorization:
-                "Bearer " + JSON.parse(localStorage.infoUser).author,
+                "Bearer " + userInfo.author,
             },
           }
         );
@@ -1560,7 +1560,7 @@ function GroupDetails() {
       //id: updateAPost.id,
 
       alumniId: updateAPost.alumniId,
-      groupId: JSON.parse(localStorage.infoUser).GroupId,
+      groupId: userInfo.GroupId,
       content: document.getElementById("emojionearea1").value,
       createAt: updateAPost.createAt,
       modifiedAt: new Date(),
@@ -1574,7 +1574,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -1593,7 +1593,7 @@ function GroupDetails() {
 
   const addPostApi = async () => {
     const dataAddPost = {
-      alumniId: JSON.parse(localStorage.infoUser).Id,
+      alumniId: userInfo.Id,
       content: content,
       createAt: new Date(),
       modifiedAt: null,
@@ -1607,7 +1607,7 @@ function GroupDetails() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -1650,7 +1650,7 @@ function GroupDetails() {
               headers: {
                 "Content-Type": "application/json",
                 Authorization:
-                  "Bearer " + JSON.parse(localStorage.infoUser).author,
+                  "Bearer " + userInfo.author,
               },
             }
           );
@@ -1697,7 +1697,7 @@ function GroupDetails() {
         const infoRender = memberInGroup.filter(
           (user) => element.alumniId === user.id
         );
-        if (JSON.parse(localStorage.infoUser).GroupId == element.groupId) {
+        if (userInfo.GroupId == element.groupId) {
           return (
             <div key={index} className="main-wraper">
               <div className="user-post">
@@ -1751,7 +1751,7 @@ function GroupDetails() {
                           </svg>
                         </i>
                         <ul>
-                          {JSON.parse(localStorage.infoUser).Id ==
+                          {userInfo.Id ==
                           element.alumniId ? (
                             <li onClick={() => updatePost(element)}>
                               <i className="icofont-pen-alt-1" />
@@ -1767,9 +1767,9 @@ function GroupDetails() {
                             Ẩn bài đăng
                             <span>Hide This Post</span>
                           </li>
-                          {JSON.parse(localStorage.infoUser).Id ==
+                          {userInfo.Id ==
                             element.alumniId ||
-                          JSON.parse(localStorage.infoUser).Id ==
+                          userInfo.Id ==
                             groupRecent.groupAdminId ? (
                             <li
                               onClick={() => {
@@ -3117,7 +3117,7 @@ function GroupDetails() {
                             <i className="icofont-check-circled" />
                             Joined
                           </a>
-                          {JSON.parse(localStorage.infoUser).Id ==
+                          {userInfo.Id ==
                           groupRecent.groupAdminId ? (
                             <label for="imgCover">
                               <div className="wall">
@@ -3141,7 +3141,7 @@ function GroupDetails() {
 
                           <figure className="group-dp">
                             <img src={groupRecent.avataImg} alt="" />
-                            {JSON.parse(localStorage.infoUser).Id ==
+                            {userInfo.Id ==
                             groupRecent.groupAdminId ? (
                               <label for="imgAva">
                                 <a className="icon-camera">
@@ -3261,7 +3261,7 @@ function GroupDetails() {
                               </div>
                             </div>
                             {/* create new post */}
-                            {JSON.parse(localStorage.infoUser).Id ==
+                            {userInfo.Id ==
                             groupRecent.groupAdminId ? (
                               <div
                                 className="event-button"

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 import HeaderPage from "./Header";
+import {useSelector} from "react-redux"
 
 function Profile() {
   const { id } = useParams();
@@ -26,7 +27,7 @@ function Profile() {
     },
   ]);
   const [listFollow, setListFollow] = useState(undefined);
-
+   const userInfo = useSelector(state => state.userReducer.user)
   const createFollow = async (alumID, followerID, statusCreate) => {
     try {
       const data = {
@@ -41,7 +42,7 @@ function Profile() {
           headers: {
             "Access-Control-Allow-Origin": "*",
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -53,15 +54,15 @@ function Profile() {
     }
   };
   useEffect(async () => {
-    if (JSON.parse(localStorage.infoUser).infoDetail.id != id) {
+    if (userInfo.infoDetail.id != id) {
       await getFollower();
     }
     await getUserById();
   }, [id]);
   useEffect(async () => {
-    if (JSON.parse(localStorage.infoUser).infoDetail.id == id) {
+    if (userInfo.infoDetail.id == id) {
       await getFollowerNotAccept(
-        JSON.parse(localStorage.infoUser).infoDetail.id,
+        userInfo.infoDetail.id,
         true
       );
     }
@@ -74,7 +75,7 @@ function Profile() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -104,7 +105,7 @@ function Profile() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -175,7 +176,7 @@ function Profile() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -189,7 +190,7 @@ function Profile() {
           }
         }
         await getFollowerNotAccept(
-          JSON.parse(localStorage.infoUser).infoDetail.id,
+          userInfo.infoDetail.id,
           true
         );
       }
@@ -205,14 +206,14 @@ function Profile() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
       if (response.status === 200) {
         setListFollow(undefined);
         await getFollowerNotAccept(
-          JSON.parse(localStorage.infoUser).infoDetail.id,
+          userInfo.infoDetail.id,
           true
         );
       }
@@ -234,14 +235,14 @@ function Profile() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
       if (respone.status === 200) {
         setListFollow(undefined);
         await getFollowerNotAccept(
-          JSON.parse(localStorage.infoUser).infoDetail.id,
+          userInfo.infoDetail.id,
           true
         );
         createFollow(element.followerId, element.alumniId, true);
@@ -254,12 +255,12 @@ function Profile() {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/followers/checkfollowed?alumniId=${
-          JSON.parse(localStorage.infoUser).infoDetail.id
+          userInfo.infoDetail.id
         }&followerId=${id}`,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -274,12 +275,12 @@ function Profile() {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/followers/checkfollowed?alumniId=${id}&followerId=${
-          JSON.parse(localStorage.infoUser).infoDetail.id
+          userInfo.infoDetail.id
         }`,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -304,7 +305,7 @@ function Profile() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -1020,7 +1021,7 @@ function Profile() {
                       <a
                         style={{
                           cursor:
-                            JSON.parse(localStorage.infoUser).infoDetail.id !=
+                            userInfo.infoDetail.id !=
                               id && numFollow > -1
                               ? "pointer"
                               : "default",
@@ -1028,12 +1029,12 @@ function Profile() {
                         data-ripple
                         title
                         onClick={
-                          JSON.parse(localStorage.infoUser).infoDetail.id !=
+                          userInfo.infoDetail.id !=
                             id && numFollow == 3
                             ? () =>
                                 createFollow(
                                   id,
-                                  JSON.parse(localStorage.infoUser).infoDetail
+                                  userInfo.infoDetail
                                     .id,
                                   false
                                 )
@@ -1041,7 +1042,7 @@ function Profile() {
                         }
                         className="invite"
                       >
-                        {JSON.parse(localStorage.infoUser).infoDetail.id !=
+                        {userInfo.infoDetail.id !=
                           id && numFollow > -1
                           ? stateFollow[numFollow].content
                           : "Trang cá nhân của bạn"}
@@ -1051,7 +1052,7 @@ function Profile() {
                       <li
                         style={{
                           display:
-                            JSON.parse(localStorage.infoUser).infoDetail.id !=
+                            userInfo.infoDetail.id !=
                             id
                               ? "none"
                               : "block",
@@ -1073,7 +1074,7 @@ function Profile() {
                       <li className="nav-item">
                         <a
                           className={
-                            JSON.parse(localStorage.infoUser).infoDetail.id !=
+                            userInfo.infoDetail.id !=
                             id
                               ? "active"
                               : ""
@@ -1102,7 +1103,7 @@ function Profile() {
                       <div className="tab-content">
                         <div
                           className={
-                            JSON.parse(localStorage.infoUser).infoDetail.id !=
+                            userInfo.infoDetail.id !=
                             id
                               ? "tab-pane fade"
                               : "tab-pane fade active show"
@@ -1121,7 +1122,7 @@ function Profile() {
 
                         <div
                           className={
-                            JSON.parse(localStorage.infoUser).infoDetail.id !=
+                            userInfo.infoDetail.id !=
                             id
                               ? "tab-pane fade active show"
                               : "tab-pane fade "
@@ -1133,7 +1134,7 @@ function Profile() {
                               display:
                                 (numFollow == 2 &&
                                   stateFollow[numFollow].status === true) ||
-                                JSON.parse(localStorage.infoUser).infoDetail
+                               userInfo.infoDetail
                                   .id == id
                                   ? "block"
                                   : "none",
@@ -1167,7 +1168,7 @@ function Profile() {
                               display:
                                 (numFollow == 2 &&
                                   stateFollow[numFollow].status === true) ||
-                                JSON.parse(localStorage.infoUser).infoDetail
+                                userInfo.infoDetail
                                   .id == id
                                   ? "block"
                                   : "none",
@@ -1202,7 +1203,7 @@ function Profile() {
                               display:
                                 (numFollow == 2 &&
                                   stateFollow[numFollow].status === true) ||
-                                JSON.parse(localStorage.infoUser).infoDetail
+                                userInfo.infoDetail
                                   .id == id
                                   ? "none"
                                   : "block",

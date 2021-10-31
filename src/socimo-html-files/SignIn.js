@@ -6,6 +6,7 @@ import { withRouter } from "react-router-dom";
 import axios from "axios";
 import {connect } from "react-redux"
 import {userInfo} from '../redux/actions/userInfo'
+import { tokenUser } from "../redux/actions/userInfo";
 const uiConfig = {
   // Popup signin flow rather than redirect flow.
   signInFlow: "popup", //redirect
@@ -62,12 +63,7 @@ class SignIn extends React.Component {
           );
           decoded.infoSchool = schoolDe;
         }
-
-        localStorage.setItem("infoUser", JSON.stringify(decoded));
-        let info = JSON.stringify(decoded);
         this.props.userInfo(decoded);
-        console.log(decoded);
-        console.log(this.props.user.Id)
       }
     } catch (err) {
       console.error(err);
@@ -133,9 +129,10 @@ class SignIn extends React.Component {
         }, 3000)
       );
   };
+
   handleSubmit = (e, history) => {
     e.preventDefault();
-
+    let token = ""
     if (this.isFormValid) {
       this.setState({ error: [], loading: true });
       const { email, password, error } = this.state;
@@ -150,15 +147,13 @@ class SignIn extends React.Component {
             .auth()
             .currentUser.getIdToken(/* forceRefresh */ true)
             .then(async function (idToken) {
-              await localStorage.setItem("token", idToken);
-              console.log(idToken)
-              //  await this.encodeToDecode(idToken);
+                token = idToken;
+            })
+            .then(() => {
+                this.props.tokenUser(token)
             })
             .then(async () => {
-              //console.log(localStorage.getItem("token"));
-              
-              const token = localStorage.getItem("token");
-              await this.encodeToDecode(token);
+              await this.encodeToDecode(this.props.token);
             });
         })
         .then(() => {
@@ -318,6 +313,6 @@ class SignIn extends React.Component {
   }
 }
 
-const mapStateToProps =(state) => ({user: state.userReducer.user})
-const mapDispatchToProps = (dispatch) => ({userInfo: (info) => dispatch(userInfo(info))})
+const mapStateToProps =(state) => ({user: state.userReducer.user ,token: state.userReducer.token})
+const mapDispatchToProps = (dispatch) => ({userInfo: (info) => dispatch(userInfo(info)) ,tokenUser: (token) => dispatch(tokenUser(token))})
 export default withRouter(connect(mapStateToProps ,mapDispatchToProps)(SignIn));

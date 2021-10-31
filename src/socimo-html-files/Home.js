@@ -4,8 +4,10 @@ import AccountPopup from "./AccountPopup";
 import Groups from "./Groups";
 import HeaderPage from "./Header";
 import EventLoad from "./EventLoad"
+import {useSelector} from 'react-redux'
 
 function Home() {
+  const userInfo = useSelector(state => state.userReducer.user)
   const [clickGroups, setClickGroups] = useState(false);
   const [clickEvent, setClickEvent] = useState(false);
   const [clickHome, setClickHome] = useState(true);
@@ -19,10 +21,10 @@ function Home() {
    const getEventInSchool = async () => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/events/schoolid?schoolid=${JSON.parse(localStorage.infoUser).infoDetail.schoolId}`,
+        `https://truongxuaapp.online/api/v1/events/schoolid?schoolid=${userInfo.infoDetail.schoolId}`,
         {
         headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+            Authorization: "Bearer " + userInfo.author,}
       }
   
       );
@@ -34,15 +36,13 @@ function Home() {
 
 
   useEffect(async() => {
-    console.log(JSON.parse(localStorage.infoUser).SchoolId);
-
     await getEventInSchool();
-  },[]);
+  },[userInfo]);
 
   useEffect(async () => {
     await getNewsInSchool();
-    //console.log(JSON.parse(localStorage.infoUser).SchoolId);
-  }, [deleteAPost]);
+  }, [deleteAPost,userInfo]);
+
 
   const updateImg = (event) => {
     setImg(event.target.files[0]);
@@ -87,11 +87,11 @@ function Home() {
     const body = {
       schoolId:
         elementUpdate == undefined
-          ? JSON.parse(localStorage.infoUser).SchoolId
+          ? userInfo.SchoolId
           : elementUpdate.schoolId,
       adminId:
         elementUpdate == undefined
-          ? JSON.parse(localStorage.infoUser).Id
+          ? userInfo.Id
           : elementUpdate.adminId,
       title: document.getElementById("titleID").value,
       content: document.getElementById("emojionearea1").value,
@@ -107,7 +107,7 @@ function Home() {
               headers: {
                 "Content-Type": "application/json",
                 Authorization:
-                  "Bearer " + JSON.parse(localStorage.infoUser).author,
+                  "Bearer " + userInfo.author,
               },
             })
           : await axios.put(
@@ -118,7 +118,7 @@ function Home() {
                   "Access-Control-Allow-Origin": "*",
                   "Content-Type": "application/json",
                   Authorization:
-                    "Bearer " + JSON.parse(localStorage.infoUser).author,
+                    "Bearer " + userInfo.author,
                 },
               }
             );
@@ -142,7 +142,7 @@ function Home() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -159,12 +159,12 @@ function Home() {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/news/schoolid?schoolId=${
-          JSON.parse(localStorage.infoUser).SchoolId
+          userInfo.SchoolId
         }`,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -226,7 +226,7 @@ function Home() {
     if (dataContent != undefined) {
       return dataContent.map((element, index) => {
         const d = new Date(element.createAt);
-        if (JSON.parse(localStorage.infoUser).SchoolId == element.schoolId) {
+        if (userInfo.SchoolId == element.schoolId) {
           return (
             <div key={index} className="main-wraper">
               <div className="user-post">
@@ -253,7 +253,7 @@ function Home() {
                         width: 40,
                         height: 40,
                       }}
-                      src={JSON.parse(localStorage.infoUser).infoSchool.image}
+                      src={userInfo.infoSchool.image}
                     />
                   </figure>
                   <div className="friend-name">
@@ -325,7 +325,7 @@ function Home() {
                     </div>
                     <ins>
                       <a title="verified" href="time-line.html">
-                        {JSON.parse(localStorage.infoUser).infoSchool.name}
+                        {userInfo.infoSchool.name}
                       </a>{" "}
                       Đăng bài
                     </ins>
@@ -734,7 +734,7 @@ function Home() {
           </div>
         </div>
         {/* responsive header */}
-        {JSON.parse(localStorage.infoUser).SchoolId == "" ? (
+        {userInfo.SchoolId == "" ? (
           <AccountPopup />
         ) : (
           ""

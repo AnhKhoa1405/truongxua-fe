@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../css/popup.css";
-
+import {useSelector} from "react-redux"
 import { useForm } from "react-hook-form";
 import { render } from "@testing-library/react";
+import {useDispatch} from "react-redux"
+import {newUser} from "../redux/actions/userInfo"
 function AccountPopup(props) {
   const initialState = {
     search: "",
@@ -17,9 +19,11 @@ function AccountPopup(props) {
     yearId:"",
     name :"",
   };
-
+   const jwtDecode = require("jwt-decode").default;
+   const userInfo = useSelector(state => state.userReducer.user)
+  const token =   useSelector(state => state.userReducer.token)
   const [alumiId,setAluniId] = useState(9);
-
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
@@ -88,7 +92,7 @@ function AccountPopup(props) {
       const response = await axios.get('https://truongxuaapp.online/api/v1/schools/schoolyears?pageNumber=0&pageSize=0',
       {
         headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+            Authorization: "Bearer " + userInfo.author,}
       });
       setSchoolYear(response.data);
     }
@@ -166,12 +170,13 @@ function AccountPopup(props) {
     };
     
   try{
-    const response  = await axios.put(`https://truongxuaapp.online/api/v1/alumni?id=${JSON.parse(localStorage.infoUser).Id}`,
+    const response  = await axios.put(`https://truongxuaapp.online/api/v1/alumni?id=${userInfo.Id}`,
     data,{
         headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+            Authorization: "Bearer " + userInfo.author,}
       }
     )
+    encodeToDecode(token);
 	setTrigger(false);
  
   }
@@ -185,10 +190,10 @@ function AccountPopup(props) {
   const getProfile = async () => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/alumni/${JSON.parse(localStorage.infoUser).Id}`,
+        `https://truongxuaapp.online/api/v1/alumni/${userInfo.Id}`,
         {
         headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+            Authorization: "Bearer " + userInfo.author,}
       }
   
       );
@@ -207,7 +212,7 @@ function AccountPopup(props) {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/schools/name?searchName=${formData.search}&pageNumber=1&pageSize=4`,{
         headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+            Authorization: "Bearer " + userInfo.author,}
       }
       );
       setSearchList(response.data);
@@ -215,6 +220,84 @@ function AccountPopup(props) {
       console.log(error);
     }
   }
+
+  const encodeToDecode = async (tokenUser) => {
+    try {
+      const response = await axios.post(
+        `https://truongxuaapp.online/api/users/log-in?idToken=${tokenUser}`,
+        {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
+      if (response.status == 200) {
+        let decoded = jwtDecode(response.data);
+
+        decoded.author = response.data;
+
+        const infoDe = await findUserById(decoded.Id, response.data);
+
+        decoded.infoDetail = infoDe;
+        if (decoded.SchoolId === "") {
+          decoded.infoSchool = "";
+        } else {
+          const schoolDe = await findSchoolById(
+            decoded.SchoolId,
+            response.data
+          );
+          decoded.infoSchool = schoolDe;
+        }
+
+       const action = newUser(decoded);
+        dispatch(action);
+        console.log("update" + userInfo)
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const findUserById = async (id, token) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/alumni/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+ const findSchoolById = async (id, token) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/schools/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
  
 

@@ -3,10 +3,11 @@ import React ,{ useState, useEffect} from "react";
 import { Link ,useLocation } from "react-router-dom";
 import axios from "axios";
 import HeaderPage from "./Header";
+import {useSelector} from "react-redux"
 
 function EventDetail()  {
   let location = useLocation();
-  
+  const userInfo = useSelector(state => state.userReducer.user)
   const [eventDetail, setEventDetail] = useState({});
   const [imageEvent , setImageEvent] = useState([]);
   const [activity,setActivity]  = useState([]);
@@ -17,7 +18,7 @@ function EventDetail()  {
         `https://truongxuaapp.online/api/v1/events/${id}`,
         {
         headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+            Authorization: "Bearer " + userInfo.author,}
       }
   
       );
@@ -49,7 +50,7 @@ function EventDetail()  {
         `https://truongxuaapp.online/api/v1/images/eventid?eventid=${eventId}`,
         {
         headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+            Authorization: "Bearer " + userInfo.author,}
       }
   
       );
@@ -67,7 +68,7 @@ function EventDetail()  {
         `https://truongxuaapp.online/api/v1/activities/eventid?eventId=${eventId}`,
         {
         headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,}
+            Authorization: "Bearer " + userInfo.author,}
       }
   
       );
