@@ -61,12 +61,13 @@ function Profile() {
   useEffect(async () => {
     if (JSON.parse(localStorage.infoUser).infoDetail.id == id) {
       await getFollowerNotAccept(
-        JSON.parse(localStorage.infoUser).infoDetail.id
+        JSON.parse(localStorage.infoUser).infoDetail.id,
+        true
       );
     }
   }, [id]);
 
-  const getFollowerNotAccept = async (idAlum) => {
+  const getFollowerNotAccept = async (idAlum, status) => {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/followers/Follower/${idAlum}`,
@@ -80,13 +81,17 @@ function Profile() {
       if (response.status === 200) {
         //setListFollow(response.data);
         //console.log(response.data);
-        let listAlumni = [];
-        for (let i = 0; i < response.data.length; i++) {
-          const alumni = await getAlumniById(response.data[i].followerId);
-          response.data[i].alumniDetail = alumni;
-          listAlumni.push(response.data[i]);
+        if (status === true) {
+          let listAlumni = [];
+          for (let i = 0; i < response.data.length; i++) {
+            const alumni = await getAlumniById(response.data[i].followerId);
+            response.data[i].alumniDetail = alumni;
+            listAlumni.push(response.data[i]);
+          }
+          setListFollow(listAlumni);
+        } else {
+          return response.data;
         }
-        setListFollow(listAlumni);
       }
     } catch (err) {
       console.error(err);
@@ -176,8 +181,16 @@ function Profile() {
       );
       if (response.status === 200) {
         setListFollow(undefined);
+        const dataSwap = await getFollowerNotAccept(element.followerId, false);
+        console.log(dataSwap)
+        for (let i = 0; i < dataSwap.length; i++) {
+          if (element.alumniId === dataSwap[i].followerId) {
+            await deleteFollowSwap(dataSwap[i].id);
+          }
+        }
         await getFollowerNotAccept(
-          JSON.parse(localStorage.infoUser).infoDetail.id
+          JSON.parse(localStorage.infoUser).infoDetail.id,
+          true
         );
       }
     } catch (err) {
@@ -199,7 +212,8 @@ function Profile() {
       if (response.status === 200) {
         setListFollow(undefined);
         await getFollowerNotAccept(
-          JSON.parse(localStorage.infoUser).infoDetail.id
+          JSON.parse(localStorage.infoUser).infoDetail.id,
+          true
         );
       }
     } catch (err) {
@@ -227,7 +241,8 @@ function Profile() {
       if (respone.status === 200) {
         setListFollow(undefined);
         await getFollowerNotAccept(
-          JSON.parse(localStorage.infoUser).infoDetail.id
+          JSON.parse(localStorage.infoUser).infoDetail.id,
+          true
         );
         createFollow(element.followerId, element.alumniId, true);
       }
