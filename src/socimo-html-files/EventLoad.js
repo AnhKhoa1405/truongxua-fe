@@ -90,7 +90,7 @@ function EventLoad(props) {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -125,7 +125,7 @@ function EventLoad(props) {
               <span>2 hours ago</span>
               <p>{element.content}</p>
              
-              {element.profile.id == JSON.parse(localStorage.infoUser).Id ? (
+              {element.profile.id == userInfo.Id ? (
                 <div
                   style={{
                     zIndex: 10,
@@ -239,7 +239,7 @@ function EventLoad(props) {
         eventId: id,
         rateStart: 5,
         content: document.getElementById(id).value,
-        alumniId: JSON.parse(localStorage.infoUser).Id,
+        alumniId: userInfo.Id,
       };
       const response =
         idUpdate == -1
