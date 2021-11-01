@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import AccountPopup from "./AccountPopup";
 import Groups from "./Groups";
 import HeaderPage from "./Header";
-import EventLoad from "./EventLoad"
-import {useSelector} from 'react-redux'
+import EventLoad from "./EventLoad";
+import { useSelector } from "react-redux";
 
 function Home() {
-  const userInfo = useSelector(state => state.userReducer.user)
+  const userInfo = useSelector((state) => state.userReducer.user);
   const [clickGroups, setClickGroups] = useState(false);
   const [clickEvent, setClickEvent] = useState(false);
   const [clickHome, setClickHome] = useState(true);
@@ -17,32 +17,55 @@ function Home() {
   const [elementUpdate, setElementUpdate] = useState(undefined);
   const axios = require("axios").default;
   const [eventInSchool, setEventInSchool] = useState([]);
-
-   const getEventInSchool = async () => {
+  const getStatusDonate = async (eventId) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/donates/alumni-in-event?alumniId=${userInfo.Id}&eventId=${eventId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const getEventInSchool = async () => {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/events/schoolid?schoolid=${userInfo.infoDetail.schoolId}`,
         {
-        headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + userInfo.author,}
-      }
-  
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
       );
+      if (response.status === 200) {
+        for (let i = 0; i < response.data.length; i++) {
+          const statusDo = await getStatusDonate(response.data[i].id);
+          console.log(statusDo)
+          response.data[i].statusDonate = statusDo;
+        }
+      }
       setEventInSchool(response.data);
     } catch (error) {
       console.log(error);
     }
   };
 
-
-  useEffect(async() => {
+  useEffect(async () => {
     await getEventInSchool();
-  },[userInfo]);
+  }, [userInfo]);
 
   useEffect(async () => {
     await getNewsInSchool();
-  }, [deleteAPost,userInfo]);
-
+  }, [deleteAPost, userInfo]);
 
   const updateImg = (event) => {
     setImg(event.target.files[0]);
@@ -86,13 +109,8 @@ function Home() {
     //console.log(document.getElementById("emojionearea1").value);
     const body = {
       schoolId:
-        elementUpdate == undefined
-          ? userInfo.SchoolId
-          : elementUpdate.schoolId,
-      adminId:
-        elementUpdate == undefined
-          ? userInfo.Id
-          : elementUpdate.adminId,
+        elementUpdate == undefined ? userInfo.SchoolId : elementUpdate.schoolId,
+      adminId: elementUpdate == undefined ? userInfo.Id : elementUpdate.adminId,
       title: document.getElementById("titleID").value,
       content: document.getElementById("emojionearea1").value,
       createAt:
@@ -106,8 +124,7 @@ function Home() {
           ? await axios.post("https://truongxuaapp.online/api/v1/news", body, {
               headers: {
                 "Content-Type": "application/json",
-                Authorization:
-                  "Bearer " + userInfo.author,
+                Authorization: "Bearer " + userInfo.author,
               },
             })
           : await axios.put(
@@ -117,8 +134,7 @@ function Home() {
                 headers: {
                   "Access-Control-Allow-Origin": "*",
                   "Content-Type": "application/json",
-                  Authorization:
-                    "Bearer " + userInfo.author,
+                  Authorization: "Bearer " + userInfo.author,
                 },
               }
             );
@@ -158,9 +174,7 @@ function Home() {
   const getNewsInSchool = async () => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/news/schoolid?schoolId=${
-          userInfo.SchoolId
-        }`,
+        `https://truongxuaapp.online/api/v1/news/schoolid?schoolId=${userInfo.SchoolId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -734,11 +748,7 @@ function Home() {
           </div>
         </div>
         {/* responsive header */}
-        {userInfo.SchoolId == "" ? (
-          <AccountPopup />
-        ) : (
-          ""
-        )}
+        {userInfo.SchoolId == "" ? <AccountPopup /> : ""}
         <HeaderPage />
         {/* header */}
         <nav className="sidebar">
@@ -1250,13 +1260,11 @@ function Home() {
                               </ul>
                             </div>
                           </div>
-                         
-                          {
-                            eventInSchool.map((event) => {
-                              return <EventLoad props = {event}/>
-                            })
-                          }
-                           
+
+                          {eventInSchool.map((event) => {
+                            return <EventLoad props={event} />;
+                          })}
+
                           <div>{renderHome()}</div>
                         </div>
                       )}

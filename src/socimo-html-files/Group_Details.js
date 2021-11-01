@@ -4,7 +4,7 @@ import axios from "axios";
 import HeaderPage from "./Header";
 import "../css/groupdetail.css";
 import { useForm } from "react-hook-form";
-import {useSelector} from "react-redux"
+import { useSelector } from "react-redux";
 
 function GroupDetails() {
   const moment = require("moment-timezone");
@@ -15,7 +15,7 @@ function GroupDetails() {
     watch,
     formState: { errors },
   } = useForm();
-   const userInfo = useSelector(state => state.userReducer.user)
+  const userInfo = useSelector((state) => state.userReducer.user);
   const showEventPopup = () => {
     console.log(userInfo.infoDetail.name);
     setEventPopup(true);
@@ -49,10 +49,9 @@ function GroupDetails() {
     setActivityError("");
   };
 
-  
   const [errorStart, setErrorStart] = useState("");
   const [errorEnd, setErrorEnd] = useState("");
-  
+
   const [formEvent, setFormEvent] = useState(initialState);
   // const [imgSave, setImgSave] = useState([]);
   const [content, setContent] = useState("");
@@ -103,66 +102,59 @@ function GroupDetails() {
     let minuteStart = formEvent.minuteStart.toString();
     let hourEnd = formEvent.hourEnd.toString();
     let minuteEnd = formEvent.minuteEnd.toString();
-    if(hourStart<10) hourStart= "0"+hourStart;
-    if(minuteStart<10) minuteStart= "0"+minuteStart;
-    if(hourEnd<10) hourEnd= "0"+hourEnd;
-    if(minuteEnd<10) minuteEnd= "0"+minuteEnd;
-   if(formEvent.startDate == "") {
-       setErrorStart("Nhập ngày bắt đầu");
+    if (hourStart < 10) hourStart = "0" + hourStart;
+    if (minuteStart < 10) minuteStart = "0" + minuteStart;
+    if (hourEnd < 10) hourEnd = "0" + hourEnd;
+    if (minuteEnd < 10) minuteEnd = "0" + minuteEnd;
+    if (formEvent.startDate == "") {
+      setErrorStart("Nhập ngày bắt đầu");
     }
-     if(formEvent.endDate == "") {
-       setErrorEnd("Nhập ngày kết thúc");
+    if (formEvent.endDate == "") {
+      setErrorEnd("Nhập ngày kết thúc");
     }
 
-    if (formEvent.startDate != "" || formEvent.endDate != "" || activityEvent.length ==0) {
-
+    if (
+      formEvent.startDate != "" ||
+      formEvent.endDate != "" ||
+      activityEvent.length == 0
+    ) {
       const start = moment
         .tz(
           `${formEvent.startDate} ${hourStart}:${minuteStart}`,
           "Asia/Ho_Chi_Minh"
         )
         .format();
-        const end = moment
-      .tz(
-        `${
-          formEvent.endDate
-        } ${hourEnd}:${minuteEnd}`,
-        "Asia/Ho_Chi_Minh"
-      )
-      .format();
+      const end = moment
+        .tz(`${formEvent.endDate} ${hourEnd}:${minuteEnd}`, "Asia/Ho_Chi_Minh")
+        .format();
       if (start < m) {
         console.log(start);
-        setErrorStart("Ngày bắt đầu và thời gian phải lớn hơn thời gian hiện tại");
+        setErrorStart(
+          "Ngày bắt đầu và thời gian phải lớn hơn thời gian hiện tại"
+        );
         return;
       }
-       if(start >= end) {
+      if (start >= end) {
         console.log(end);
-        setErrorEnd("Ngày kết thúc và thời gian phải lớn hơn thời gian bắt đầu");
-        return;
-        
-      }
-      if(activityEvent.length == 0) {
-        setActivityError("Thêm ít nhất 1 hoạt động ")
+        setErrorEnd(
+          "Ngày kết thúc và thời gian phải lớn hơn thời gian bắt đầu"
+        );
         return;
       }
-
+      if (activityEvent.length == 0) {
+        setActivityError("Thêm ít nhất 1 hoạt động ");
+        return;
+      }
     }
- 
+
     const start = moment
       .tz(
-        `${
-          formEvent.startDate
-        } ${hourStart}:${minuteStart}`,
+        `${formEvent.startDate} ${hourStart}:${minuteStart}`,
         "Asia/Ho_Chi_Minh"
       )
       .format();
     const end = moment
-      .tz(
-        `${
-          formEvent.endDate
-        } ${hourEnd}:${minuteEnd}`,
-        "Asia/Ho_Chi_Minh"
-      )
+      .tz(`${formEvent.endDate} ${hourEnd}:${minuteEnd}`, "Asia/Ho_Chi_Minh")
       .format();
     const data = {
       alumniCreatedId: formEvent.alumniCreatedId,
@@ -198,7 +190,6 @@ function GroupDetails() {
     } catch (err) {
       console.log(err);
     }
- 
   };
 
   const saveEventActivity = async (eventId) => {
@@ -214,8 +205,7 @@ function GroupDetails() {
             {
               headers: {
                 "Content-Type": "application/json",
-                Authorization:
-                  "Bearer " + userInfo.author,
+                Authorization: "Bearer " + userInfo.author,
               },
             }
           );
@@ -484,8 +474,7 @@ function GroupDetails() {
               </span>
               <p> {element.content}</p>
               {userInfo.Id == element.alumniId ||
-              userInfo.Id ==
-                groupRecent.groupAdminId ? (
+              userInfo.Id == groupRecent.groupAdminId ? (
                 <div
                   style={{
                     zIndex: 10,
@@ -518,8 +507,7 @@ function GroupDetails() {
                       width: 400,
                     }}
                   >
-                    {userInfo.Id ==
-                    element.alumniId ? (
+                    {userInfo.Id == element.alumniId ? (
                       <li
                         style={{ margin: 0 }}
                         onClick={() => editComment(element, idPost)}
@@ -584,17 +572,14 @@ function GroupDetails() {
   const createComment = async (idPost) => {
     try {
       const data = {
-        alumniId:
-          updateCmt === undefined
-            ? userInfo.Id
-            : updateCmt.alumniId,
+        alumniId: updateCmt === undefined ? userInfo.Id : updateCmt.alumniId,
         postId: updateCmt === undefined ? idPost : updateCmt.postId,
         content: document.getElementById(idPost).value,
         createAt: updateCmt === undefined ? new Date() : updateCmt.createAt,
         modifiedAt: updateCmt === undefined ? null : new Date(),
         status: true,
       };
-      //console.log(JSON.parse(localStorage.infoUser).author);
+
       const response =
         updateCmt === undefined
           ? await axios.post(
@@ -603,8 +588,7 @@ function GroupDetails() {
               {
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization:
-                    "Bearer " + userInfo.author,
+                  Authorization: "Bearer " + userInfo.author,
                 },
               }
             )
@@ -614,8 +598,7 @@ function GroupDetails() {
               {
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization:
-                    "Bearer " + userInfo.author,
+                  Authorization: "Bearer " + userInfo.author,
                 },
               }
             );
@@ -627,10 +610,6 @@ function GroupDetails() {
     } catch (err) {
       console.error(err);
     }
-  };
-  const dataUser = () => {
-    let userInfo = JSON.parse(sessionStorage.getItem("infoUser"));
-    return userInfo.author;
   };
 
   // function renderPostDetail() {
@@ -1160,11 +1139,10 @@ function GroupDetails() {
   //   )
   // }
   //}
-  const findUserInGroup = async (id) => {
-    const member = [];
+  const getAlumniInGroupByGroupId = async (idGroup) => {
     try {
       const response = await axios.get(
-        "https://truongxuaapp.online/api/v1/alumni?pageNumber=1&pageSize=0",
+        `https://truongxuaapp.online/api/v1/alumniingroup/groupid?groupid=${idGroup}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -1173,10 +1151,10 @@ function GroupDetails() {
         }
       );
       if (response.status === 200) {
+        const member = [];
         for (let i = 0; i < response.data.length; i++) {
-          if (response.data[i].groupId === id) {
-            member.push(response.data[i]);
-          }
+          const alumniById = await findAlumniById(response.data[i].alumniId);
+          member.push(alumniById);
         }
         setMemberInGroup(member);
       }
@@ -1184,10 +1162,53 @@ function GroupDetails() {
       console.error(err);
     }
   };
+  const findAlumniById = async (idAlum) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/alumni/${idAlum}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  // const findUserInGroup = async (id) => {
+  //   const member = [];
+  //   try {
+  //     const response = await axios.get(
+  //       "https://truongxuaapp.online/api/v1/alumni?pageNumber=1&pageSize=0",
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: "Bearer " + userInfo.author,
+  //         },
+  //       }
+  //     );
+  //     if (response.status === 200) {
+  //       for (let i = 0; i < response.data.length; i++) {
+  //         if (response.data[i].groupId === id) {
+  //           member.push(response.data[i]);
+  //         }
+  //       }
+  //       setMemberInGroup(member);
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
   useEffect(async () => {
-    const idGroup = await getGroup();
-    await findUserInGroup(idGroup);
+    let query = new URLSearchParams(location.search);
+    const idGroup = await getGroup(query.get("idGroup"));
+    await getAlumniInGroupByGroupId(query.get("idGroup"));
   }, []);
 
   useEffect(async () => {
@@ -1196,10 +1217,10 @@ function GroupDetails() {
     await getAllComment();
   }, [noti]);
 
-  const getGroup = async () => {
+  const getGroup = async (idGroup) => {
     try {
       const response = await axios.get(
-        "https://truongxuaapp.online/api/v1/groups/33",
+        `https://truongxuaapp.online/api/v1/groups/33`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -1293,8 +1314,7 @@ function GroupDetails() {
             {
               headers: {
                 "Content-Type": "application/json",
-                Authorization:
-                  "Bearer " + userInfo.author,
+                Authorization: "Bearer " + userInfo.author,
               },
             }
           );
@@ -1328,8 +1348,7 @@ function GroupDetails() {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization:
-                "Bearer " + userInfo.author,
+              Authorization: "Bearer " + userInfo.author,
             },
           }
         );
@@ -1346,8 +1365,7 @@ function GroupDetails() {
               {
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization:
-                    "Bearer " + userInfo.author,
+                  Authorization: "Bearer " + userInfo.author,
                 },
               }
             );
@@ -1394,8 +1412,7 @@ function GroupDetails() {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization:
-                "Bearer " + userInfo.author,
+              Authorization: "Bearer " + userInfo.author,
             },
           }
         );
@@ -1415,8 +1432,7 @@ function GroupDetails() {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization:
-                "Bearer " + userInfo.author,
+              Authorization: "Bearer " + userInfo.author,
             },
           }
         );
@@ -1538,8 +1554,7 @@ function GroupDetails() {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization:
-                "Bearer " + userInfo.author,
+              Authorization: "Bearer " + userInfo.author,
             },
           }
         );
@@ -1550,7 +1565,6 @@ function GroupDetails() {
   };
 
   const updatePostApi = async () => {
-    //console.log(JSON.parse(localStorage.inf));
     const updatePost = {
       // alumniId: updateAPost.alumniId,
       // content: document.getElementById("emojionearea1").value,
@@ -1560,7 +1574,7 @@ function GroupDetails() {
       //id: updateAPost.id,
 
       alumniId: updateAPost.alumniId,
-      groupId: userInfo.GroupId,
+      groupId: groupRecent.id,
       content: document.getElementById("emojionearea1").value,
       createAt: updateAPost.createAt,
       modifiedAt: new Date(),
@@ -1649,8 +1663,7 @@ function GroupDetails() {
             {
               headers: {
                 "Content-Type": "application/json",
-                Authorization:
-                  "Bearer " + userInfo.author,
+                Authorization: "Bearer " + userInfo.author,
               },
             }
           );
@@ -1697,7 +1710,7 @@ function GroupDetails() {
         const infoRender = memberInGroup.filter(
           (user) => element.alumniId === user.id
         );
-        if (userInfo.GroupId == element.groupId) {
+        if (groupRecent.id == element.groupId) {
           return (
             <div key={index} className="main-wraper">
               <div className="user-post">
@@ -1751,8 +1764,7 @@ function GroupDetails() {
                           </svg>
                         </i>
                         <ul>
-                          {userInfo.Id ==
-                          element.alumniId ? (
+                          {userInfo.Id == element.alumniId ? (
                             <li onClick={() => updatePost(element)}>
                               <i className="icofont-pen-alt-1" />
                               Chỉnh sửa bài đăng
@@ -1767,10 +1779,8 @@ function GroupDetails() {
                             Ẩn bài đăng
                             <span>Hide This Post</span>
                           </li>
-                          {userInfo.Id ==
-                            element.alumniId ||
-                          userInfo.Id ==
-                            groupRecent.groupAdminId ? (
+                          {userInfo.Id == element.alumniId ||
+                          userInfo.Id == groupRecent.groupAdminId ? (
                             <li
                               onClick={() => {
                                 var value =
@@ -3117,8 +3127,7 @@ function GroupDetails() {
                             <i className="icofont-check-circled" />
                             Joined
                           </a>
-                          {userInfo.Id ==
-                          groupRecent.groupAdminId ? (
+                          {userInfo.Id == groupRecent.groupAdminId ? (
                             <label for="imgCover">
                               <div className="wall">
                                 <i class="icofont-camera"></i>
@@ -3141,8 +3150,7 @@ function GroupDetails() {
 
                           <figure className="group-dp">
                             <img src={groupRecent.avataImg} alt="" />
-                            {userInfo.Id ==
-                            groupRecent.groupAdminId ? (
+                            {userInfo.Id == groupRecent.groupAdminId ? (
                               <label for="imgAva">
                                 <a className="icon-camera">
                                   <i class="icofont-camera"></i>
@@ -3261,8 +3269,7 @@ function GroupDetails() {
                               </div>
                             </div>
                             {/* create new post */}
-                            {userInfo.Id ==
-                            groupRecent.groupAdminId ? (
+                            {/* {userInfo.Id == groupRecent.groupAdminId ? (
                               <div
                                 className="event-button"
                                 onClick={showEventPopup}
@@ -3271,7 +3278,7 @@ function GroupDetails() {
                               </div>
                             ) : (
                               ""
-                            )}
+                            )} */}
 
                             {/* <div
                               className="event-button"
@@ -3285,492 +3292,7 @@ function GroupDetails() {
                             {/* suggested friends */}
 
                             {/* share post without image */}
-                            <div className="main-wraper">
-                              <div className="user-post">
-                                <div className="friend-info">
-                                  <figure>
-                                    <img
-                                      alt=""
-                                      src="images/resources/user2.jpg"
-                                    />
-                                  </figure>
-                                  <div className="friend-name">
-                                    <div className="more">
-                                      <div className="more-post-optns">
-                                        <i className>
-                                          <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width={24}
-                                            height={24}
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth={2}
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            className="feather feather-more-horizontal"
-                                          >
-                                            <circle cx={12} cy={12} r={1} />
-                                            <circle cx={19} cy={12} r={1} />
-                                            <circle cx={5} cy={12} r={1} />
-                                          </svg>
-                                        </i>
-                                        <ul>
-                                          <li>
-                                            <i className="icofont-pen-alt-1" />
-                                            Edit Post
-                                            <span>
-                                              Edit This Post within a Hour
-                                            </span>
-                                          </li>
-                                          <li>
-                                            <i className="icofont-ban" />
-                                            Hide Post
-                                            <span>Hide This Post</span>
-                                          </li>
-                                          <li>
-                                            <i className="icofont-ui-delete" />
-                                            Delete Post
-                                            <span>
-                                              If inappropriate Post By Mistake
-                                            </span>
-                                          </li>
-                                          <li>
-                                            <i className="icofont-flag" />
-                                            Report
-                                            <span>Inappropriate content</span>
-                                          </li>
-                                        </ul>
-                                      </div>
-                                    </div>
-                                    <ins>
-                                      <a title href="time-line.html">
-                                        Maria k.
-                                      </a>{" "}
-                                      Premium Product
-                                    </ins>
-                                    <span>
-                                      <i className="icofont-globe" /> published:
-                                      Sep,15 2020
-                                    </span>
-                                  </div>
-                                  <div className="post-meta">
-                                    <figure className="premium-post">
-                                      <img
-                                        src="images/resources/book5.jpg"
-                                        alt=""
-                                      />
-                                    </figure>
-                                    <div className="premium">
-                                      <a
-                                        href="book-detail.html"
-                                        className="post-title"
-                                      >
-                                        Technicial words 2020 Book world
-                                      </a>
-                                      <p>
-                                        Nam eget dui. Etiam rhoncus. Maecenas
-                                        tempus, tellus eget condimentum rhoncus,
-                                        sem quam semper libero.
-                                      </p>
-                                      <a
-                                        className="main-btn purchase-btn"
-                                        title
-                                        href="book-detail.html"
-                                      >
-                                        <i className="icofont-cart-alt" /> Buy
-                                        Now
-                                      </a>
-                                    </div>
-                                    <div className="we-video-info">
-                                      <ul>
-                                        <li>
-                                          <span title="views" className="views">
-                                            <i>
-                                              <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width={16}
-                                                height={16}
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth={2}
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className="feather feather-eye"
-                                              >
-                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                                                <circle cx={12} cy={12} r={3} />
-                                              </svg>
-                                            </i>
-                                            <ins>1.2k</ins>
-                                          </span>
-                                        </li>
-                                        <li>
-                                          <span
-                                            title="Comments"
-                                            className="Recommend"
-                                          >
-                                            <i>
-                                              <svg
-                                                className="feather feather-message-square"
-                                                strokeLinejoin="round"
-                                                strokeLinecap="round"
-                                                strokeWidth={2}
-                                                stroke="currentColor"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                height={16}
-                                                width={16}
-                                                xmlns="http://www.w3.org/2000/svg"
-                                              >
-                                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                                              </svg>
-                                            </i>
-                                            <ins>54</ins>
-                                          </span>
-                                        </li>
-                                        <li>
-                                          <span
-                                            title="follow"
-                                            className="Follow"
-                                          >
-                                            <i>
-                                              <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width={16}
-                                                height={16}
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth={2}
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className="feather feather-star"
-                                              >
-                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                                              </svg>
-                                            </i>
-                                            <ins>5k</ins>
-                                          </span>
-                                        </li>
-                                        <li>
-                                          <span
-                                            className="share-pst"
-                                            title="Share"
-                                          >
-                                            <i>
-                                              <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                width={16}
-                                                height={16}
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth={2}
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                className="feather feather-share-2"
-                                              >
-                                                <circle cx={18} cy={5} r={3} />
-                                                <circle cx={6} cy={12} r={3} />
-                                                <circle cx={18} cy={19} r={3} />
-                                                <line
-                                                  x1="8.59"
-                                                  y1="13.51"
-                                                  x2="15.42"
-                                                  y2="17.49"
-                                                />
-                                                <line
-                                                  x1="15.41"
-                                                  y1="6.51"
-                                                  x2="8.59"
-                                                  y2="10.49"
-                                                />
-                                              </svg>
-                                            </i>
-                                            <ins>205</ins>
-                                          </span>
-                                        </li>
-                                      </ul>
-                                      <a
-                                        href="post-detail.html"
-                                        title
-                                        className="reply"
-                                      >
-                                        Reply <i className="icofont-reply" />
-                                      </a>
-                                    </div>
-                                    <div className="stat-tools">
-                                      <div className="box">
-                                        <div className="Like">
-                                          <a className="Like__link">
-                                            <i className="icofont-like" /> Like
-                                          </a>
-                                          <div className="Emojis">
-                                            <div className="Emoji Emoji--like">
-                                              <div className="icon icon--like" />
-                                            </div>
-                                            <div className="Emoji Emoji--love">
-                                              <div className="icon icon--heart" />
-                                            </div>
-                                            <div className="Emoji Emoji--haha">
-                                              <div className="icon icon--haha" />
-                                            </div>
-                                            <div className="Emoji Emoji--wow">
-                                              <div className="icon icon--wow" />
-                                            </div>
-                                            <div className="Emoji Emoji--sad">
-                                              <div className="icon icon--sad" />
-                                            </div>
-                                            <div className="Emoji Emoji--angry">
-                                              <div className="icon icon--angry" />
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="box">
-                                        <div className="Emojis">
-                                          <div className="Emoji Emoji--like">
-                                            <div className="icon icon--like" />
-                                          </div>
-                                          <div className="Emoji Emoji--love">
-                                            <div className="icon icon--heart" />
-                                          </div>
-                                          <div className="Emoji Emoji--haha">
-                                            <div className="icon icon--haha" />
-                                          </div>
-                                          <div className="Emoji Emoji--wow">
-                                            <div className="icon icon--wow" />
-                                          </div>
-                                          <div className="Emoji Emoji--sad">
-                                            <div className="icon icon--sad" />
-                                          </div>
-                                          <div className="Emoji Emoji--angry">
-                                            <div className="icon icon--angry" />
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <a title href="#" className="comment-to">
-                                        <i className="icofont-comment" />{" "}
-                                        Comment
-                                      </a>
-                                      <a title href="#" className="share-to">
-                                        <i className="icofont-share-alt" />{" "}
-                                        Share
-                                      </a>
-                                      <div className="emoji-state">
-                                        <div className="popover_wrapper">
-                                          <a
-                                            className="popover_title"
-                                            href="#"
-                                            title
-                                          >
-                                            <img
-                                              alt=""
-                                              src="images/smiles/thumb.png"
-                                            />
-                                          </a>
-                                          <div className="popover_content">
-                                            <span>
-                                              <img
-                                                alt=""
-                                                src="images/smiles/thumb.png"
-                                              />{" "}
-                                              Likes
-                                            </span>
-                                            <ul className="namelist">
-                                              <li>Jhon Doe</li>
-                                              <li>Amara Sin</li>
-                                              <li>Sarah K.</li>
-                                              <li>
-                                                <span>20+ more</span>
-                                              </li>
-                                            </ul>
-                                          </div>
-                                        </div>
-                                        <div className="popover_wrapper">
-                                          <a
-                                            className="popover_title"
-                                            href="#"
-                                            title
-                                          >
-                                            <img
-                                              alt=""
-                                              src="images/smiles/heart.png"
-                                            />
-                                          </a>
-                                          <div className="popover_content">
-                                            <span>
-                                              <img
-                                                alt=""
-                                                src="images/smiles/heart.png"
-                                              />{" "}
-                                              Love
-                                            </span>
-                                            <ul className="namelist">
-                                              <li>Amara Sin</li>
-                                              <li>Jhon Doe</li>
-                                              <li>
-                                                <span>10+ more</span>
-                                              </li>
-                                            </ul>
-                                          </div>
-                                        </div>
-                                        <div className="popover_wrapper">
-                                          <a
-                                            className="popover_title"
-                                            href="#"
-                                            title
-                                          >
-                                            <img
-                                              alt=""
-                                              src="images/smiles/smile.png"
-                                            />
-                                          </a>
-                                          <div className="popover_content">
-                                            <span>
-                                              <img
-                                                alt=""
-                                                src="images/smiles/smile.png"
-                                              />{" "}
-                                              Happy
-                                            </span>
-                                            <ul className="namelist">
-                                              <li>Sarah K.</li>
-                                              <li>Jhon Doe</li>
-                                              <li>Amara Sin</li>
-                                              <li>
-                                                <span>100+ more</span>
-                                              </li>
-                                            </ul>
-                                          </div>
-                                        </div>
-                                        <div className="popover_wrapper">
-                                          <a
-                                            className="popover_title"
-                                            href="#"
-                                            title
-                                          >
-                                            <img
-                                              alt=""
-                                              src="images/smiles/weep.png"
-                                            />
-                                          </a>
-                                          <div className="popover_content">
-                                            <span>
-                                              <img
-                                                alt=""
-                                                src="images/smiles/weep.png"
-                                              />{" "}
-                                              Dislike
-                                            </span>
-                                            <ul className="namelist">
-                                              <li>Danial Carbal</li>
-                                              <li>Amara Sin</li>
-                                              <li>Sarah K.</li>
-                                              <li>
-                                                <span>15+ more</span>
-                                              </li>
-                                            </ul>
-                                          </div>
-                                        </div>
-                                        <p>10+</p>
-                                      </div>
-                                      <div
-                                        className="new-comment"
-                                        style={{ display: "block" }}
-                                      >
-                                        <form method="post">
-                                          <input
-                                            type="text"
-                                            placeholder="write comment"
-                                          />
-                                          <button type="submit">
-                                            <i className="icofont-paper-plane" />
-                                          </button>
-                                        </form>
-                                        <div className="comments-area">
-                                          <ul>
-                                            <li>
-                                              <figure>
-                                                <img
-                                                  alt=""
-                                                  src="images/resources/user1.jpg"
-                                                />
-                                              </figure>
-                                              <div className="commenter">
-                                                <h5>
-                                                  <a title href="#">
-                                                    Jack Carter
-                                                  </a>
-                                                </h5>
-                                                <span>2 hours ago</span>
-                                                <p>
-                                                  i think that some how, we
-                                                  learn who we really are and
-                                                  then live with that decision,
-                                                  great post!
-                                                </p>
-                                                <span>
-                                                  you can view the more detail
-                                                  via link
-                                                </span>
-                                                <a title href="#">
-                                                  https://www.youtube.com/watch?v=HpZgwHU1GcI
-                                                </a>
-                                              </div>
-                                              <a title="Like" href="#">
-                                                <i className="icofont-heart" />
-                                              </a>
-                                              <a
-                                                title="Reply"
-                                                href="#"
-                                                className="reply-coment"
-                                              >
-                                                <i className="icofont-reply" />
-                                              </a>
-                                            </li>
-                                            <li>
-                                              <figure>
-                                                <img
-                                                  alt=""
-                                                  src="images/resources/user2.jpg"
-                                                />
-                                              </figure>
-                                              <div className="commenter">
-                                                <h5>
-                                                  <a title href="#">
-                                                    Ching xang
-                                                  </a>
-                                                </h5>
-                                                <span>2 hours ago</span>
-                                                <p>
-                                                  i think that some how, we
-                                                  learn who we really are and
-                                                  then live with that decision,
-                                                  great post!
-                                                </p>
-                                              </div>
-                                              <a title="Like" href="#">
-                                                <i className="icofont-heart" />
-                                              </a>
-                                              <a
-                                                title="Reply"
-                                                href="#"
-                                                className="reply-coment"
-                                              >
-                                                <i className="icofont-reply" />
-                                              </a>
-                                            </li>
-                                          </ul>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+
                             {/* post sell book */}
                             <div>{renderHome()}</div>
                           </div>
@@ -3855,7 +3377,6 @@ function GroupDetails() {
                     name="name"
                     type="text"
                     placeholder="Tên sự kiện"
-                    
                     {...register("name", {
                       required: "Nhập tên sự kiện ",
                     })}
@@ -3869,7 +3390,6 @@ function GroupDetails() {
                     name="description"
                     type="text"
                     placeholder="Mô tả"
-                    
                     {...register("description", {
                       required: "Nhập mô tả ",
                     })}
@@ -3891,7 +3411,6 @@ function GroupDetails() {
                           name="hourStart"
                           type="number"
                           placeholder="Giờ"
-                          
                           {...register("hourStart", {
                             max: {
                               value: 24,
@@ -3902,9 +3421,8 @@ function GroupDetails() {
                               message: "Giờ trong khoảng 0-24h ",
                             },
                             required: "Nhập giờ ",
-                          })
-                        }onChange={onChange}
-                        
+                          })}
+                          onChange={onChange}
                         />
                         {errors.hourStart && (
                           <p className="error">{errors.hourStart.message}</p>
@@ -3916,7 +3434,6 @@ function GroupDetails() {
                           name="minuteStart"
                           type="number"
                           placeholder="Phút"
-                         
                           {...register("minuteStart", {
                             max: {
                               value: 60,
@@ -3926,7 +3443,7 @@ function GroupDetails() {
                               value: 0,
                               message: "Giờ trong khoảng 0-60 phút ",
                             },
-                          })} 
+                          })}
                           onChange={onChange}
                         />
                         {errors.minuteStart && (
@@ -3948,7 +3465,6 @@ function GroupDetails() {
                           name="hourEnd"
                           type="number"
                           placeholder="Giờ"
-                         
                           {...register("hourEnd", {
                             max: {
                               value: 24,
@@ -3959,9 +3475,8 @@ function GroupDetails() {
                               message: "Giờ trong khoảng 0-24h ",
                             },
                             required: "Nhập giờ ",
-                          })
-                       }onChange={onChange} 
-                      
+                          })}
+                          onChange={onChange}
                         />
                         {errors.hourEnd && (
                           <p className="error">{errors.hourEnd.message}</p>
@@ -3973,7 +3488,6 @@ function GroupDetails() {
                           name="minuteEnd"
                           type="number"
                           placeholder="Phút"
-                         
                           {...register("minuteEnd", {
                             max: {
                               value: 60,
@@ -3984,7 +3498,7 @@ function GroupDetails() {
                               message: "Phút trong khoảng 0-60 phút ",
                             },
                           })}
-                           onChange={onChange}
+                          onChange={onChange}
                         />
                         {errors.minuteEnd && (
                           <p className="error">{errors.minuteEnd.message}</p>
@@ -4017,7 +3531,6 @@ function GroupDetails() {
                       >
                         Thêm
                       </span>
-
                     </div>
                     <p className="error">{activityError}</p>
                     <div className="activity-item">
