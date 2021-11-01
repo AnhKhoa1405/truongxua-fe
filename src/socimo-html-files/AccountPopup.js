@@ -55,6 +55,54 @@ function AccountPopup(props) {
     });
   };
 
+  async function featchGroups(shoolYearId) {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/groups/schoolyearid?schoolyearid=${shoolYearId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+        console.log(response.data.length);
+      // for (let i = 0; i <response.data.length; i++) {
+      //   let data = {
+      //     classId: response.data[i].id,
+      //     alumniId: userInfo.Id
+      //   }
+      //   await saveAlumiToGroup(data);
+      // }
+      const listGroups = response.data;
+      
+      return listGroups;
+      
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  
+  async function saveAlumiToGroup(data) {
+    try {
+      const response = await axios.post(
+        `https://truongxuaapp.online/api/v1/alumniingroup`, data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+      if(response.status === 200){
+        console.log("thanh cong " + response.data)
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  
+
   const findSchoolYear = (schoolId) => {
     let listYears = [];
     schoolYear.forEach(element => {
@@ -176,9 +224,18 @@ function AccountPopup(props) {
             Authorization: "Bearer " + userInfo.author,}
       }
     )
+    if(response.status === 200){
+    const listGroup = await featchGroups(formData.schoolId);
+    for (let i = 0; i <listGroup.length; i++) {
+        let data = {
+          classId: listGroup[i].id,
+          alumniId: userInfo.Id
+        };
+        await saveAlumiToGroup(data);
+      }
     encodeToDecode(token);
 	setTrigger(false);
- 
+ }
   }
   catch(err){
     console.log(err)

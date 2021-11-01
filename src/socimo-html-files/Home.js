@@ -33,8 +33,25 @@ function Home() {
       console.log(error);
     }
   };
+   const test = async () => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/alumniingroup?sort=desc&pageNumber=0&pageSize=0`,
+        {
+        headers: {"Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,}
+      }
+  
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-
+useEffect(async ()=> {
+  await test()
+},[])  
   useEffect(async() => {
     await getEventInSchool();
   },[userInfo]);
@@ -1196,6 +1213,11 @@ function Home() {
                           </ul>
                         </div> */}
                       {/* chat rooms */}
+                      {clickEvent &&  
+                            eventInSchool.map((event) => {
+                              return <EventLoad props = {event}/>
+                            })
+                          }
                       {clickGroups && <Groups />}
                       {clickHome && (
                         <div className="blogsInSchool">
@@ -1250,13 +1272,7 @@ function Home() {
                               </ul>
                             </div>
                           </div>
-                         
-                          {
-                            eventInSchool.map((event) => {
-                              return <EventLoad props = {event}/>
-                            })
-                          }
-                           
+                                                   
                           <div>{renderHome()}</div>
                         </div>
                       )}
