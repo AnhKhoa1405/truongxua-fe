@@ -2,18 +2,19 @@ import React, { useState, useEffect } from "react";
 import "../css/group.css";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import {useSelector} from "react-redux"
 
 function Groups(props) {
   const [listGroups, setListGroups] = useState([]);
-
+  const userInfo = useSelector(state => state.userReducer.user)
   async function featchGroups() {
     try {
       const response = await axios.get(
-        "https://truongxuaapp.online/api/v1/groups?pageNumber=1&pageSize=5",
+        `https://truongxuaapp.online/api/v1/groups/schoolyearid?schoolyearid=${userInfo.SchoolId}`,
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + JSON.parse(localStorage.infoUser).author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
@@ -52,7 +53,7 @@ function Groups(props) {
           </div>
 
           <div className="bottom">
-            <Link to="/groupDetails">
+            <Link to={`groupDetails?idGroup=${group.id}`}>
               <p className="join">Tham gia</p>
             </Link>
           </div>
