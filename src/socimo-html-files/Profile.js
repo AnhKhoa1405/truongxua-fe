@@ -119,11 +119,12 @@ function Profile() {
   const renderFollower = () => {
     if (listFollow != undefined) {
       return listFollow.map((element, index) => {
-        //console.log(element)
+        const url = "/profile/" + element.followerId;
         return (
           <div key={index} className="col-lg-4 col-md-4 col-sm-6">
             <div className="friendz">
               <figure>
+                <Link to={url}>
                 <img
                   style={{
                     width: 80,
@@ -132,11 +133,16 @@ function Profile() {
                   src={element.alumniDetail.img}
                   alt=""
                 />
+                </Link>
+                
               </figure>
               <span>
+                <Link to={url}>
                 <a href="#" title>
                   {element.alumniDetail.name}
                 </a>
+                </Link>
+                
               </span>
               <a
                 onClick={() => deleteFollow(element)}
