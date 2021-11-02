@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import HeaderPage from "./Header";
 import "../css/groupdetail.css";
 import { useForm } from "react-hook-form";
-import {useSelector} from "react-redux"
+import { useSelector } from "react-redux";
 
 function GroupDetails() {
   const moment = require("moment-timezone");
+  let location = useLocation();
   const [eventPopup, setEventPopup] = useState(false);
   const {
     register,
@@ -15,7 +16,7 @@ function GroupDetails() {
     watch,
     formState: { errors },
   } = useForm();
-   const userInfo = useSelector(state => state.userReducer.user)
+  const userInfo = useSelector((state) => state.userReducer.user);
   const showEventPopup = () => {
     console.log(userInfo.infoDetail.name);
     setEventPopup(true);
@@ -49,10 +50,15 @@ function GroupDetails() {
     setActivityError("");
   };
 
-  
+  useEffect(async () => {
+    let query = new URLSearchParams(location.search);
+    await getGroup(query.get("idGroup"));
+    await getAlumniInGroupByGroupId(query.get("idGroup"));
+  }, []);
+
   const [errorStart, setErrorStart] = useState("");
   const [errorEnd, setErrorEnd] = useState("");
-  
+
   const [formEvent, setFormEvent] = useState(initialState);
   // const [imgSave, setImgSave] = useState([]);
   const [content, setContent] = useState("");
@@ -103,66 +109,59 @@ function GroupDetails() {
     let minuteStart = formEvent.minuteStart.toString();
     let hourEnd = formEvent.hourEnd.toString();
     let minuteEnd = formEvent.minuteEnd.toString();
-    if(hourStart<10) hourStart= "0"+hourStart;
-    if(minuteStart<10) minuteStart= "0"+minuteStart;
-    if(hourEnd<10) hourEnd= "0"+hourEnd;
-    if(minuteEnd<10) minuteEnd= "0"+minuteEnd;
-   if(formEvent.startDate == "") {
-       setErrorStart("Nhập ngày bắt đầu");
+    if (hourStart < 10) hourStart = "0" + hourStart;
+    if (minuteStart < 10) minuteStart = "0" + minuteStart;
+    if (hourEnd < 10) hourEnd = "0" + hourEnd;
+    if (minuteEnd < 10) minuteEnd = "0" + minuteEnd;
+    if (formEvent.startDate == "") {
+      setErrorStart("Nhập ngày bắt đầu");
     }
-     if(formEvent.endDate == "") {
-       setErrorEnd("Nhập ngày kết thúc");
+    if (formEvent.endDate == "") {
+      setErrorEnd("Nhập ngày kết thúc");
     }
 
-    if (formEvent.startDate != "" || formEvent.endDate != "" || activityEvent.length ==0) {
-
+    if (
+      formEvent.startDate != "" ||
+      formEvent.endDate != "" ||
+      activityEvent.length == 0
+    ) {
       const start = moment
         .tz(
           `${formEvent.startDate} ${hourStart}:${minuteStart}`,
           "Asia/Ho_Chi_Minh"
         )
         .format();
-        const end = moment
-      .tz(
-        `${
-          formEvent.endDate
-        } ${hourEnd}:${minuteEnd}`,
-        "Asia/Ho_Chi_Minh"
-      )
-      .format();
+      const end = moment
+        .tz(`${formEvent.endDate} ${hourEnd}:${minuteEnd}`, "Asia/Ho_Chi_Minh")
+        .format();
       if (start < m) {
         console.log(start);
-        setErrorStart("Ngày bắt đầu và thời gian phải lớn hơn thời gian hiện tại");
+        setErrorStart(
+          "Ngày bắt đầu và thời gian phải lớn hơn thời gian hiện tại"
+        );
         return;
       }
-       if(start >= end) {
+      if (start >= end) {
         console.log(end);
-        setErrorEnd("Ngày kết thúc và thời gian phải lớn hơn thời gian bắt đầu");
-        return;
-        
-      }
-      if(activityEvent.length == 0) {
-        setActivityError("Thêm ít nhất 1 hoạt động ")
+        setErrorEnd(
+          "Ngày kết thúc và thời gian phải lớn hơn thời gian bắt đầu"
+        );
         return;
       }
-
+      if (activityEvent.length == 0) {
+        setActivityError("Thêm ít nhất 1 hoạt động ");
+        return;
+      }
     }
- 
+
     const start = moment
       .tz(
-        `${
-          formEvent.startDate
-        } ${hourStart}:${minuteStart}`,
+        `${formEvent.startDate} ${hourStart}:${minuteStart}`,
         "Asia/Ho_Chi_Minh"
       )
       .format();
     const end = moment
-      .tz(
-        `${
-          formEvent.endDate
-        } ${hourEnd}:${minuteEnd}`,
-        "Asia/Ho_Chi_Minh"
-      )
+      .tz(`${formEvent.endDate} ${hourEnd}:${minuteEnd}`, "Asia/Ho_Chi_Minh")
       .format();
     const data = {
       alumniCreatedId: formEvent.alumniCreatedId,
@@ -198,7 +197,6 @@ function GroupDetails() {
     } catch (err) {
       console.log(err);
     }
- 
   };
 
   const saveEventActivity = async (eventId) => {
@@ -214,8 +212,7 @@ function GroupDetails() {
             {
               headers: {
                 "Content-Type": "application/json",
-                Authorization:
-                  "Bearer " + userInfo.author,
+                Authorization: "Bearer " + userInfo.author,
               },
             }
           );
@@ -457,9 +454,7 @@ function GroupDetails() {
   const renderComment = (idPost) => {
     return comment.map((element, index) => {
       const d = new Date(element.createAt);
-      const userComment = memberInGroup.filter(
-        (user) => element.alumniId === user.id
-      );
+
       if (idPost === element.postId && element.status == true) {
         return (
           <li key={index}>
@@ -470,13 +465,13 @@ function GroupDetails() {
                   width: 25,
                   height: 25,
                 }}
-                src={memberInGroup.length > 0 ? userComment[0].img : "thua"}
+                src={element.comUser.img}
               />
             </figure>
             <div className="commenter">
               <h5>
                 <a title href="#">
-                  {memberInGroup.length > 0 ? userComment[0].name : "Khoa"}
+                  {element.comUser.name}
                 </a>
               </h5>
               <span>
@@ -484,8 +479,7 @@ function GroupDetails() {
               </span>
               <p> {element.content}</p>
               {userInfo.Id == element.alumniId ||
-              userInfo.Id ==
-                groupRecent.groupAdminId ? (
+              userInfo.Id == groupRecent.groupAdminId ? (
                 <div
                   style={{
                     zIndex: 10,
@@ -518,8 +512,7 @@ function GroupDetails() {
                       width: 400,
                     }}
                   >
-                    {userInfo.Id ==
-                    element.alumniId ? (
+                    {userInfo.Id == element.alumniId ? (
                       <li
                         style={{ margin: 0 }}
                         onClick={() => editComment(element, idPost)}
@@ -574,6 +567,11 @@ function GroupDetails() {
         }
       );
       if (response.status === 200) {
+        for(let i = 0 ; i < response.data.length;i++){
+          
+          const alumni = await findAlumniById(response.data[i].alumniId);
+          response.data[i].comUser = alumni;
+        }
         setComment(response.data);
       }
     } catch (err) {
@@ -584,17 +582,14 @@ function GroupDetails() {
   const createComment = async (idPost) => {
     try {
       const data = {
-        alumniId:
-          updateCmt === undefined
-            ? userInfo.Id
-            : updateCmt.alumniId,
+        alumniId: updateCmt === undefined ? userInfo.Id : updateCmt.alumniId,
         postId: updateCmt === undefined ? idPost : updateCmt.postId,
         content: document.getElementById(idPost).value,
         createAt: updateCmt === undefined ? new Date() : updateCmt.createAt,
         modifiedAt: updateCmt === undefined ? null : new Date(),
         status: true,
       };
-      //console.log(JSON.parse(localStorage.infoUser).author);
+
       const response =
         updateCmt === undefined
           ? await axios.post(
@@ -603,8 +598,7 @@ function GroupDetails() {
               {
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization:
-                    "Bearer " + userInfo.author,
+                  Authorization: "Bearer " + userInfo.author,
                 },
               }
             )
@@ -614,8 +608,7 @@ function GroupDetails() {
               {
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization:
-                    "Bearer " + userInfo.author,
+                  Authorization: "Bearer " + userInfo.author,
                 },
               }
             );
@@ -627,10 +620,6 @@ function GroupDetails() {
     } catch (err) {
       console.error(err);
     }
-  };
-  const dataUser = () => {
-    let userInfo = JSON.parse(sessionStorage.getItem("infoUser"));
-    return userInfo.author;
   };
 
   // function renderPostDetail() {
@@ -1160,11 +1149,10 @@ function GroupDetails() {
   //   )
   // }
   //}
-  const findUserInGroup = async (id) => {
-    const member = [];
+  const getAlumniInGroupByGroupId = async (idGroup) => {
     try {
       const response = await axios.get(
-        "https://truongxuaapp.online/api/v1/alumni?pageNumber=1&pageSize=0",
+        `https://truongxuaapp.online/api/v1/alumniingroup/groupid?groupid=${idGroup}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -1173,12 +1161,32 @@ function GroupDetails() {
         }
       );
       if (response.status === 200) {
+        const member = [];
         for (let i = 0; i < response.data.length; i++) {
-          if (response.data[i].groupId === id) {
-            member.push(response.data[i]);
-          }
+          //console.log(response.data[i])
+          const alumniById = await findAlumniById(response.data[i].alumniId);
+          member.push(alumniById);
         }
+
         setMemberInGroup(member);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const findAlumniById = async (idAlum) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/alumni/${idAlum}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
       }
     } catch (err) {
       console.error(err);
@@ -1186,20 +1194,15 @@ function GroupDetails() {
   };
 
   useEffect(async () => {
-    const idGroup = await getGroup();
-    await findUserInGroup(idGroup);
-  }, []);
-
-  useEffect(async () => {
     await getAllPost();
     setTimeout(() => getAllImg(), 3000);
     await getAllComment();
   }, [noti]);
 
-  const getGroup = async () => {
+  const getGroup = async (idGroup) => {
     try {
       const response = await axios.get(
-        "https://truongxuaapp.online/api/v1/groups/33",
+        `https://truongxuaapp.online/api/v1/groups/${idGroup}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -1209,7 +1212,6 @@ function GroupDetails() {
       );
       if (response.status == 200) {
         setGroupRecent(response.data);
-        return response.data.id;
       }
     } catch (err) {
       console.error(err);
@@ -1244,9 +1246,15 @@ function GroupDetails() {
           },
         }
       );
-      setDataContent(response.data);
-
-      return response.data[0].id;
+      if (response.status === 200) {
+        for (let i = 0; i < response.data.length; i++) {
+          const alumni = await findAlumniById(response.data[i].alumniId);
+          response.data[i].userPost = alumni;
+        }
+        console.log(response.data);
+        setDataContent(response.data);
+        return response.data[0].id;
+      }
     } catch (err) {
       console.error(err);
     }
@@ -1293,8 +1301,7 @@ function GroupDetails() {
             {
               headers: {
                 "Content-Type": "application/json",
-                Authorization:
-                  "Bearer " + userInfo.author,
+                Authorization: "Bearer " + userInfo.author,
               },
             }
           );
@@ -1328,8 +1335,7 @@ function GroupDetails() {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization:
-                "Bearer " + userInfo.author,
+              Authorization: "Bearer " + userInfo.author,
             },
           }
         );
@@ -1346,8 +1352,7 @@ function GroupDetails() {
               {
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization:
-                    "Bearer " + userInfo.author,
+                  Authorization: "Bearer " + userInfo.author,
                 },
               }
             );
@@ -1394,8 +1399,7 @@ function GroupDetails() {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization:
-                "Bearer " + userInfo.author,
+              Authorization: "Bearer " + userInfo.author,
             },
           }
         );
@@ -1415,8 +1419,7 @@ function GroupDetails() {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization:
-                "Bearer " + userInfo.author,
+              Authorization: "Bearer " + userInfo.author,
             },
           }
         );
@@ -1538,8 +1541,7 @@ function GroupDetails() {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization:
-                "Bearer " + userInfo.author,
+              Authorization: "Bearer " + userInfo.author,
             },
           }
         );
@@ -1550,7 +1552,6 @@ function GroupDetails() {
   };
 
   const updatePostApi = async () => {
-    //console.log(JSON.parse(localStorage.inf));
     const updatePost = {
       // alumniId: updateAPost.alumniId,
       // content: document.getElementById("emojionearea1").value,
@@ -1560,7 +1561,7 @@ function GroupDetails() {
       //id: updateAPost.id,
 
       alumniId: updateAPost.alumniId,
-      groupId: userInfo.GroupId,
+      groupId: groupRecent.id,
       content: document.getElementById("emojionearea1").value,
       createAt: updateAPost.createAt,
       modifiedAt: new Date(),
@@ -1649,8 +1650,7 @@ function GroupDetails() {
             {
               headers: {
                 "Content-Type": "application/json",
-                Authorization:
-                  "Bearer " + userInfo.author,
+                Authorization: "Bearer " + userInfo.author,
               },
             }
           );
@@ -1694,10 +1694,7 @@ function GroupDetails() {
     if (dataContent != undefined) {
       return dataContent.map((element, index) => {
         const d = new Date(element.createAt);
-        const infoRender = memberInGroup.filter(
-          (user) => element.alumniId === user.id
-        );
-        if (userInfo.GroupId == element.groupId) {
+        if (groupRecent.id == element.groupId) {
           return (
             <div key={index} className="main-wraper">
               <div className="user-post">
@@ -1724,9 +1721,7 @@ function GroupDetails() {
                         height: 40,
                       }}
                       alt=""
-                      src={
-                        memberInGroup.length > 0 ? infoRender[0].img : "thua"
-                      }
+                      src={element.userPost.img}
                     />
                   </figure>
                   <div className="friend-name">
@@ -1751,8 +1746,7 @@ function GroupDetails() {
                           </svg>
                         </i>
                         <ul>
-                          {userInfo.Id ==
-                          element.alumniId ? (
+                          {userInfo.Id == element.alumniId ? (
                             <li onClick={() => updatePost(element)}>
                               <i className="icofont-pen-alt-1" />
                               Chỉnh sửa bài đăng
@@ -1767,10 +1761,8 @@ function GroupDetails() {
                             Ẩn bài đăng
                             <span>Hide This Post</span>
                           </li>
-                          {userInfo.Id ==
-                            element.alumniId ||
-                          userInfo.Id ==
-                            groupRecent.groupAdminId ? (
+                          {userInfo.Id == element.alumniId ||
+                          userInfo.Id == groupRecent.groupAdminId ? (
                             <li
                               onClick={() => {
                                 var value =
@@ -1797,7 +1789,7 @@ function GroupDetails() {
                     </div>
                     <ins>
                       <a title href="#">
-                        {memberInGroup.length > 0 ? infoRender[0].name : "Khoa"}
+                        {element.userPost.name}
                       </a>{" "}
                       Tạo bài đăng
                     </ins>
@@ -3117,8 +3109,7 @@ function GroupDetails() {
                             <i className="icofont-check-circled" />
                             Joined
                           </a>
-                          {userInfo.Id ==
-                          groupRecent.groupAdminId ? (
+                          {userInfo.Id == groupRecent.groupAdminId ? (
                             <label for="imgCover">
                               <div className="wall">
                                 <i class="icofont-camera"></i>
@@ -3141,8 +3132,7 @@ function GroupDetails() {
 
                           <figure className="group-dp">
                             <img src={groupRecent.avataImg} alt="" />
-                            {userInfo.Id ==
-                            groupRecent.groupAdminId ? (
+                            {userInfo.Id == groupRecent.groupAdminId ? (
                               <label for="imgAva">
                                 <a className="icon-camera">
                                   <i class="icofont-camera"></i>
@@ -3261,8 +3251,7 @@ function GroupDetails() {
                               </div>
                             </div>
                             {/* create new post */}
-                            {userInfo.Id ==
-                            groupRecent.groupAdminId ? (
+                            {userInfo.Id == groupRecent.groupAdminId ? (
                               <div
                                 className="event-button"
                                 onClick={showEventPopup}
@@ -3855,7 +3844,6 @@ function GroupDetails() {
                     name="name"
                     type="text"
                     placeholder="Tên sự kiện"
-                    
                     {...register("name", {
                       required: "Nhập tên sự kiện ",
                     })}
@@ -3869,7 +3857,6 @@ function GroupDetails() {
                     name="description"
                     type="text"
                     placeholder="Mô tả"
-                    
                     {...register("description", {
                       required: "Nhập mô tả ",
                     })}
@@ -3891,7 +3878,6 @@ function GroupDetails() {
                           name="hourStart"
                           type="number"
                           placeholder="Giờ"
-                          
                           {...register("hourStart", {
                             max: {
                               value: 24,
@@ -3902,9 +3888,8 @@ function GroupDetails() {
                               message: "Giờ trong khoảng 0-24h ",
                             },
                             required: "Nhập giờ ",
-                          })
-                        }onChange={onChange}
-                        
+                          })}
+                          onChange={onChange}
                         />
                         {errors.hourStart && (
                           <p className="error">{errors.hourStart.message}</p>
@@ -3916,7 +3901,6 @@ function GroupDetails() {
                           name="minuteStart"
                           type="number"
                           placeholder="Phút"
-                         
                           {...register("minuteStart", {
                             max: {
                               value: 60,
@@ -3926,7 +3910,7 @@ function GroupDetails() {
                               value: 0,
                               message: "Giờ trong khoảng 0-60 phút ",
                             },
-                          })} 
+                          })}
                           onChange={onChange}
                         />
                         {errors.minuteStart && (
@@ -3948,7 +3932,6 @@ function GroupDetails() {
                           name="hourEnd"
                           type="number"
                           placeholder="Giờ"
-                         
                           {...register("hourEnd", {
                             max: {
                               value: 24,
@@ -3959,9 +3942,8 @@ function GroupDetails() {
                               message: "Giờ trong khoảng 0-24h ",
                             },
                             required: "Nhập giờ ",
-                          })
-                       }onChange={onChange} 
-                      
+                          })}
+                          onChange={onChange}
                         />
                         {errors.hourEnd && (
                           <p className="error">{errors.hourEnd.message}</p>
@@ -3973,7 +3955,6 @@ function GroupDetails() {
                           name="minuteEnd"
                           type="number"
                           placeholder="Phút"
-                         
                           {...register("minuteEnd", {
                             max: {
                               value: 60,
@@ -3984,7 +3965,7 @@ function GroupDetails() {
                               message: "Phút trong khoảng 0-60 phút ",
                             },
                           })}
-                           onChange={onChange}
+                          onChange={onChange}
                         />
                         {errors.minuteEnd && (
                           <p className="error">{errors.minuteEnd.message}</p>
@@ -4017,7 +3998,6 @@ function GroupDetails() {
                       >
                         Thêm
                       </span>
-
                     </div>
                     <p className="error">{activityError}</p>
                     <div className="activity-item">

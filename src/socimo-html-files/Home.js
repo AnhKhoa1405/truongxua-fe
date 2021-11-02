@@ -5,6 +5,7 @@ import Groups from "./Groups";
 import HeaderPage from "./Header";
 import EventLoad from "./EventLoad"
 import {useSelector} from 'react-redux'
+import { PayPalButton } from "react-paypal-button-v2";
 
 function Home() {
   const userInfo = useSelector(state => state.userReducer.user)
@@ -18,6 +19,27 @@ function Home() {
   const axios = require("axios").default;
   const [eventInSchool, setEventInSchool] = useState([]);
 
+  
+  const getStatusDonate = async (eventId) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/donates/alumni-in-event?alumniId=${userInfo.Id}&eventId=${eventId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
    const getEventInSchool = async () => {
     try {
       const response = await axios.get(
@@ -26,8 +48,14 @@ function Home() {
         headers: {"Content-Type": "application/json",
             Authorization: "Bearer " + userInfo.author,}
       }
-  
       );
+      if (response.status === 200) {
+        for (let i = 0; i < response.data.length; i++) {
+          const statusDo = await getStatusDonate(response.data[i].id);
+          console.log(statusDo)
+          response.data[i].statusDonate = statusDo;
+        }
+      }
       setEventInSchool(response.data);
     } catch (error) {
       console.log(error);
