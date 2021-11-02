@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import {useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 import { PayPalButton } from "react-paypal-button-v2";
 function EventLoad(props) {
   const initialState = {
     name: "",
     img: "",
   };
-   const userInfo = useSelector(state => state.userReducer.user)
-   const [donateComplete, setDonateComplete] = useState(false);
+  const userInfo = useSelector((state) => state.userReducer.user);
+  const [donateComplete, setDonateComplete] = useState(false);
   const [imageEvent, setImageEvent] = useState([]);
   const [feedBackInEvent, setFeedBackInEvent] = useState([]);
   const [idUpdate, setIdUpdate] = useState(-1);
@@ -19,7 +19,7 @@ function EventLoad(props) {
     const time = dayTime[1].split(":");
     return `${day[0]}/${day[1]}/${day[2]} ${time[0]} giờ, ${time[1]} phút`;
   };
-
+  const [priceToPayPal, isPriceToPalPal] = useState((props.props.ticketPrice / 23000).toFixed(2))
   const [profile, setProfile] = useState(initialState);
 
   const saveDonationInDb = async (data) => {
@@ -41,7 +41,6 @@ function EventLoad(props) {
       console.error(err);
     }
   };
-
 
   const getProfile = async (alumniCreatedId) => {
     try {
@@ -146,7 +145,7 @@ function EventLoad(props) {
               </h5>
               <span>2 hours ago</span>
               <p>{element.content}</p>
-             
+
               {element.profile.id == userInfo.Id ? (
                 <div
                   style={{
@@ -271,8 +270,7 @@ function EventLoad(props) {
               {
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization:
-                    "Bearer " + userInfo.author,
+                  Authorization: "Bearer " + userInfo.author,
                 },
               }
             )
@@ -282,8 +280,7 @@ function EventLoad(props) {
               {
                 headers: {
                   "Content-Type": "application/json",
-                  Authorization:
-                    "Bearer " + userInfo.author,
+                  Authorization: "Bearer " + userInfo.author,
                 },
               }
             );
@@ -321,7 +318,6 @@ function EventLoad(props) {
       console.error(err);
     }
   };
-
 
   const deleteFeedback = async (id) => {
     try {
@@ -451,27 +447,51 @@ function EventLoad(props) {
               !props.props.statusDonate &&
               !donateComplete ? (
                 <PayPalButton
-                  amount={(props.props.ticketPrice / 23000).toFixed(2)}
+                  amount={props.props.ticketPrice}
                   // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
                   onSuccess={(details, data) => {
                     saveDonationInDb({
-                      eventId: props.props.id,
-                      alumniId: userInfo.Id,
-                      dateDonante: new Date(),
-                      paymentMethod: "Paypal",
-                      amount: props.props.ticketPrice,
-                    });
+                            eventId: props.props.id,
+                            alumniId: userInfo.Id,
+                            dateDonante: new Date(),
+                            paymentMethod: "Paypal",
+                            amount: props.props.ticketPrice,
+                          });
 
                     // OPTIONAL: Call your server to save the transaction
                     return fetch("/paypal-transaction-complete", {
                       method: "post",
                       body: JSON.stringify({
-                        orderID: data.orderID,
+                        orderId: data.orderID,
                       }),
                     });
                   }}
+                  options={{
+                    clientId:
+                      "AQcrdEu0mdkLrgpuAJ-sOCxqHcxTijxDi2DKptqPZVXnkAAcpzZeq9cFWJyP7mQ4TYzcEeZpS_AriCIx",
+                  }}
                 />
               ) : (
+                // <PayPalButton
+                //   amount={(props.props.ticketPrice / 23000).toFixed(2)}
+                //   // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
+                //   onSuccess={(details, data) => {
+                //     saveDonationInDb({
+                //       eventId: props.props.id,
+                //       alumniId: userInfo.Id,
+                //       dateDonante: new Date(),
+                //       paymentMethod: "Paypal",
+                //       amount: props.props.ticketPrice,
+                //     });
+                //     // OPTIONAL: Call your server to save the transaction
+                //     return fetch("/paypal-transaction-complete", {
+                //       method: "post",
+                //       body: JSON.stringify({
+                //         orderID: data.orderID,
+                //       }),
+                //     });
+                //   }}
+                // />
                 <a
                   className="main-btn purchase-btn"
                   title
