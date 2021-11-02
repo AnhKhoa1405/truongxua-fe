@@ -158,7 +158,7 @@ class SignIn extends React.Component {
         })
         .then(() => {
           setTimeout(() => {
-            this.props.history.push("/home");
+            this.props.history.push("/aboutUniversity");
           }, 3000);
         })
         .catch((err) => {

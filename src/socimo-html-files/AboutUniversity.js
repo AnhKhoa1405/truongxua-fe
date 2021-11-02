@@ -1,12 +1,30 @@
 import axios from "axios";
 import React, { Component, useState, useEffect } from "react";
 import HeaderPage from "./Header";
-import {useSelector} from "react-redux"
+import { useSelector } from "react-redux";
 
 function AboutUniversity() {
   const [school, setSchool] = useState({});
   const [memberinSchool, setMemberinSchool] = useState([]);
-  const userInfo = useSelector(state => state.userReducer.user)
+  const userInfo = useSelector((state) => state.userReducer.user);
+  const [stateFollow, setStateFollow] = useState([
+    {
+      content: "Chờ xác nhận từ bạn",
+      status: true,
+    },
+    {
+      content: "Đã gửi lời mời kết nối",
+      status: false,
+    },
+    {
+      content: "Đã kết nối",
+      status: true,
+    },
+    {
+      content: "Kết nối",
+      status: false,
+    },
+  ]);
   useEffect(async () => {
     await getSchoolById();
     await getStudentInSchool();
@@ -30,8 +48,24 @@ function AboutUniversity() {
               </figure>
               <span>{element.name}</span>
               <ins>Department of Sociology</ins>
-              <a data-ripple title href="#">
-                <i className="icofont-star" /> Follow
+              <a 
+              
+              onClick={() => {
+                if (element.followedUser == 3 && userInfo.Id != element.id) {
+                  connectFollow(element.id);
+                } else {
+                  console.log("May ngu");
+                }
+              }}
+              style={{
+                cursor: "pointer",
+              }}
+              
+              data-ripple title >
+                <i className="icofont-star" />{" "}
+                {userInfo.Id != element.id
+                  ? stateFollow[element.followedUser].content
+                  : ""}
               </a>
             </div>
           </div>
@@ -52,8 +86,24 @@ function AboutUniversity() {
               </figure>
               <span>{element.name}</span>
               <ins>Department of Sociology</ins>
-              <a data-ripple title href="#">
-                <i className="icofont-star" /> Follow
+              <a
+                onClick={() => {
+                  if (element.followedUser == 3 && userInfo.Id != element.id) {
+                    connectFollow(element.id);
+                  } else {
+                    console.log("May ngu");
+                  }
+                }}
+                style={{
+                  cursor: "pointer",
+                }}
+                data-ripple
+                title
+              >
+                <i className="icofont-star" />
+                {userInfo.Id != element.id
+                  ? stateFollow[element.followedUser].content
+                  : ""}
               </a>
             </div>
           </div>
@@ -62,24 +112,93 @@ function AboutUniversity() {
     });
   };
 
+  const getFollowedById = async (idFollwed) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/followers/checkfollowed?alumniId=${idFollwed}&followerId=${userInfo.Id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const getFollowedByIdSwap = async (idFollwed) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/followers/checkfollowed?alumniId=${userInfo.Id}&followerId=${idFollwed}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const connectFollow = async (idAlum) => {
+    if (idAlum != userInfo.Id) {
+      try {
+        const data = {
+          alumniId: idAlum,
+          followerAlumni: userInfo.Id,
+          status: false,
+        };
+        const response = await axios.post(
+          `https://truongxuaapp.online/api/v1/followers`,
+          data,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + userInfo.author,
+            },
+          }
+        );
+        if (response.status === 200) {
+          await getStudentInSchool();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
   const getStudentInSchool = async () => {
     try {
       const member = [];
       const response = await axios.get(
-        "https://truongxuaapp.online/api/v1/alumni?pageNumber=1&pageSize=0",{
+        "https://truongxuaapp.online/api/v1/alumni?pageNumber=1&pageSize=0",
+        {
           headers: {
             "Content-Type": "application/json",
-            Authorization:
-              "Bearer " + userInfo.author,
+            Authorization: "Bearer " + userInfo.author,
           },
         }
       );
       if (response.status === 200) {
         for (let i = 0; i < response.data.length; i++) {
-          if (
-            userInfo.SchoolId ==
-            response.data[i].schoolId
-          ) {
+          if (userInfo.SchoolId == response.data[i].schoolId) {
+            //console.log(response.data[i])
+            const followed = await getFollowedById(response.data[i].id);
+            const followedSwap = await getFollowedByIdSwap(response.data[i].id);
+            if (followedSwap == 0 && followed == 0) {
+              response.data[i].followedUser = 3;
+            } else {
+              response.data[i].followedUser = followed;
+            }
+
             member.push(response.data[i]);
           }
         }
@@ -93,9 +212,7 @@ function AboutUniversity() {
   const getSchoolById = async () => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/schools/${
-          userInfo.SchoolId
-        }`,
+        `https://truongxuaapp.online/api/v1/schools/${userInfo.SchoolId}`,
         {
           headers: {
             "Content-Type": "application/json",
