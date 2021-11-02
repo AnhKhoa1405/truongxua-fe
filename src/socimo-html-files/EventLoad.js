@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import {useSelector} from "react-redux"
+import {useSelector} from "react-redux";
+import { PayPalButton } from "react-paypal-button-v2";
 function EventLoad(props) {
   const initialState = {
     name: "",
     img: "",
   };
    const userInfo = useSelector(state => state.userReducer.user)
-
+   const [donateComplete, setDonateComplete] = useState(false);
   const [imageEvent, setImageEvent] = useState([]);
   const [feedBackInEvent, setFeedBackInEvent] = useState([]);
   const [idUpdate, setIdUpdate] = useState(-1);
@@ -20,6 +21,27 @@ function EventLoad(props) {
   };
 
   const [profile, setProfile] = useState(initialState);
+
+  const saveDonationInDb = async (data) => {
+    try {
+      const response = await axios.post(
+        "https://truongxuaapp.online/api/v1/donates",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setDonateComplete(true);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 
   const getProfile = async (alumniCreatedId) => {
     try {
@@ -425,13 +447,39 @@ function EventLoad(props) {
                 {formatDate(props.props.endDate)}
               </p>
               <p>{props.props.ticketPrice}đ</p>
-              <a
-                className="main-btn purchase-btn"
-                title
-                href="book-detail.html"
-              >
-                <i className="icofont-cart-alt" /> Buy Now
-              </a>
+              {props.props.ticketPrice > 0 &&
+              !props.props.statusDonate &&
+              !donateComplete ? (
+                <PayPalButton
+                  amount={(props.props.ticketPrice / 23000).toFixed(2)}
+                  // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
+                  onSuccess={(details, data) => {
+                    saveDonationInDb({
+                      eventId: props.props.id,
+                      alumniId: userInfo.Id,
+                      dateDonante: new Date(),
+                      paymentMethod: "Paypal",
+                      amount: props.props.ticketPrice,
+                    });
+
+                    // OPTIONAL: Call your server to save the transaction
+                    return fetch("/paypal-transaction-complete", {
+                      method: "post",
+                      body: JSON.stringify({
+                        orderID: data.orderID,
+                      }),
+                    });
+                  }}
+                />
+              ) : (
+                <a
+                  className="main-btn purchase-btn"
+                  title
+                  href="book-detail.html"
+                >
+                  <i class="icofont-verification-check" /> Tham gia
+                </a>
+              )}
             </div>
             <div className="we-video-info">
               <Link to={`eventDetail?id=${props.props.id}`}>
