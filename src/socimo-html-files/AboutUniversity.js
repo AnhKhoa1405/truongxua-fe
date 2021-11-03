@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { Component, useState, useEffect } from "react";
 import HeaderPage from "./Header";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 function AboutUniversity() {
   const [school, setSchool] = useState({});
@@ -32,11 +33,13 @@ function AboutUniversity() {
 
   const renderMemberInSchool = (range) => {
     return memberinSchool.map((element, index) => {
+      const url = "/profile/" + element.id;
       if (range != undefined && index <= range) {
         return (
           <div key={index} className="col-lg-3 col-md-3 col-sm-6">
             <div className="members">
               <figure>
+                <Link to={url}>
                 <img
                   style={{
                     width: 152,
@@ -45,23 +48,29 @@ function AboutUniversity() {
                   alt=""
                   src={element.img}
                 />
+                </Link>
+                
               </figure>
-              <span>{element.name}</span>
-              <ins>Department of Sociology</ins>
-              <a 
-              
-              onClick={() => {
-                if (element.followedUser == 3 && userInfo.Id != element.id) {
-                  connectFollow(element.id);
-                } else {
-                  console.log("May ngu");
-                }
-              }}
-              style={{
-                cursor: "pointer",
-              }}
-              
-              data-ripple title >
+              <span>
+              <Link to={url}>
+              {element.name}
+              </Link>
+              </span>
+              <ins>Cựu học sinh</ins>
+              <a
+                onClick={() => {
+                  if (element.followedUser == 3 && userInfo.Id != element.id) {
+                    connectFollow(element.id);
+                  } else {
+                    console.log("May ngu");
+                  }
+                }}
+                style={{
+                  cursor: "pointer",
+                }}
+                data-ripple
+                title
+              >
                 <i className="icofont-star" />{" "}
                 {userInfo.Id != element.id
                   ? stateFollow[element.followedUser].content
@@ -75,6 +84,7 @@ function AboutUniversity() {
           <div key={index} className="col-lg-3 col-md-3 col-sm-6">
             <div className="members">
               <figure>
+              <Link to={url}>
                 <img
                   style={{
                     width: 152,
@@ -83,8 +93,13 @@ function AboutUniversity() {
                   alt=""
                   src={element.img}
                 />
+                </Link>
               </figure>
-              <span>{element.name}</span>
+              <span>
+              <Link to={url}>
+              {element.name}
+              </Link>
+              </span>
               <ins>Department of Sociology</ins>
               <a
                 onClick={() => {
@@ -904,7 +919,7 @@ function AboutUniversity() {
                       <ul className="sharing-options">
                         <li>
                           <a
-                            title="Invite Colleagues"
+                            title="Trang thông tin của trường"
                             href="#"
                             data-toggle="tooltip"
                           >

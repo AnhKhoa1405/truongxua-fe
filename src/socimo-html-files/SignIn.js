@@ -4,8 +4,8 @@ import firebase from "firebase";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import { withRouter } from "react-router-dom";
 import axios from "axios";
-import {connect } from "react-redux"
-import {userInfo} from '../redux/actions/userInfo'
+import { connect } from "react-redux";
+import { userInfo } from "../redux/actions/userInfo";
 import { tokenUser } from "../redux/actions/userInfo";
 const uiConfig = {
   // Popup signin flow rather than redirect flow.
@@ -132,7 +132,7 @@ class SignIn extends React.Component {
 
   handleSubmit = (e, history) => {
     e.preventDefault();
-    let token = ""
+    let token = "";
     if (this.isFormValid) {
       this.setState({ error: [], loading: true });
       const { email, password, error } = this.state;
@@ -147,10 +147,10 @@ class SignIn extends React.Component {
             .auth()
             .currentUser.getIdToken(/* forceRefresh */ true)
             .then(async function (idToken) {
-                token = idToken;
+              token = idToken;
             })
             .then(() => {
-                this.props.tokenUser(token)
+              this.props.tokenUser(token);
             })
             .then(async () => {
               await this.encodeToDecode(this.props.token);
@@ -158,7 +158,7 @@ class SignIn extends React.Component {
         })
         .then(() => {
           setTimeout(() => {
-            this.props.history.push("/aboutUniversity");
+            this.props.history.push("/home");
           }, 3000);
         })
         .catch((err) => {
@@ -250,14 +250,14 @@ class SignIn extends React.Component {
             <div className="verticle-center">
               <div className="login-form">
                 <h4>
-                  <i className="icofont-key-hole" /> Login
+                  <i className="icofont-key-hole" /> Đăng nhập
                 </h4>
                 <form className="c-form">
                   <input
                     name="email"
                     type="text"
                     onChange={this.handleChange}
-                    placeholder="User Name @"
+                    placeholder="Email"
                   />
                   <p style={{ color: "red", marginLeft: 10 }}>
                     {this.state.errorUser}
@@ -266,7 +266,7 @@ class SignIn extends React.Component {
                     name="password"
                     type="password"
                     onChange={this.handleChange}
-                    placeholder="Passwordxxxxxxxxxx"
+                    placeholder="Mật khẩu"
                   />
                   <p style={{ color: "red", marginLeft: 10 }}>
                     {this.state.errorPassword}
@@ -275,16 +275,38 @@ class SignIn extends React.Component {
                     <label htmlFor="checkbox">
                       <span>Remember Me</span>
                     </label> */}
-                  <div className="login-buttons">
-                    <button className="button" onClick={this.signInWithGoogle}>
-                      <i className="fab fa-google"></i>Sign in with google
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div className="login-buttons">
+                      <button
+                        style={{
+                          marginRight: 8,
+                        }}
+                        className="main-btn"
+                        onClick={this.signInWithGoogle}
+                      >
+                        Đăng nhập với Google
+                      </button>
+                    </div>
+
+                    {/* <Link to="/home"> */}
+                    <button
+                      style={{
+                        marginLeft: 8,
+                      }}
+                      onClick={this.handleSubmit}
+                      className="main-btn"
+                    >
+                      <i className="icofont-key" /> Đăng nhập
                     </button>
                   </div>
 
-                  {/* <Link to="/home"> */}
-                  <button onClick={this.handleSubmit} className="main-btn">
-                    <i className="icofont-key" /> Đăng nhập
-                  </button>
                   {/* </Link> */}
                 </form>
                 <Link to="/signup">
@@ -313,6 +335,12 @@ class SignIn extends React.Component {
   }
 }
 
-const mapStateToProps =(state) => ({user: state.userReducer.user ,token: state.userReducer.token})
-const mapDispatchToProps = (dispatch) => ({userInfo: (info) => dispatch(userInfo(info)) ,tokenUser: (token) => dispatch(tokenUser(token))})
-export default withRouter(connect(mapStateToProps ,mapDispatchToProps)(SignIn));
+const mapStateToProps = (state) => ({
+  user: state.userReducer.user,
+  token: state.userReducer.token,
+});
+const mapDispatchToProps = (dispatch) => ({
+  userInfo: (info) => dispatch(userInfo(info)),
+  tokenUser: (token) => dispatch(tokenUser(token)),
+});
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(SignIn));
