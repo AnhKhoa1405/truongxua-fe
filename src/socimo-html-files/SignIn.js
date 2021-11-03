@@ -118,6 +118,7 @@ class SignIn extends React.Component {
       .auth()
       .signInWithPopup(googleProvider)
       .then(async (res) => {
+        console.log(res.user._lat);
         await this.encodeToDecode(res.user._lat);
       })
       .catch((error) => {
