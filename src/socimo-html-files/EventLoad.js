@@ -495,7 +495,9 @@ function EventLoad(props) {
                 <a
                   className="main-btn purchase-btn"
                   title
-                  href="book-detail.html"
+                  style={{
+                    cursor: "default"
+                  }}
                 >
                   <i class="icofont-verification-check" /> Tham gia
                 </a>

@@ -120,7 +120,7 @@ function HeaderPage() {
               </Link>
             </div>
           </li>
-
+                  
           {/* <li className="go-live">
                   <a
                     href="live-stream.html"
@@ -142,7 +142,7 @@ function HeaderPage() {
                 </li> */}
           <li>
             <Link to="/home">
-              <a href="index.html" title="Home" data-toggle="tooltip">
+              <a href="index.html" title="Trang chủ" data-toggle="tooltip">
                 <i>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -160,6 +160,13 @@ function HeaderPage() {
                     <polyline points="9 22 9 12 15 12 15 22" />
                   </svg>
                 </i>
+              </a>
+            </Link>
+          </li>
+          <li>
+            <Link to="/aboutUniversity">
+              <a href="index.html" title="Thông tin về trường" data-toggle="tooltip">
+              <i class="icofont-university"></i>
               </a>
             </Link>
           </li>
