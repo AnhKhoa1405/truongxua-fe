@@ -65,8 +65,10 @@ function AccountPopup(props) {
             Authorization: "Bearer " + userInfo.author,
           },
         }
+        
       );
-        console.log(response.data.length);
+      console.log(shoolYearId)
+       console.log(response.data)
       // for (let i = 0; i <response.data.length; i++) {
       //   let data = {
       //     classId: response.data[i].id,
@@ -214,7 +216,6 @@ function AccountPopup(props) {
     email : formData.email,
     password : formData.password,
     address : formData.address,
-    
     };
     
   try{
@@ -225,12 +226,13 @@ function AccountPopup(props) {
       }
     )
     if(response.status === 200){
-    const listGroup = await featchGroups(formData.schoolId);
+    const listGroup = await featchGroups(formData.yearId);
     for (let i = 0; i <listGroup.length; i++) {
         let data = {
           classId: listGroup[i].id,
           alumniId: userInfo.Id
         };
+        console.log(data)
         await saveAlumiToGroup(data);
       }
     encodeToDecode(token);
@@ -259,6 +261,7 @@ function AccountPopup(props) {
       initialState.address = response.data.address;
       initialState.bio = response.data.bio;
       initialState.phone = response.data.phone;
+      initialState.password = response.data.password;
     } catch (error) {
       console.log(error);
     }
