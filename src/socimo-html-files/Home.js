@@ -7,6 +7,7 @@ import EventLoad from "./EventLoad"
 import {useSelector} from 'react-redux'
 import { PayPalButton } from "react-paypal-button-v2";
 
+
 function Home() {
   const userInfo = useSelector(state => state.userReducer.user)
   const [clickGroups, setClickGroups] = useState(false);
