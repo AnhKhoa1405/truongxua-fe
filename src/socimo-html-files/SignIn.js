@@ -301,6 +301,20 @@ class SignIn extends React.Component {
                     <label htmlFor="checkbox">
                       <span>Remember Me</span>
                     </label> */}
+                  <p
+                    onClick={this.signInWithGoogle}
+                    style={{
+                      marginTop: 20,
+                      fontSize: 16,
+                      borderBottom: "2px solid #17a2b8",
+                      paddingBottom: 4,
+                      width: "max-content",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {" "}
+                    Đăng nhập với Google
+                  </p>
                   <div
                     style={{
                       display: "flex",
@@ -309,7 +323,7 @@ class SignIn extends React.Component {
                       alignItems: "center",
                     }}
                   >
-                    <div className="login-buttons">
+                    {/* <div className="login-buttons">
                       <button
                         style={{
                           marginRight: 8,
@@ -319,7 +333,7 @@ class SignIn extends React.Component {
                       >
                         Đăng nhập với Google
                       </button>
-                    </div>
+                    </div> */}
 
                     {/* <Link to="/home"> */}
                     <button

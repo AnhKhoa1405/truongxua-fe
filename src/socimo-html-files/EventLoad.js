@@ -19,7 +19,9 @@ function EventLoad(props) {
     const time = dayTime[1].split(":");
     return `${day[0]}/${day[1]}/${day[2]} ${time[0]} giờ, ${time[1]} phút`;
   };
-  const [priceToPayPal, isPriceToPalPal] = useState((props.props.ticketPrice / 23000).toFixed(2))
+  const [priceToPayPal, isPriceToPalPal] = useState(
+    (props.props.ticketPrice / 23000).toFixed(2)
+  );
   const [profile, setProfile] = useState(initialState);
 
   const saveDonationInDb = async (data) => {
@@ -35,13 +37,35 @@ function EventLoad(props) {
         }
       );
       if (response.status === 200) {
+        await createAlumniInEvent();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const createAlumniInEvent = async () => {
+    try {
+      const data = {
+        eventId: props.props.id,
+        alumniId: userInfo.Id,
+      };
+      const response = await axios.post(
+        "https://truongxuaapp.online/api/v1/eventinalumni/create",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      );
+      if (response.status === 200) {
         setDonateComplete(true);
       }
     } catch (err) {
       console.error(err);
     }
   };
-
   const getProfile = async (alumniCreatedId) => {
     try {
       const response = await axios.get(
@@ -451,12 +475,12 @@ function EventLoad(props) {
                   // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
                   onSuccess={(details, data) => {
                     saveDonationInDb({
-                            eventId: props.props.id,
-                            alumniId: userInfo.Id,
-                            dateDonante: new Date(),
-                            paymentMethod: "Paypal",
-                            amount: props.props.ticketPrice,
-                          });
+                      eventId: props.props.id,
+                      alumniId: userInfo.Id,
+                      dateDonante: new Date(),
+                      paymentMethod: "Paypal",
+                      amount: props.props.ticketPrice,
+                    });
 
                     // OPTIONAL: Call your server to save the transaction
                     return fetch("/paypal-transaction-complete", {
@@ -471,35 +495,46 @@ function EventLoad(props) {
                       "AQcrdEu0mdkLrgpuAJ-sOCxqHcxTijxDi2DKptqPZVXnkAAcpzZeq9cFWJyP7mQ4TYzcEeZpS_AriCIx",
                   }}
                 />
+              ) : // <PayPalButton
+              //   amount={(props.props.ticketPrice / 23000).toFixed(2)}
+              //   // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
+              //   onSuccess={(details, data) => {
+              //     saveDonationInDb({
+              //       eventId: props.props.id,
+              //       alumniId: userInfo.Id,
+              //       dateDonante: new Date(),
+              //       paymentMethod: "Paypal",
+              //       amount: props.props.ticketPrice,
+              //     });
+              //     // OPTIONAL: Call your server to save the transaction
+              //     return fetch("/paypal-transaction-complete", {
+              //       method: "post",
+              //       body: JSON.stringify({
+              //         orderID: data.orderID,
+              //       }),
+              //     });
+              //   }}
+              // />
+              !donateComplete && !props.props.statusDonate ? (
+                <a
+                  onClick={() => createAlumniInEvent()}
+                  className="main-btn "
+                  title
+                  style={{
+                    cursor: "default",
+                  }}
+                >
+                  Tham gia
+                </a>
               ) : (
-                // <PayPalButton
-                //   amount={(props.props.ticketPrice / 23000).toFixed(2)}
-                //   // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
-                //   onSuccess={(details, data) => {
-                //     saveDonationInDb({
-                //       eventId: props.props.id,
-                //       alumniId: userInfo.Id,
-                //       dateDonante: new Date(),
-                //       paymentMethod: "Paypal",
-                //       amount: props.props.ticketPrice,
-                //     });
-                //     // OPTIONAL: Call your server to save the transaction
-                //     return fetch("/paypal-transaction-complete", {
-                //       method: "post",
-                //       body: JSON.stringify({
-                //         orderID: data.orderID,
-                //       }),
-                //     });
-                //   }}
-                // />
                 <a
                   className="main-btn purchase-btn"
                   title
                   style={{
-                    cursor: "default"
+                    cursor: "default",
                   }}
                 >
-                  <i class="icofont-verification-check" /> Tham gia
+                  <i class="icofont-verification-check" /> Đã Tham gia
                 </a>
               )}
             </div>
@@ -654,11 +689,20 @@ function EventLoad(props) {
                 <p>10+</p>
               </div>
               <div className="new-comment" style={{ display: "block" }}>
-                <form onSubmit={handelSubmit} method="post">
+                <form
+                  style={{
+                    display:
+                      !donateComplete && !props.props.statusDonate
+                        ? "none"
+                        : "block",
+                  }}
+                  onSubmit={handelSubmit}
+                  method="post"
+                >
                   <input
                     id={props.props.id}
                     type="text"
-                    placeholder="write comment"
+                    placeholder="Cảm nhận về Event"
                   />
                   <button type="submit">
                     <i className="icofont-paper-plane" />
