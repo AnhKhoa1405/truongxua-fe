@@ -21,6 +21,7 @@ import SignIn from "./socimo-html-files/SignIn";
 import SignUp from "./socimo-html-files/SignUp";
 import AccountPopup from "./socimo-html-files/AccountPopup";
 import Groups from "./socimo-html-files/Groups";
+import Chat from "./socimo-html-files/Chat";
 import axios from "axios";
 
 // Configure Firebase.
@@ -45,6 +46,7 @@ function App() {
         <Route path="/" exact component={SignIn} />
         <Route path="/popup" component={AccountPopup} />
         <Route path="/groups" component={Groups} />
+        <Route path="/chat" component={Chat} />
         <Route path="/aboutUniversity" component={AboutUniversity} />
         <Route path="/home" component={Home} />
         <Route path="/sendFeedBack" component={SendFeedBack} />
