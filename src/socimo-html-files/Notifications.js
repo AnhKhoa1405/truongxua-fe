@@ -930,7 +930,7 @@ class Notifications extends React.Component {
                     <div id="page-contents" className="row merged20">
                       <div className="col-lg-8">
                         <div className="main-wraper">
-                          <h3 className="main-title">All Notifications</h3>
+                          <h3 className="main-title">Tất cả thông báo</h3>
                           <div className="editing-interest">
                             <div className="notification-box">
                               <ul>

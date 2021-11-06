@@ -1070,7 +1070,7 @@ function Profile() {
                         }}
                         className="nav-item"
                       >
-                        <a href="#chat" data-toggle="tab">
+                        <a  href="#chat" data-toggle="tab">
                           Chat giao lưu
                         </a>
                       </li>
