@@ -37,9 +37,12 @@ class SignIn extends React.Component {
   };
 
   encodeToDecode = async (tokenUser) => {
+    const data= {
+      idToken : tokenUser,
+    }
     try {
       const response = await axios.post(
-        `https://truongxuaapp.online/api/users/log-in?idToken=${tokenUser}`,
+        `https://truongxuaapp.online/api/users/log-in`,data,
         {
           headers: {
             "Access-Control-Allow-Origin": "*",
@@ -49,6 +52,43 @@ class SignIn extends React.Component {
       if (response.status == 200) {
         let decoded = this.jwtDecode(response.data);
 
+        decoded.author = response.data;
+
+        const infoDe = await this.findUserById(decoded.Id, response.data);
+
+        decoded.infoDetail = infoDe;
+        if (decoded.SchoolId === "") {
+          decoded.infoSchool = "";
+        } else {
+          const schoolDe = await this.findSchoolById(
+            decoded.SchoolId,
+            response.data
+          );
+          decoded.infoSchool = schoolDe;
+        }
+        this.props.userInfo(decoded);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  encodeToDecodeEP = async (email,password) => {
+    try {
+      const data = {
+        email: email,
+        password: password
+      }
+      const response = await axios.post(
+        `https://truongxuaapp.online/api/users/sign-in`,data,
+        {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
+      if (response.status == 200) {
+        console.log(response.data);
+        let decoded = this.jwtDecode(response.data);
         decoded.author = response.data;
 
         const infoDe = await this.findUserById(decoded.Id, response.data);
@@ -118,7 +158,8 @@ class SignIn extends React.Component {
       .auth()
       .signInWithPopup(googleProvider)
       .then(async (res) => {
-        console.log(res.user._lat);
+        let token = res.user._lat;
+         this.props.tokenUser(token);
         await this.encodeToDecode(res.user._lat);
       })
       .catch((error) => {
@@ -154,7 +195,7 @@ class SignIn extends React.Component {
               this.props.tokenUser(token);
             })
             .then(async () => {
-              await this.encodeToDecode(this.props.token);
+              await this.encodeToDecodeEP(email,password);
             });
         })
         .then(() => {

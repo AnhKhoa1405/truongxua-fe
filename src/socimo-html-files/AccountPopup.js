@@ -58,7 +58,7 @@ function AccountPopup(props) {
   async function featchGroups(shoolYearId) {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/groups/schoolyearid?schoolyearid=${shoolYearId}`,
+        `https://truongxuaapp.online/api/v1/schoolyears/${shoolYearId}/groups`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -282,9 +282,12 @@ function AccountPopup(props) {
   }
 
   const encodeToDecode = async (tokenUser) => {
+    const data = {
+      idToken: tokenUser,
+    }
     try {
       const response = await axios.post(
-        `https://truongxuaapp.online/api/users/log-in?idToken=${tokenUser}`,
+        `https://truongxuaapp.online/api/users/log-in`,data,
         {
           headers: {
             "Access-Control-Allow-Origin": "*",

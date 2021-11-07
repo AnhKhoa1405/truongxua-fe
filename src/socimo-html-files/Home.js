@@ -42,7 +42,7 @@ function Home() {
   const getEventInSchool = async () => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/events/schoolid?schoolid=${userInfo.infoDetail.schoolId}`,
+        `https://truongxuaapp.online/api/v1/schools/${userInfo.infoDetail.schoolId}/events`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -203,7 +203,9 @@ function Home() {
   const getNewsInSchool = async () => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/news/schoolid?schoolId=${userInfo.SchoolId}`,
+
+        `https://truongxuaapp.online/api/v1/schools/${userInfo.SchoolId}/news`,
+
         {
           headers: {
             "Content-Type": "application/json",
@@ -785,7 +787,13 @@ function Home() {
           </div>
         </div>
         {/* responsive header */}
-        {userInfo.SchoolId == "" ? <AccountPopup /> : ""}
+
+        {userInfo.SchoolId == "" || userInfo.SchoolId == null ? (
+          <AccountPopup />
+        ) : (
+          ""
+        )}
+
         <HeaderPage />
         {/* header */}
         <nav className="sidebar">

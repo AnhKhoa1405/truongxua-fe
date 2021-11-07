@@ -2,13 +2,53 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 import HeaderPage from "./Header";
-import { useSelector } from "react-redux";
+
+import {useSelector} from "react-redux"
+import "../css/popup.css";
+import { useForm } from "react-hook-form";
+import { render } from "@testing-library/react";
+import {useDispatch} from "react-redux"
+import {newUser} from "../redux/actions/userInfo"
+
 import Chat from "./Chat";
 
+
 function Profile() {
+   const userInfo = useSelector(state => state.userReducer.user)
+   const jwtDecode = require("jwt-decode").default;
+   const initialState = {
+    phone: userInfo.infoDetail.phone,
+    address: userInfo.infoDetail.address,
+    bio: userInfo.infoDetail.bio,
+    img: "",
+    email: userInfo.infoDetail.email,
+    password: userInfo.infoDetail.password,
+    name :userInfo.infoDetail.name,
+    facebook: userInfo.infoDetail.facebook,
+    zalo: userInfo.infoDetail.zalo,
+    instagram: userInfo.infoDetail.instagram,
+    schoolId: userInfo.infoDetail.schoolId,
+    oldPassword:"",
+    newPassword:"",
+    rePassword: "",
+  };
+  const [errorPassword,setErrorPassword] =useState("");
+  const [errorRePassword,setErrorRePassword] =useState("");
+  const token =   useSelector(state => state.userReducer.token)
+  const dispatch = useDispatch();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
+
+  const [formData, setFormData] = useState(initialState);
   const { id } = useParams();
   const [user, setUser] = useState({});
   const [numFollow, setNumFollow] = useState(-1);
+  const [changeProfile,setChangeProfile] = useState(false);
+  const [changePassword,setChangePassword] = useState(false);
   const [stateFollow, setStateFollow] = useState([
     {
       content: "Chờ xác nhận từ bạn",
@@ -29,6 +69,7 @@ function Profile() {
   ]);
   const [listFollow, setListFollow] = useState(undefined);
   const userInfo = useSelector((state) => state.userReducer.user);
+
   const createFollow = async (alumID, followerID, statusCreate) => {
     try {
       const data = {
@@ -69,7 +110,7 @@ function Profile() {
   const getFollowerNotAccept = async (idAlum, status) => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/followers/Follower/${idAlum}`,
+        `https://truongxuaapp.online/api/v1/followers/follower/${idAlum}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -305,6 +346,216 @@ function Profile() {
       console.error(err);
     }
   };
+
+   const onChange = (e) => {
+    const { name, value, type } = e.target;
+    if (type === "file") {
+      setFormData({ ...formData, [name]: e.target.files[0] });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+
+    setErrorPassword("");
+    setErrorNewPassword("");
+    setErrorRePassword("");
+
+    console.log(name + ':' + value);
+  };
+  const [errorNewPassword, setErrorNewPassword] = useState("");
+  const updatePassword = async () => {
+    if(formData.oldPassword != userInfo.infoDetail.password) {
+      setErrorPassword("Sai mật khẩu");
+      return;
+    }
+      if(formData.newPassword.length<6){
+        setErrorNewPassword("Mật khẩu phải có ít nhất 6 ký tự")
+        return;
+      }
+    if(formData.newPassword != formData.rePassword){
+      setErrorRePassword("Mật khẩu khác mật khẩu đã nhập")
+      return;
+    }
+    const data ={
+      id: userInfo.Id, 
+      password: formData.rePassword
+    }
+
+    try {
+      const response = await axios.put(`https://truongxuaapp.online/api/v1/alumni/password`,data,
+      {
+          headers: {
+            
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
+      )
+      if(response.status === 200){
+        await updateProfile();
+        setChangePassword(false);
+      }
+    }
+    catch(e){
+      console.log(e)
+    }
+  }
+
+  const saveImgInImgBB = async () => {
+    let dataImgSave = {};
+    if (formData.img != "") {
+      let body = new FormData();
+      body.set("key", "801bd3a925ecfac0e693d493198af86c");
+     
+          body.append("image", formData.img);
+          try {
+            const response = await axios({
+              method: "POST",
+              url: "https://api.imgbb.com/1/upload",
+              data: body,
+            });
+            if (response.status == 200) {
+              dataImgSave = {
+                name: response.data.data.title,
+                url_display: response.data.data.display_url,
+              };
+              
+            }
+          } catch (err) {
+            console.error(err);
+          }
+       
+    }
+    return dataImgSave.url_display;
+  }
+
+  const updateProfile =  async () => {
+   let urlBB = null;
+   if(formData.img != ""){
+     urlBB = await saveImgInImgBB()
+   }
+   if(formData.img == ""){
+     urlBB = userInfo.infoDetail.img;
+   }
+   let pass = null;
+   if(changePassword == true){
+     pass = formData.rePassword;
+   }
+   if(changeProfile == true){
+     pass = userInfo.infoDetail.password
+   }
+     const data = {
+      phone: formData.phone,
+    bio: formData.bio,
+    img:urlBB,
+    name :formData.name,
+    email : formData.email,
+    password :pass,
+    address : formData.address,
+    facebook: formData.facebook,
+    zalo:formData.zalo,
+    instagram: formData.instagram,
+    schoolId: formData.schoolId,
+    };
+    
+  try{
+    const response  = await axios.put(`https://truongxuaapp.online/api/v1/alumni?id=${userInfo.Id}`,
+    data,{
+        headers: {"Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,}
+      }
+    )
+    if(response.status === 200){
+
+    encodeToDecode(token);
+	setChangeProfile(false);
+
+  setFormData({ ...formData, img : ""})
+ }
+  }
+  catch(err){
+    console.log(err)
+  }
+  };
+
+   const encodeToDecode = async (tokenUser) => {
+    try {
+      const response = await axios.post(
+        `https://truongxuaapp.online/api/users/log-in?idToken=${tokenUser}`,
+        {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+          },
+        }
+      );
+      if (response.status == 200) {
+        let decoded = jwtDecode(response.data);
+
+        decoded.author = response.data;
+
+        const infoDe = await findUserById(decoded.Id, response.data);
+
+        decoded.infoDetail = infoDe;
+        if (decoded.SchoolId === "") {
+          decoded.infoSchool = "";
+        } else {
+          const schoolDe = await findSchoolById(
+            decoded.SchoolId,
+            response.data
+          );
+          decoded.infoSchool = schoolDe;
+        }
+
+       const action = newUser(decoded);
+        dispatch(action);
+        console.log("update" + userInfo)
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const findUserById = async (id, token) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/alumni/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+ const findSchoolById = async (id, token) => {
+    try {
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/schools/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+      if (response.status === 200) {
+        return response.data;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+ 
+  const [trigger,setTrigger]= useState(true);
+
   return (
     <div>
       {/* <div className="page-loader" id="page-loader">
@@ -1169,19 +1420,29 @@ function Profile() {
                                 </li>
                                 <li>
                                   <span>Facebook</span>
-                                  <p>{user.facebook}</p>
+                                  <p>{userInfo.infoDetail.facebook}</p>
                                 </li>
                                 <li>
                                   <span>Instagram</span>
-                                  <p>{user.instagram}</p>
+                                  <p>{userInfo.infoDetail.instagram}</p>
                                 </li>
                                 <li>
                                   <span>Zalo</span>
-                                  <p>{user.zalo}</p>
+                                  <p>{userInfo.infoDetail.zalo}</p>
                                 </li>
                               </ul>
                             </div>
                           </div>
+                            <div className="option">
+                              <span style={{marginRight:20, paddingBottom:10,
+                              cursor:'pointer', fontSize:18,borderBottom:"3px solid #77ade7"
+                              }}
+                              onClick={()=> {setChangeProfile(true); setFormData({...formData,img:""})}}>Chỉnh sửa thông tin </span>
+                              <span style={{ paddingBottom:10,
+                              cursor:'pointer', fontSize:18,borderBottom:"3px solid #77ade7"
+                              }}
+                              onClick={()=> setChangePassword(true)}>Đổi mật khẩu</span>
+                            </div>
 
                           <div
                             style={{
@@ -1369,92 +1630,169 @@ function Profile() {
           </div>
         </div>
         {/* bottombar */}
-        <div className="wraper-invite">
-          <div className="popup">
-            <span className="popup-closed">
+        <div className={`wraper-invite ${changeProfile == true ?'active':""}`}>
+          <div
+        className="popup"
+      >
+        <span className="popup-closed" onClick={()=> {setChangeProfile(false); setFormData({...formData,img:""})}}>
               <i className="icofont-close" />
             </span>
-            <div className="popup-meta">
-              <div className="popup-head">
-                <h5>
-                  <i>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width={24}
-                      height={24}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="feather feather-mail"
-                    >
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                      <polyline points="22,6 12,13 2,6" />
-                    </svg>
-                  </i>{" "}
-                  Kết nối
-                </h5>
-              </div>
-              <div className="invitation-meta">
-                <p>
-                  Enter an email address to invite a colleague or co-author to
-                  join you on socimo. They will receive an email and, in some
-                  cases, up to two reminders.
-                </p>
-                <form method="post" className="c-form">
-                  <input type="text" placeholder="Enter Email" />
-                  <button type="submit" className="main-btn">
-                    Invite
-                  </button>
-                </form>
-              </div>
-            </div>
+        <div className="popup-inner" style={{}}>
+          <div className="search-school" style={{ marginLeft: 0 }}>
+              <p style={{ marginBottom: 10, marginTop: 20 }}>
+                Thông tin cá nhân
+              </p>
+            <form method="post" name="form-info">
+              <p style={{ marginBottom: 10, marginTop: 20 }}>
+                Tên
+              </p>
+              <input
+                type="text"
+                {...register("name", {
+                  required: "Nhập tên ",
+                })}
+                onChange={onChange}
+                value={formData.name}
+                name="name"
+                placeholder="Tên..."
+              />
+              {errors.name && <p className="error">{errors.name.message}</p>}
+              
+
+              <p style={{ marginBottom: 10, marginTop: 20 }}>
+                 Số điện thoại
+              </p>
+              <input
+                type="text"
+                {...register("phone", {
+                  required: "Nhập số điện thoại ",
+                  pattern: {
+                    value: /^[0-9]+$/,
+                    message: "Số điện thoại không chứa kí tự đặc biệt hoặc chữ",
+                  },
+                })}
+                onChange={onChange}
+                value={formData.phone}
+                name="phone"
+                placeholder="Phone..."
+              />
+              {errors.phone && <p className="error">{errors.phone.message}</p>}
+              
+              <p style={{ marginBottom: 10, marginTop: 20 }}>
+                Địa chỉ
+              </p>
+              <input
+                type="text"
+                {...register("address", {
+                  required: "Nhập địa chỉ ",
+                })}
+                onChange={onChange}
+                value={formData.address}
+                name="name"
+                placeholder="Tên..."
+              />
+              {errors.address && <p className="error">{errors.address.message}</p>}
+              
+              <p style={{ marginBottom: 10, marginTop: 20 }}>
+                Giới thiệu bản thân
+              </p>
+              <textarea
+                {...register("bio", {
+                  required: "Nhập tiểu sử ",
+                })}
+                onChange={onChange}
+                name="bio"
+                value={formData.bio}
+                placeholder="Giới thiệu..."
+              ></textarea>
+                {errors.bio && <p className="error">{errors.bio.message}</p>}
+              <div className="social">
+                <div>
+                  <p style={{ marginBottom: 10, marginTop: 20 }}>
+                Facebook
+              </p>
+                <input type="text" onChange={onChange} name="facebook" value={formData.facebook}/>
+                </div>
+                <div>
+                  <p style={{ marginBottom: 10, marginTop: 20 }}>
+                Zalo
+              </p>
+                  <input type="text" onChange={onChange} name="zalo" value={formData.zalo}/>
+                </div>
+                <div>
+                  <p style={{ marginBottom: 10, marginTop: 20 }}>
+                Instagram
+              </p>
+                  <input type="text" onChange={onChange} name="instagram" value={formData.instagram}/>
+             </div> </div>
+              <p style={{ marginBottom: 10, marginTop: 20 }}>Chọn ảnh</p>
+              <input type="file" onChange={onChange} name="img" />
+
+              <button
+                type="submit"
+                style={{
+                  position: "unset",
+                  backgroundColor: "#71cff9",
+                  color: "black",
+                  margin: "20px auto",
+                  width: "max-content",
+                  display: "block",
+                  padding: "10px 40px",
+                  borderRadius: 10,
+                  border:"none",
+                  fontWeight:"bold"
+                }}
+                onClick={handleSubmit(updateProfile)}
+              >
+                Hoàn tất
+              </button>
+            </form>
+            
           </div>
         </div>
+      </div>
+        </div>
         {/* invite colleague popup */}
-        <div className="popup-wraper">
+        <div className={`popup-wraper ${changePassword == true?'active':""}`}>
           <div className="popup">
-            <span className="popup-closed">
+            <span className="popup-closed" onClick={()=> setChangePassword(false)}>
               <i className="icofont-close" />
             </span>
             <div className="popup-meta">
               <div className="popup-head">
                 <h5>
-                  <i>
-                    <svg
-                      className="feather feather-message-square"
-                      strokeLinejoin="round"
-                      strokeLinecap="round"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      height={24}
-                      width={24}
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    </svg>
-                  </i>{" "}
-                  Send Message
+                 
+                  Đổi mật khẩu
                 </h5>
               </div>
               <div className="send-message">
                 <form method="post" className="c-form">
-                  <input type="text" placeholder="Enter Name.." />
-                  <input type="text" placeholder="Subject" />
-                  <textarea placeholder="Write Message" defaultValue={""} />
-                  <div className="uploadimage">
-                    <i className="icofont-file-jpg" />
-                    <label className="fileContainer">
-                      <input type="file" />
-                      Attach file
-                    </label>
-                  </div>
-                  <button type="submit" className="main-btn">
-                    Send
+                  <p style={{ marginBottom: 10, marginTop: 20 }}>
+                Nhập mật khẩu cũ
+              </p>
+                  <input type="text" placeholder="Mật khẩu cũ.." 
+                  
+                  name="oldPassword" onChange ={onChange} />
+                   
+                   <p style={{color:"red"}}>{errorPassword}</p>
+                  <p style={{ marginBottom: 10, marginTop: 20 }}>
+                Nhập mật khẩu Mới
+              </p>
+                  <input type="text" placeholder="Mật khẩu mới"
+                  
+                  name="newPassword"  onChange ={onChange}/>
+                  
+                    <p style={{color:"red"}}>{errorNewPassword}</p>
+                  <p style={{ marginBottom: 10, marginTop: 20 }}>
+                Nhập lại mật khẩu mới
+              </p>
+                  <input type="text" placeholder="Mật khẩu mới" 
+                 
+                  name="rePassword"  onChange ={onChange}/>
+                  
+                   <p style={{color:"red"}}>{errorRePassword}</p>
+                  <button type="submit" className="main-btn" onClick={ handleSubmit(updatePassword)}>
+                    Hoàn tất
                   </button>
                 </form>
               </div>
