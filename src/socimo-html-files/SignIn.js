@@ -295,7 +295,7 @@ class SignIn extends React.Component {
                       width: 573,
                       height: 435,
                     }}
-                    src="https://lh3.googleusercontent.com/proxy/HikYTXGpLWIbJPo9MAYM1YN9YH7tkZPyYh_hPzXGhHL7xXm7bE5m3oqLSnN5YOsDrAcKFaJ8PTceEn0kmxN2JXsSakZG4waukeT6DIWhYO68R3LaciSeMn1qQsHHImpGJh4CeSF3HtKujiU"
+                    src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fgiaoducthoidai.vn%2Fket-noi%2Fban-hanh-quy-dinh-moi-ve-danh-gia-xep-loai-hoc-sinh-thcs-thpt-nRK1RsDGR.html&psig=AOvVaw2Ei-Zj_Q0qoVtyvDaEWJCP&ust=1636378482035000&source=images&cd=vfe&ved=0CAsQjRxqFwoTCMCm_I6vhvQCFQAAAAAdAAAAABAE"
                     alt=""
                   />
                 </figure>
