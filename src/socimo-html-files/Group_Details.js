@@ -2894,7 +2894,7 @@ function GroupDetails() {
                               </div>
                             </div>
                             {/* create new post */}
-                            {userInfo.Id == groupRecent.groupAdminId ? (
+                            {/* {userInfo.Id == groupRecent.groupAdminId ? (
                               <div
                                 className="event-button"
                                 onClick={showEventPopup}
@@ -2903,7 +2903,7 @@ function GroupDetails() {
                               </div>
                             ) : (
                               ""
-                            )}
+                            )} */}
 
                             {/* <div
                               className="event-button"
