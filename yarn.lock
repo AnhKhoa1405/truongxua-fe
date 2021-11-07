@@ -9855,6 +9855,11 @@
   "resolved" "https://registry.npmjs.org/react-error-overlay/-/react-error-overlay-6.0.9.tgz"
   "version" "6.0.9"
 
+"react-firebase-hooks@^3.0.0":
+  "integrity" "sha512-0WU8/oXGBhyd3VYSaRPCpgTG6Spt7BbSkN6NuKldX8b0DIj7EmEo22a4uT0i4iNvt0Piy/qTxSk3dHptz72VeA=="
+  "resolved" "https://registry.npmjs.org/react-firebase-hooks/-/react-firebase-hooks-3.0.0.tgz"
+  "version" "3.0.0"
+
 "react-firebaseui@^5.0.2":
   "integrity" "sha512-ZfIWfRKlKAkMwEI+41rMPkwdNEQEfBLXV6TVaN5er3cdwMD0vQecWt6YOE4/v1ELziaj10NNRB8yB42V56QBMQ=="
   "resolved" "https://registry.npmjs.org/react-firebaseui/-/react-firebaseui-5.0.2.tgz"
@@ -10007,7 +10012,7 @@
   optionalDependencies:
     "fsevents" "^2.1.3"
 
-"react@*", "react@^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0", "react@^0.14.6 || 15.x.x || 16.x.x || 17.x.x", "react@^16.14.0 || ^17.0.0", "react@^16.8.0 || ^17", "react@^16.8.3 || ^17", "react@^17.0.2", "react@>= 16", "react@>=15", "react@>=15 <=17", "react@17.0.2":
+"react@*", "react@^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0", "react@^0.14.6 || 15.x.x || 16.x.x || 17.x.x", "react@^16.14.0 || ^17.0.0", "react@^16.8.0 || ^17", "react@^16.8.3 || ^17", "react@^17.0.2", "react@>= 16", "react@>= 16.8.0", "react@>=15", "react@>=15 <=17", "react@17.0.2":
   "integrity" "sha512-gnhPt75i/dq/z3/6q/0asP78D0u592D5L1pd7M8P+dck6Fu/jJeL6iVVK23fptSUZj8Vjf++7wXA8UNclGQcbA=="
   "resolved" "https://registry.npmjs.org/react/-/react-17.0.2.tgz"
   "version" "17.0.2"

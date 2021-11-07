@@ -251,32 +251,57 @@ class SignIn extends React.Component {
             <ul className="welcome-caro">
               <li className="welcome-box">
                 <figure>
-                  <img src="images/resources/login-1.png" alt="" />
+                  <img
+                    style={{
+                      width: 573,
+                      height: 435,
+                    }}
+                    src="https://kyuc.net/wp-content/uploads/2015/11/nhung-bai-tho-tham-lai-truong-xua-that-xuc-dong.jpg"
+                    alt=""
+                  />
                 </figure>
-                <h4>Ask questions with seniors Researchers</h4>
+
+                <h4>Trường Xưa - Quay về thời cấp ba còn nhiều hoài bão</h4>
                 <p>
-                  Ask questions and get the experienced answer by researchers
-                  and others fellows.
+                  Những câu chuyện chưa được nói, những tình cảm chưa được thổ
+                  lộ. Tất cả sẽ có trong app Trường Xưa - Nơi biến giấc mơ không
+                  thể thành có thể
                 </p>
               </li>
               <li className="welcome-box">
                 <figure>
-                  <img src="images/resources/login-2.png" alt="" />
+                  <img
+                    style={{
+                      width: 573,
+                      height: 435,
+                    }}
+                    src="https://sites.google.com/site/trianthayco2015/_/rsrc/1447331457103/tho-ca/vetruongxuathamthay/6330222761_6eb5e98f68_b.jpg?height=264&width=400"
+                    alt=""
+                  />
                 </figure>
-                <h4>Find New Researchers or Friends</h4>
+
+                <h4>
+                  Trường xưa - Sống lại thời cấp 3 theo mong muốn của mỗi người
+                </h4>
                 <p>
-                  Join Socimo and make your network of university or college
-                  fellows.
+                  Tại đây các bạn có thể tìm về trường cũ để ôn lại nhiều kỉ
+                  niệm tuyệt vời
                 </p>
               </li>
               <li className="welcome-box">
                 <figure>
-                  <img src="images/resources/login-3.png" alt="" />
+                  <img
+                    style={{
+                      width: 573,
+                      height: 435,
+                    }}
+                    src="https://lh3.googleusercontent.com/proxy/HikYTXGpLWIbJPo9MAYM1YN9YH7tkZPyYh_hPzXGhHL7xXm7bE5m3oqLSnN5YOsDrAcKFaJ8PTceEn0kmxN2JXsSakZG4waukeT6DIWhYO68R3LaciSeMn1qQsHHImpGJh4CeSF3HtKujiU"
+                    alt=""
+                  />
                 </figure>
-                <h4>Sell Your Online paid Content</h4>
+                <h4>Trường Xưa - Nơi kết nối các cựu học sinh ở các trường</h4>
                 <p>
-                  Sell your online lectures, videos, books and many more with
-                  Socimo.
+                  Đây là nơi để các cựu học sinh tìm về trường cũ, tìm bạn bè
                 </p>
               </li>
             </ul>
@@ -317,6 +342,20 @@ class SignIn extends React.Component {
                     <label htmlFor="checkbox">
                       <span>Remember Me</span>
                     </label> */}
+                  <p
+                    onClick={this.signInWithGoogle}
+                    style={{
+                      marginTop: 20,
+                      fontSize: 16,
+                      borderBottom: "2px solid #17a2b8",
+                      paddingBottom: 4,
+                      width: "max-content",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {" "}
+                    Đăng nhập với Google
+                  </p>
                   <div
                     style={{
                       display: "flex",
@@ -325,7 +364,7 @@ class SignIn extends React.Component {
                       alignItems: "center",
                     }}
                   >
-                    <div className="login-buttons">
+                    {/* <div className="login-buttons">
                       <button
                         style={{
                           marginRight: 8,
@@ -335,7 +374,7 @@ class SignIn extends React.Component {
                       >
                         Đăng nhập với Google
                       </button>
-                    </div>
+                    </div> */}
 
                     {/* <Link to="/home"> */}
                     <button

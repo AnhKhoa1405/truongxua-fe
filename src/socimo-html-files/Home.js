@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 import AccountPopup from "./AccountPopup";
 import Groups from "./Groups";
 import HeaderPage from "./Header";
-import EventLoad from "./EventLoad"
-import {useSelector} from 'react-redux'
+import EventLoad from "./EventLoad";
+import { useSelector } from "react-redux";
 import { PayPalButton } from "react-paypal-button-v2";
 
 function Home() {
-  const userInfo = useSelector(state => state.userReducer.user)
+  const userInfo = useSelector((state) => state.userReducer.user);
   const [clickGroups, setClickGroups] = useState(false);
   const [clickEvent, setClickEvent] = useState(false);
   const [clickHome, setClickHome] = useState(true);
@@ -19,11 +19,10 @@ function Home() {
   const axios = require("axios").default;
   const [eventInSchool, setEventInSchool] = useState([]);
 
-  
-  const getStatusDonate = async (eventId) => {
+  const getAlumniInGroup = async (eventId) => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/donates/alumni-in-event?alumniId=${userInfo.Id}&eventId=${eventId}`,
+        `https://truongxuaapp.online/api/v1/eventinalumni/isalumniinevent?aid=${userInfo.Id}&eid=${eventId}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -32,6 +31,7 @@ function Home() {
         }
       );
       if (response.status === 200) {
+        console.log(response.data);
         return response.data;
       }
     } catch (err) {
@@ -39,37 +39,45 @@ function Home() {
     }
   };
 
-
-   const getEventInSchool = async () => {
+  const getEventInSchool = async () => {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/schools/${userInfo.infoDetail.schoolId}/events`,
         {
-        headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + userInfo.author,}
-      }
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
       );
       if (response.status === 200) {
         for (let i = 0; i < response.data.length; i++) {
-          const statusDo = await getStatusDonate(response.data[i].id);
-          console.log(statusDo)
-          response.data[i].statusDonate = statusDo;
+          const statusDo = await getAlumniInGroup(response.data[i].id);
+          console.log(statusDo);
+          if (statusDo == -1) {
+            response.data[i].statusDonate = false;
+          } else {
+            response.data[i].statusDonate = true;
+          }
+          //response.data[i].statusDonate = statusDo;
         }
+        console.log(response.data);
       }
       setEventInSchool(response.data);
     } catch (error) {
       console.log(error);
     }
   };
-   const test = async () => {
+  const test = async () => {
     try {
       const response = await axios.get(
         `https://truongxuaapp.online/api/v1/alumniingroup?sort=desc&pageNumber=0&pageSize=0`,
         {
-        headers: {"Content-Type": "application/json",
-            Authorization: "Bearer " + userInfo.author,}
-      }
-  
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + userInfo.author,
+          },
+        }
       );
       console.log(response.data);
     } catch (error) {
@@ -77,17 +85,16 @@ function Home() {
     }
   };
 
-useEffect(async ()=> {
-  await test()
-},[])  
-  useEffect(async() => {
+  useEffect(async () => {
+    await test();
+  }, []);
+  useEffect(async () => {
     await getEventInSchool();
-  },[userInfo]);
+  }, [userInfo]);
 
   useEffect(async () => {
     await getNewsInSchool();
-  }, [deleteAPost,userInfo]);
-
+  }, [deleteAPost, userInfo]);
 
   const updateImg = (event) => {
     setImg(event.target.files[0]);
@@ -131,13 +138,8 @@ useEffect(async ()=> {
     //console.log(document.getElementById("emojionearea1").value);
     const body = {
       schoolId:
-        elementUpdate == undefined
-          ? userInfo.SchoolId
-          : elementUpdate.schoolId,
-      adminId:
-        elementUpdate == undefined
-          ? userInfo.Id
-          : elementUpdate.adminId,
+        elementUpdate == undefined ? userInfo.SchoolId : elementUpdate.schoolId,
+      adminId: elementUpdate == undefined ? userInfo.Id : elementUpdate.adminId,
       title: document.getElementById("titleID").value,
       content: document.getElementById("emojionearea1").value,
       createAt:
@@ -151,8 +153,7 @@ useEffect(async ()=> {
           ? await axios.post("https://truongxuaapp.online/api/v1/news", body, {
               headers: {
                 "Content-Type": "application/json",
-                Authorization:
-                  "Bearer " + userInfo.author,
+                Authorization: "Bearer " + userInfo.author,
               },
             })
           : await axios.put(
@@ -162,8 +163,7 @@ useEffect(async ()=> {
                 headers: {
                   "Access-Control-Allow-Origin": "*",
                   "Content-Type": "application/json",
-                  Authorization:
-                    "Bearer " + userInfo.author,
+                  Authorization: "Bearer " + userInfo.author,
                 },
               }
             );
@@ -203,7 +203,9 @@ useEffect(async ()=> {
   const getNewsInSchool = async () => {
     try {
       const response = await axios.get(
+
         `https://truongxuaapp.online/api/v1/schools/${userInfo.SchoolId}/news`,
+
         {
           headers: {
             "Content-Type": "application/json",
@@ -218,30 +220,30 @@ useEffect(async ()=> {
       console.error(err);
     }
   };
-  const saveImgInImgBB = async () => {
-    let dataImgSave = {};
+  // const saveImgInImgBB = async () => {
+  //   let dataImgSave = {};
 
-    let body = new FormData();
-    body.set("key", "71b6c3846105c92074f8e9a49b85887f");
+  //   let body = new FormData();
+  //   body.set("key", "71b6c3846105c92074f8e9a49b85887f");
 
-    body.append("image", img);
-    try {
-      const response = await axios({
-        method: "POST",
-        url: "https://api.imgbb.com/1/upload",
-        data: body,
-      });
-      if (response.status == 200) {
-        dataImgSave = {
-          name: response.data.data.title,
-          url_display: response.data.data.display_url,
-        };
-      }
-    } catch (err) {
-      console.error(err);
-    }
-    return dataImgSave;
-  };
+  //   body.append("image", img);
+  //   try {
+  //     const response = await axios({
+  //       method: "POST",
+  //       url: "https://api.imgbb.com/1/upload",
+  //       data: body,
+  //     });
+  //     if (response.status == 200) {
+  //       dataImgSave = {
+  //         name: response.data.data.title,
+  //         url_display: response.data.data.display_url,
+  //       };
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  //   return dataImgSave;
+  // };
 
   const changeNav = (e) => {
     const { id } = e.target;
@@ -374,7 +376,15 @@ useEffect(async ()=> {
                     </ins>
                     <span>
                       <i className="icofont-globe" /> Ngày tạo:{" "}
-                      {d.getDate() + "-" + d.getMonth() + "-" + d.getFullYear()}
+                      {d.getDate() +
+                        "/" +
+                        d.getMonth() +
+                        "/" +
+                        d.getFullYear() +
+                        " " +
+                        d.getHours() +
+                        " Giờ, " +
+                        d.getMinutes() + " phút"}
                     </span>
                   </div>
                   <div className="post-meta">
@@ -777,11 +787,13 @@ useEffect(async ()=> {
           </div>
         </div>
         {/* responsive header */}
+
         {userInfo.SchoolId == "" || userInfo.SchoolId == null ? (
           <AccountPopup />
         ) : (
           ""
         )}
+
         <HeaderPage />
         {/* header */}
         <nav className="sidebar">
@@ -1239,11 +1251,10 @@ useEffect(async ()=> {
                           </ul>
                         </div> */}
                       {/* chat rooms */}
-                      {clickEvent &&  
-                            eventInSchool.map((event) => {
-                              return <EventLoad props = {event}/>
-                            })
-                          }
+                      {clickEvent &&
+                        eventInSchool.map((event) => {
+                          return <EventLoad props={event} />;
+                        })}
                       {clickGroups && <Groups />}
                       {clickHome && (
                         <div className="blogsInSchool">
@@ -1298,7 +1309,7 @@ useEffect(async ()=> {
                               </ul>
                             </div>
                           </div>
-                                                   
+
                           <div>{renderHome()}</div>
                         </div>
                       )}

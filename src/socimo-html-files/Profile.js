@@ -2,12 +2,16 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 import HeaderPage from "./Header";
+
 import {useSelector} from "react-redux"
 import "../css/popup.css";
 import { useForm } from "react-hook-form";
 import { render } from "@testing-library/react";
 import {useDispatch} from "react-redux"
 import {newUser} from "../redux/actions/userInfo"
+
+import Chat from "./Chat";
+
 
 function Profile() {
    const userInfo = useSelector(state => state.userReducer.user)
@@ -64,7 +68,8 @@ function Profile() {
     },
   ]);
   const [listFollow, setListFollow] = useState(undefined);
-  
+  const userInfo = useSelector((state) => state.userReducer.user);
+
   const createFollow = async (alumID, followerID, statusCreate) => {
     try {
       const data = {
@@ -98,10 +103,7 @@ function Profile() {
   }, [id]);
   useEffect(async () => {
     if (userInfo.infoDetail.id == id) {
-      await getFollowerNotAccept(
-        userInfo.infoDetail.id,
-        true
-      );
+      await getFollowerNotAccept(userInfo.infoDetail.id, true);
     }
   }, [id]);
 
@@ -162,24 +164,22 @@ function Profile() {
             <div className="friendz">
               <figure>
                 <Link to={url}>
-                <img
-                  style={{
-                    width: 80,
-                    height: 80,
-                  }}
-                  src={element.alumniDetail.img}
-                  alt=""
-                />
+                  <img
+                    style={{
+                      width: 80,
+                      height: 80,
+                    }}
+                    src={element.alumniDetail.img}
+                    alt=""
+                  />
                 </Link>
-                
               </figure>
               <span>
                 <Link to={url}>
-                <a href="#" title>
-                  {element.alumniDetail.name}
-                </a>
+                  <a href="#" title>
+                    {element.alumniDetail.name}
+                  </a>
                 </Link>
-                
               </span>
               <a
                 onClick={() => deleteFollow(element)}
@@ -226,16 +226,13 @@ function Profile() {
       if (response.status === 200) {
         setListFollow(undefined);
         const dataSwap = await getFollowerNotAccept(element.followerId, false);
-        console.log(dataSwap)
+        console.log(dataSwap);
         for (let i = 0; i < dataSwap.length; i++) {
           if (element.alumniId === dataSwap[i].followerId) {
             await deleteFollowSwap(dataSwap[i].id);
           }
         }
-        await getFollowerNotAccept(
-          userInfo.infoDetail.id,
-          true
-        );
+        await getFollowerNotAccept(userInfo.infoDetail.id, true);
       }
     } catch (err) {
       console.error(err);
@@ -255,10 +252,7 @@ function Profile() {
       );
       if (response.status === 200) {
         setListFollow(undefined);
-        await getFollowerNotAccept(
-          userInfo.infoDetail.id,
-          true
-        );
+        await getFollowerNotAccept(userInfo.infoDetail.id, true);
       }
     } catch (err) {
       console.error(err);
@@ -284,10 +278,7 @@ function Profile() {
       );
       if (respone.status === 200) {
         setListFollow(undefined);
-        await getFollowerNotAccept(
-          userInfo.infoDetail.id,
-          true
-        );
+        await getFollowerNotAccept(userInfo.infoDetail.id, true);
         createFollow(element.followerId, element.alumniId, true);
       }
     } catch (err) {
@@ -297,9 +288,7 @@ function Profile() {
   const getFollowerSwap = async () => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/followers/checkfollowed?alumniId=${
-          userInfo.infoDetail.id
-        }&followerId=${id}`,
+        `https://truongxuaapp.online/api/v1/followers/checkfollowed?alumniId=${userInfo.infoDetail.id}&followerId=${id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -317,9 +306,7 @@ function Profile() {
   const getFollower = async () => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/followers/checkfollowed?alumniId=${id}&followerId=${
-          userInfo.infoDetail.id
-        }`,
+        `https://truongxuaapp.online/api/v1/followers/checkfollowed?alumniId=${id}&followerId=${userInfo.infoDetail.id}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -1274,29 +1261,21 @@ function Profile() {
                       <a
                         style={{
                           cursor:
-                            userInfo.infoDetail.id !=
-                              id && numFollow > -1
+                            userInfo.infoDetail.id != id && numFollow > -1
                               ? "pointer"
                               : "default",
                         }}
                         data-ripple
                         title
                         onClick={
-                          userInfo.infoDetail.id !=
-                            id && numFollow == 3
+                          userInfo.infoDetail.id != id && numFollow == 3
                             ? () =>
-                                createFollow(
-                                  id,
-                                  userInfo.infoDetail
-                                    .id,
-                                  false
-                                )
+                                createFollow(id, userInfo.infoDetail.id, false)
                             : ""
                         }
                         className="invite"
                       >
-                        {userInfo.infoDetail.id !=
-                          id && numFollow > -1
+                        {userInfo.infoDetail.id != id && numFollow > -1
                           ? stateFollow[numFollow].content
                           : "Trang cá nhân của bạn"}
                       </a>
@@ -1305,10 +1284,7 @@ function Profile() {
                       <li
                         style={{
                           display:
-                            userInfo.infoDetail.id !=
-                            id
-                              ? "none"
-                              : "block",
+                            userInfo.infoDetail.id != id ? "none" : "block",
                         }}
                         className="nav-item"
                       >
@@ -1327,15 +1303,26 @@ function Profile() {
                       <li className="nav-item">
                         <a
                           className={
-                            userInfo.infoDetail.id !=
-                            id
-                              ? "active"
-                              : ""
+                            userInfo.infoDetail.id != id ? "active" : ""
                           }
                           href="#about"
                           data-toggle="tab"
                         >
                           Thông tin cá nhân
+                        </a>
+                      </li>
+
+                      <li
+                        style={{
+                          display:
+                            numFollow == 2 && userInfo.infoDetail.id != id
+                              ? "block"
+                              : "none",
+                        }}
+                        className="nav-item"
+                      >
+                        <a  href="#chat" data-toggle="tab">
+                          Chat giao lưu
                         </a>
                       </li>
                     </ul>
@@ -1356,8 +1343,7 @@ function Profile() {
                       <div className="tab-content">
                         <div
                           className={
-                            userInfo.infoDetail.id !=
-                            id
+                            userInfo.infoDetail.id != id
                               ? "tab-pane fade"
                               : "tab-pane fade active show"
                           }
@@ -1375,8 +1361,7 @@ function Profile() {
 
                         <div
                           className={
-                            userInfo.infoDetail.id !=
-                            id
+                            userInfo.infoDetail.id != id
                               ? "tab-pane fade active show"
                               : "tab-pane fade "
                           }
@@ -1387,8 +1372,7 @@ function Profile() {
                               display:
                                 (numFollow == 2 &&
                                   stateFollow[numFollow].status === true) ||
-                               userInfo.infoDetail
-                                  .id == id
+                                userInfo.infoDetail.id == id
                                   ? "block"
                                   : "none",
                             }}
@@ -1421,8 +1405,7 @@ function Profile() {
                               display:
                                 (numFollow == 2 &&
                                   stateFollow[numFollow].status === true) ||
-                                userInfo.infoDetail
-                                  .id == id
+                                userInfo.infoDetail.id == id
                                   ? "block"
                                   : "none",
                             }}
@@ -1466,8 +1449,42 @@ function Profile() {
                               display:
                                 (numFollow == 2 &&
                                   stateFollow[numFollow].status === true) ||
-                                userInfo.infoDetail
-                                  .id == id
+                                userInfo.infoDetail.id == id
+                                  ? "none"
+                                  : "block",
+                            }}
+                          >
+                            <h3
+                              style={{
+                                fontWeight: "700",
+                                fontSize: "24",
+                              }}
+                            >
+                              {numFollow == 1
+                                ? "Bạn kết nối người này rồi. Hãy chờ chấp nhận để xem thông tin chi tiết nhé ^^"
+                                : "Bạn hãy kết nối người này để có thể biết thông tin chi tiết của họ"}
+                            </h3>
+                          </div>
+                        </div>
+                        <div className="tab-pane fade " id="chat">
+                          <div
+                            style={{
+                              display:
+                                numFollow == 2 && userInfo.infoDetail.id != id
+                                  ? "block"
+                                  : "none",
+                            }}
+                            //className="main-wraper"
+                          >
+                            <Chat idUser={id} />
+                          </div>
+
+                          <div
+                            style={{
+                              display:
+                                (numFollow == 2 &&
+                                  stateFollow[numFollow].status === true) ||
+                                userInfo.infoDetail.id == id
                                   ? "none"
                                   : "block",
                             }}

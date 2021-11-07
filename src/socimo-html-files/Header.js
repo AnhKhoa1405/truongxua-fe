@@ -1,11 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import firebase from "firebase";
-import {useSelector} from "react-redux"
+import { useSelector } from "react-redux";
 
 function HeaderPage() {
-  const userInfo = useSelector(state => state.userReducer.user)
-  console.log(userInfo)
+  const userInfo = useSelector((state) => state.userReducer.user);
+  console.log(userInfo);
   const deletestorage = () => {
     firebase
       .auth()
@@ -120,7 +120,7 @@ function HeaderPage() {
               </Link>
             </div>
           </li>
-                  
+
           {/* <li className="go-live">
                   <a
                     href="live-stream.html"
@@ -165,8 +165,12 @@ function HeaderPage() {
           </li>
           <li>
             <Link to="/aboutUniversity">
-              <a href="index.html" title="Thông tin về trường" data-toggle="tooltip">
-              <i class="icofont-university"></i>
+              <a
+                href="index.html"
+                title="Thông tin về trường"
+                data-toggle="tooltip"
+              >
+                <i class="icofont-university"></i>
               </a>
             </Link>
           </li>
@@ -197,31 +201,33 @@ function HeaderPage() {
                   <span />
                 </li> */}
           <li>
-            <a
-              className="mesg-notif"
-              href="#"
-              title="Notifications"
-              data-toggle="tooltip"
-            >
-              <i>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={16}
-                  height={16}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="feather feather-bell"
-                >
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-              </i>
-            </a>
-            <span />
+            <Link to="/notifications">
+              <a
+                className="mesg-notif"
+                href="#"
+                title="Notifications"
+                data-toggle="tooltip"
+              >
+                <i>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={16}
+                    height={16}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="feather feather-bell"
+                  >
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                </i>
+              </a>
+              <span />
+            </Link>
           </li>
           <li>
             <a
@@ -294,8 +300,8 @@ function HeaderPage() {
                   <i className="icofont-gear" /> Setting
                 </a>
               </li>
-              
-                <li onClick={() => deletestorage()} className="logout">
+
+              <li onClick={() => deletestorage()} className="logout">
                 <Link to="/">
                   <a
                     style={{
@@ -305,9 +311,8 @@ function HeaderPage() {
                   >
                     <i className="icofont-power" /> Đăng xuất
                   </a>
-                  </Link>
-                </li>
-              
+                </Link>
+              </li>
             </ul>
           </li>
         </ul>
