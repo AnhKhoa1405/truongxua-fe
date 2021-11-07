@@ -29,10 +29,10 @@ export default function Chat(props) {
 function ChatRoom(props) {
   const userInfo = useSelector((state) => state.userReducer.user);
   const dummy = useRef();
-  const chats =
-    props.userId > userInfo.Id
-      ? userInfo.Id + "-" + props.userId
-      : props.userId + "-" + userInfo.Id;
+   const chats =
+      props.userId > userInfo.Id
+        ? props.userId + "-" + userInfo.Id
+        : userInfo.Id + "-" + props.userId;
   const messagesRef = firebase
     .firestore()
     .collection("chats")
@@ -198,8 +198,8 @@ function TestChatRoom(props) {
     const { uid } = firebase.auth().currentUser;
     const chats =
       props.userId > userInfo.Id
-        ? userInfo.Id + "-" + props.userId
-        : props.userId + "-" + userInfo.Id;
+        ? props.userId + "-" + userInfo.Id
+        : userInfo.Id + "-" + props.userId;
     console.log(props.userId);
     await messagesRef
       .doc(chats)
