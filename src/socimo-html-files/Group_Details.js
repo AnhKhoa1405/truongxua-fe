@@ -5,9 +5,12 @@ import HeaderPage from "./Header";
 import "../css/groupdetail.css";
 import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
+import firebase from "firebase";
+import "firebase/auth";
+import "firebase/firestore";
 
 function GroupDetails() {
-  const moment = require("moment-timezone");
+  const momentDate = require("moment-timezone");
   let location = useLocation();
   const [eventPopup, setEventPopup] = useState(false);
   const {
@@ -77,6 +80,7 @@ function GroupDetails() {
   const [updateCmt, setUpdateCmt] = useState(undefined);
   //const axios = require("axios").default;
   const [activityEvent, setActivityEvent] = useState([]);
+  const moment = require("moment-timezone");
 
   const RenderActivity = ({ item, index }) => {
     // return activity.map((item,index) => {
@@ -1147,7 +1151,7 @@ function GroupDetails() {
       groupId: groupRecent.id,
       content: document.getElementById("emojionearea1").value,
       createAt: updateAPost.createAt,
-      modifiedAt: new Date(),
+      modifiedAt: momentDate().tz("Asia/Ho_Chi_Minh").format(),
       status: true,
     };
 
@@ -1179,7 +1183,7 @@ function GroupDetails() {
     const dataAddPost = {
       alumniId: userInfo.Id,
       content: content,
-      createAt: new Date(),
+      createAt: momentDate().tz("Asia/Ho_Chi_Minh").format(),
       modifiedAt: null,
       status: true,
       groupId: groupRecent.id,
@@ -1201,12 +1205,58 @@ function GroupDetails() {
         document.getElementById("emojionearea1").value = "";
         setimgNotSave([]);
         setNoti(response.config.data);
+        await getAlumniInGroup(groupRecent.id);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const getAlumniInGroup = async (groupId) => {
+    try {
+      const listStudentId = [];
+      const response = await axios.get(
+        `https://truongxuaapp.online/api/v1/alumniingroup/groupid?groupid=${groupId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + localStorage.authorization,
+          },
+        }
+      );
+      if (response.status === 200) {
+        if (response.data.length > 0) {
+          for (let i = 0; i < response.data.length; i++) {
+            listStudentId.push(response.data[i].alumniId);
+          }
+        }
+        await addNotiInFirebase(listStudentId);
       }
     } catch (err) {
       console.error(err);
     }
   };
 
+  const addNotiInFirebase = async (listStudentId) => {
+    const messagesRef = firebase.firestore().collection("notifications");
+    console.log(userInfo.infoDetail);
+    //const infoUser = decodeAuthor();
+    //const school = await getSchoolRecent();
+    for (let i = 0; i < listStudentId.length; i++) {
+      //console.log(listStudentId[i]);
+      await messagesRef
+        .doc(listStudentId[i] + "")
+        .collection("messages")
+        .add({
+          content:
+            userInfo.infoDetail.name +
+            " đã đăng bài trong nhóm " +
+            groupRecent.name,
+          img: userInfo.infoDetail.img,
+          createAt: new Date(),
+          idCreatePost: userInfo.Id,
+        });
+    }
+  };
   const addImgApi = async (imgData) => {
     let id = 0;
 
@@ -1380,7 +1430,8 @@ function GroupDetails() {
                       <i className="icofont-globe" /> Ngày đăng:{" "}
                       {d.getDate() +
                         "/" +
-                        d.getMonth() +
+                        parseInt(d.getMonth()) +
+                        1 +
                         "/" +
                         d.getFullYear() +
                         " " +

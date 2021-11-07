@@ -50,7 +50,7 @@ function EventLoad(props) {
         alumniId: userInfo.Id,
       };
       const response = await axios.post(
-        "https://truongxuaapp.online/api/v1/eventinalumni/create",
+        "https://truongxuaapp.online/api/v1/eventinalumni",
         data,
         {
           headers: {

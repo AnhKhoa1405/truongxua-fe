@@ -22,7 +22,7 @@ function Home() {
   const getAlumniInGroup = async (eventId) => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/eventinalumni/isalumniinevent?aid=${userInfo.Id}&eid=${eventId}`,
+        `https://truongxuaapp.online/api/v1/eventinalumni/${eventId}/alumni`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -31,7 +31,7 @@ function Home() {
         }
       );
       if (response.status === 200) {
-        console.log(response.data);
+        //console.log(response.data);
         return response.data;
       }
     } catch (err) {
@@ -53,15 +53,19 @@ function Home() {
       if (response.status === 200) {
         for (let i = 0; i < response.data.length; i++) {
           const statusDo = await getAlumniInGroup(response.data[i].id);
-          console.log(statusDo);
-          if (statusDo == -1) {
-            response.data[i].statusDonate = false;
-          } else {
-            response.data[i].statusDonate = true;
+          let flag = false;
+          for (let j = 0; j < statusDo.length; j++) {
+            if (statusDo[j] == userInfo.Id) {
+              flag = true;
+              response.data[i].statusDonate = true;
+              break;
+            }
           }
-          //response.data[i].statusDonate = statusDo;
+          if (flag == false) {
+            response.data[i].statusDonate = false;
+          }
         }
-        console.log(response.data);
+        //console.log(response.data);
       }
       setEventInSchool(response.data);
     } catch (error) {
@@ -203,7 +207,6 @@ function Home() {
   const getNewsInSchool = async () => {
     try {
       const response = await axios.get(
-
         `https://truongxuaapp.online/api/v1/schools/${userInfo.SchoolId}/news`,
 
         {
@@ -302,72 +305,7 @@ function Home() {
                     />
                   </figure>
                   <div className="friend-name">
-                    <div className="more">
-                      <div className="more-post-optns">
-                        <i className>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width={24}
-                            height={24}
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="feather feather-more-horizontal"
-                          >
-                            <circle cx={12} cy={12} r={1} />
-                            <circle cx={19} cy={12} r={1} />
-                            <circle cx={5} cy={12} r={1} />
-                          </svg>
-                        </i>
-                        <ul>
-                          <li
-                            onClick={() => {
-                              var elementTest =
-                                document.getElementById("post-new");
-                              elementTest.classList.add("active");
-                              let test =
-                                document.getElementById("popup-head-name");
-                              test.innerHTML = "Chỉnh sửa bài đăng";
-                              console.log(element);
-                              document.getElementById("titleID").value =
-                                element.title;
-                              document.getElementById("emojionearea1").value =
-                                element.content;
-                              setElementUpdate(element);
-                            }}
-                          >
-                            <i className="icofont-pen-alt-1" />
-                            Chỉnh sửa bài đăng
-                            <span>Edit This Post within a Hour</span>
-                          </li>
-                          <li>
-                            <i className="icofont-ban" />
-                            Ẩn bài đăng
-                            <span>Hide This Post</span>
-                          </li>
-                          <li
-                            onClick={() => {
-                              var value =
-                                document.getElementById("delete-post");
-                              value.classList.add("active");
-                              setDeleteAPost(element.id);
-                            }}
-                          >
-                            <i className="icofont-ui-delete" />
-                            Xóa bài đăng
-                            <span>If inappropriate Post By Mistake</span>
-                          </li>
-                          <li>
-                            <i className="icofont-flag" />
-                            Báo cáo bài đăng
-                            <span>Inappropriate content</span>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
+                    
                     <ins>
                       <a title="verified" href="time-line.html">
                         {userInfo.infoSchool.name}
@@ -384,7 +322,8 @@ function Home() {
                         " " +
                         d.getHours() +
                         " Giờ, " +
-                        d.getMinutes() + " phút"}
+                        d.getMinutes() +
+                        " phút"}
                     </span>
                   </div>
                   <div className="post-meta">

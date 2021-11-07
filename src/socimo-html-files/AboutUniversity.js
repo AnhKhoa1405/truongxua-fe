@@ -1103,7 +1103,7 @@ function AboutUniversity() {
                                 </li>
                               </ul>
                             </div>
-                            <div className="sp sp-bars" />
+                            
                           </div>
                         </div>
                         <div className="tab-pane fade" id="link13">
@@ -1114,7 +1114,7 @@ function AboutUniversity() {
                             <div className="row col-xs-6 merged-10">
                               {renderMemberInSchool()}
                             </div>
-                            <div className="sp sp-bars" />
+                            
                           </div>
                         </div>
                       </div>
