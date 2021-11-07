@@ -31,8 +31,8 @@ function ChatRoom(props) {
   const dummy = useRef();
   const chats =
     props.userId > userInfo.Id
-      ? props.userId + "-" + userInfo.Id
-      : userInfo.Id + "-" + props.userId;
+      ? userInfo.Id + "-" + props.userId
+      : props.userId + "-" + userInfo.Id;
   const messagesRef = firebase
     .firestore()
     .collection("chats")
@@ -63,7 +63,7 @@ function ChatRoom(props) {
   );
 }
 function ChatMessage(props) {
-  const { text, photoURL, uid, user } = props.message;
+  const { text, photoURL, uid, user, createdAt } = props.message;
   const userInfo = useSelector((state) => state.userReducer.user);
   const messageClass =
     uid === firebase.auth().currentUser.uid ? "sent" : "received";
@@ -95,9 +95,32 @@ function ChatMessage(props) {
               style={{
                 marginRight: 10,
                 marginTop: 20,
+                paddingTop: 10,
+                paddingLeft: 10,
+                paddingRight: 10,
+                color: "white",
+                backgroundColor: "#3E4042",
+                borderRadius: 10,
+                fontWeight: "500",
               }}
             >
               {text}
+              <p
+                style={{
+                  color: "white",
+                }}
+              >
+                {createdAt.toDate().getDate() +
+                  "/" +
+                  createdAt.toDate().getMonth() +
+                  "/" +
+                  createdAt.toDate().getFullYear() +
+                  " " +
+                  createdAt.toDate().getHours() +
+                  " Giờ, " +
+                  createdAt.toDate().getMinutes() +
+                  " Phút"}
+              </p>
             </p>
             <img
               style={{
@@ -126,9 +149,34 @@ function ChatMessage(props) {
             <p
               style={{
                 marginTop: 20,
+                marginRight: 10,
+                marginTop: 20,
+                paddingTop: 10,
+                paddingLeft: 10,
+                paddingRight: 10,
+                color: "white",
+                backgroundColor: "#3E4042",
+                borderRadius: 10,
+                fontWeight: "500",
               }}
             >
               {text}
+              <p
+                style={{
+                  color: "white",
+                }}
+              >
+                {createdAt.toDate().getDate() +
+                  "/" +
+                  createdAt.toDate().getMonth() +
+                  "/" +
+                  createdAt.toDate().getFullYear() +
+                  " " +
+                  createdAt.toDate().getHours() +
+                  " Giờ, " +
+                  createdAt.toDate().getMinutes() +
+                  " Phút"}
+              </p>
             </p>
           </div>
         )}
@@ -150,8 +198,8 @@ function TestChatRoom(props) {
     const { uid } = firebase.auth().currentUser;
     const chats =
       props.userId > userInfo.Id
-        ? props.userId + "-" + userInfo.Id
-        : userInfo.Id + "-" + props.userId;
+        ? userInfo.Id + "-" + props.userId
+        : props.userId + "-" + userInfo.Id;
     console.log(props.userId);
     await messagesRef
       .doc(chats)
