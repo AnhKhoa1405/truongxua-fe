@@ -477,9 +477,12 @@ function Profile() {
   };
 
   const encodeToDecode = async (tokenUser) => {
+    const data= {
+      idToken : tokenUser,
+    }
     try {
       const response = await axios.post(
-        `https://truongxuaapp.online/api/users/log-in?idToken=${tokenUser}`,
+        `https://truongxuaapp.online/api/users/log-in`,data,
         {
           headers: {
             "Access-Control-Allow-Origin": "*",
@@ -1177,7 +1180,7 @@ function Profile() {
                         textAlign: "center",
                       }}
                     >
-                      Anh Khoa
+                      {userInfo.infoDetail.name}
                     </h1>
                   </div>
                   <div className="col-lg-2">

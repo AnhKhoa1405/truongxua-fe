@@ -110,15 +110,12 @@ function SignUp() {
           <div className="verticle-center">
             <div className="welcome-note">
               <div className="logo">
-                <img src="images/logo.png" alt="" />
-                <span>Socimo</span>
+                {/* <img src="images/logo.png" alt="" /> */}
+                <span>Trường xưa</span>
               </div>
-              <h1>Welcome to Socimo</h1>
+              <h1>Mừng bạn trở vê trường</h1>
               <p>
-                Socimo is a one and only plateform for the researcheres,
-                students, and Acdamic people. Every one can join this plateform
-                free and share his ideas and research with seniors and juniours
-                comments and openions.
+                Giúp các cựu học sinh kết nối với nhau dễ dàng hơn 
               </p>
             </div>
             <div
@@ -133,12 +130,12 @@ function SignUp() {
           <div className="verticle-center">
             <div className="signup-form">
               <h4>
-                <i className="icofont-lock" /> Singup
+                <i className="icofont-lock" /> Đăng ký
               </h4>
               <form className="c-form">
                 <div className="row merged-10">
                   <div className="col-lg-12">
-                    <h4>What type of researcher are you?</h4>
+                    <h4>Tạo tài khoản để kết nối với mọi người !</h4>
                   </div>
                   <div className="col-lg-6 col-sm-6 col-md-6">
                     <input
@@ -304,7 +301,7 @@ function SignUp() {
                         className="main-btn"
                         type="submit"
                       >
-                        <i className="icofont-key" /> Signup
+                        <i className="icofont-key" /> Đăng ký tài khoản
                       </button>
                     </Link>
                   </div>
