@@ -47,3 +47,14 @@ column-gap: 10px;
 	padding: 5px 10px;
 	background-color: aliceblue;
 }
+
+.social{
+	display: flex;
+}
+
+.social div{
+	margin-right: 40px;
+	width: 100%;
+}
+
+

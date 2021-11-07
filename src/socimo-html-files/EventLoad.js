@@ -63,7 +63,7 @@ function EventLoad(props) {
   const getImageEvent = async (eventId) => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/images/eventid?eventid=${eventId}`,
+        `https://truongxuaapp.online/api/v1/events/${eventId}/images`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -79,7 +79,7 @@ function EventLoad(props) {
   const getFeedbackByEventId = async (eventID) => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/feedbacks/eventid?eventid=${eventID}`,
+        `https://truongxuaapp.online/api/v1/events/${eventID}/feedbacks`,
         {
           headers: {
             "Content-Type": "application/json",

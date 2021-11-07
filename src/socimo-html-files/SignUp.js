@@ -48,11 +48,11 @@ function SignUp() {
     });
   }, [formData.firstName, formData.lastName]);
 
-  const saveUserToDb = async (e) => {
+  const saveUserToDb = async (uid) => {
     const data = formData;
     try {
       const response = await axios.post(
-        "https://truongxuaapp.online/api/v1/alumni",
+        `https://truongxuaapp.online/api/users/sign-up?userId=${uid}`,
         data,
         
       );
@@ -91,7 +91,7 @@ function SignUp() {
   };
 
   const saveUser = (createUser) => {
-    saveUserToDb();
+    saveUserToDb(createUser.user.uid);
     return formData.userRef.child(createUser.user.uid).set({
       name: createUser.user.displayName,
       // avatar: createUser.user.photoURL

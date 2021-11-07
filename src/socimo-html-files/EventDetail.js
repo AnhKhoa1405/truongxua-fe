@@ -74,7 +74,7 @@ function EventDetail() {
   const getMemberInEvent = async (eventID) => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/donates/eventid?eventId=${eventID}`,
+        `https://truongxuaapp.online/api/v1/events/${eventID}/donates`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -224,7 +224,7 @@ function EventDetail() {
   const getImageEvent = async (eventId) => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/images/eventid?eventid=${eventId}`,
+        `https://truongxuaapp.online/api/v1/events/${eventId}/images`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -242,7 +242,7 @@ function EventDetail() {
   const getActivityEvent = async (eventId) => {
     try {
       const response = await axios.get(
-        `https://truongxuaapp.online/api/v1/activities/eventid?eventId=${eventId}`,
+        `https://truongxuaapp.online/api/v1/events/${eventId}/activities`,
         {
           headers: {
             "Content-Type": "application/json",
